@@ -1,386 +1,559 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, Check, Dumbbell, Star, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { 
+  CheckCircle, 
+  ChevronRight, 
+  Menu, 
+  X, 
+  Star, 
+  Calendar,
+  ArrowRight,
+  Users,
+  MessageSquare,
+  MapPin
+} from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+// Мок-данные для отзывов
+const testimonials = [
+  {
+    id: 1,
+    name: "Алексей Иванов",
+    role: "Постоянный пользователь",
+    content: "GoodFit полностью изменил мой подход к тренировкам. Теперь я могу заниматься в разных залах города и пробовать разные направления не переплачивая.",
+    image: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80",
+    rating: 5
+  },
+  {
+    id: 2,
+    name: "Мария Соколова",
+    role: "Премиум пользователь",
+    content: "Очень удобный сервис! Всегда могу найти зал рядом с работой или домом. Большой выбор занятий и отличная поддержка.",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
+    rating: 4
+  },
+  {
+    id: 3,
+    name: "Дмитрий Петров",
+    role: "Новый пользователь",
+    content: "Регистрация заняла буквально минуту, а через пять минут я уже был на первой тренировке. Все интуитивно понятно и работает без сбоев.",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
+    rating: 5
+  }
+];
+
+// Мок-данные для фитнес-залов
+const featured_gyms = [
+  {
+    id: "gym1",
+    name: "FitZone Центр",
+    address: "ул. Ленина, 10, Москва",
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60",
+    classes: ["Кроссфит", "Йога", "Силовые"],
+    rating: 4.9,
+  },
+  {
+    id: "gym2",
+    name: "Йога Хаус",
+    address: "ул. Пушкина, 15, Москва",
+    image: "https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8eW9nYSUyMHN0dWRpb3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
+    classes: ["Хатха-йога", "Кундалини", "Пилатес"],
+    rating: 4.8,
+  },
+  {
+    id: "gym3",
+    name: "PowerHouse",
+    address: "пр. Мира, 28, Москва",
+    image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGd5bXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
+    classes: ["Бокс", "HIIT", "Тяжелая атлетика"],
+    rating: 4.7,
+  }
+];
 
 const LandingPage = () => {
+  const [mobile_menu_open, set_mobile_menu_open] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Автоматически закрывать мобильное меню при переходе на десктоп
+  useEffect(() => {
+    if (!isMobile && mobile_menu_open) {
+      set_mobile_menu_open(false);
+    }
+  }, [isMobile, mobile_menu_open]);
+
   return (
-    <div className="min-h-screen">
-      {/* Navigation */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen flex flex-col">
+      {/* Навигационная панель */}
+      <header className="bg-white sticky top-0 z-20 border-b">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <Link to="/" className="text-xl font-bold text-primary">FitPass</Link>
+            <div className="flex items-center">
+              <span className="text-xl font-bold text-primary">GoodFit</span>
+            </div>
+            
+            {/* Десктопная навигация */}
             <nav className="hidden md:flex items-center space-x-6">
-              <Link to="/gyms" className="text-gray-600 hover:text-gray-900">Gyms</Link>
-              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
+              <Link to="/gyms" className="text-gray-600 hover:text-gray-900">Залы</Link>
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Тарифы</Link>
               <Link to="/faq" className="text-gray-600 hover:text-gray-900">FAQ</Link>
-              <Link to="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link>
+              <Link to="/contact" className="text-gray-600 hover:text-gray-900">Контакты</Link>
             </nav>
-            <div className="flex items-center space-x-3">
+            
+            <div className="hidden md:flex items-center space-x-3">
               <Link to="/login">
-                <Button variant="outline">Login</Button>
+                <Button variant="outline">Войти</Button>
               </Link>
               <Link to="/register">
-                <Button>Join Now</Button>
+                <Button>Регистрация</Button>
               </Link>
             </div>
+            
+            {/* Мобильное меню */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => set_mobile_menu_open(!mobile_menu_open)}
+                className="p-2 rounded-md focus:outline-none"
+              >
+                {mobile_menu_open ? <X /> : <Menu />}
+              </button>
+            </div>
           </div>
+          
+          {/* Мобильная навигация */}
+          {mobile_menu_open && (
+            <nav className="md:hidden py-4 border-t mt-3">
+              <ul className="space-y-4">
+                <li>
+                  <Link 
+                    to="/gyms" 
+                    className="block py-2 px-3 rounded-lg hover:bg-gray-100"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    Залы
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/pricing" 
+                    className="block py-2 px-3 rounded-lg hover:bg-gray-100"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    Тарифы
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/faq" 
+                    className="block py-2 px-3 rounded-lg hover:bg-gray-100"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    to="/contact" 
+                    className="block py-2 px-3 rounded-lg hover:bg-gray-100"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    Контакты
+                  </Link>
+                </li>
+                <li className="pt-2 border-t flex flex-col space-y-2">
+                  <Link 
+                    to="/login" 
+                    className="block w-full"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    <Button variant="outline" className="w-full">Войти</Button>
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="block w-full"
+                    onClick={() => set_mobile_menu_open(false)}
+                  >
+                    <Button className="w-full">Регистрация</Button>
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          )}
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-blue-50 to-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center">
-            <div className="lg:w-1/2">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-                One Pass. <br />
-                <span className="text-primary">Unlimited</span> Fitness.
+      <main className="flex-grow">
+        {/* Главный героический раздел */}
+        <section className="bg-gradient-to-b from-gray-50 to-white py-10 md:py-20">
+          <div className="container px-4 mx-auto">
+            <div className="text-center max-w-3xl mx-auto">
+              <h1 className="text-3xl md:text-5xl font-bold mb-6">
+                Единый абонемент для всех фитнес-клубов
               </h1>
-              <p className="text-lg text-gray-600 mb-8">
-                Access hundreds of gyms, fitness studios, and classes with a single membership. 
-                No contracts, no hassle, just fitness freedom.
+              <p className="text-gray-600 text-lg mb-8">
+                Доступ к более чем 300 фитнес-залам и студиям в вашем городе. Тренируйтесь где угодно, когда угодно.
               </p>
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link to="/register">
                   <Button size="lg" className="w-full sm:w-auto">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    Начать бесплатно
                   </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    View Plans
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                    Посмотреть тарифы
                   </Button>
                 </Link>
               </div>
-            </div>
-            <div className="lg:w-1/2 mt-10 lg:mt-0">
-              <img 
-                src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
-                alt="People working out in a gym" 
-                className="rounded-lg shadow-xl w-full h-[400px] object-cover"
-              />
+              <div className="text-sm text-gray-500">
+                Уже более 50,000 активных пользователей
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Why Choose FitPass?</h2>
-            <p className="mt-4 text-xl text-gray-600">The smarter way to fitness with benefits you'll love</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-10">
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <Dumbbell className="h-7 w-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Unlimited Access</h3>
-              <p className="text-gray-600">
-                One membership gives you access to hundreds of top-rated gyms and studios across the city.
-              </p>
-            </div>
+        {/* Особенности сервиса */}
+        <section className="py-12 bg-white">
+          <div className="container px-4 mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              Преимущества GoodFit
+            </h2>
             
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <Users className="h-7 w-7 text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="text-primary w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Гибкое расписание</h3>
+                <p className="text-gray-600">
+                  Выбирайте любые занятия в любое удобное время. Больше никаких привязок к одному фитнес-клубу.
+                </p>
               </div>
-              <h3 className="text-xl font-bold mb-3">Expert Classes</h3>
-              <p className="text-gray-600">
-                Join any class led by certified instructors – from yoga and pilates to HIIT and cycling.
-              </p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
-                <Star className="h-7 w-7 text-primary" />
+              
+              <div className="text-center">
+                <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="text-primary w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">300+ локаций</h3>
+                <p className="text-gray-600">
+                  Тренируйтесь в лучших фитнес-клубах и студиях по всему городу. Всегда найдется зал рядом с вами.
+                </p>
               </div>
-              <h3 className="text-xl font-bold mb-3">Top-Rated Venues</h3>
-              <p className="text-gray-600">
-                We partner with the best gyms that maintain high standards for equipment and cleanliness.
-              </p>
+              
+              <div className="text-center">
+                <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="text-primary w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Лучшие тренеры</h3>
+                <p className="text-gray-600">
+                  Получите доступ к занятиям с профессиональными инструкторами и разнообразным программам тренировок.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">Simple, Transparent Pricing</h2>
-            <p className="mt-4 text-xl text-gray-600">Choose the plan that fits your fitness journey</p>
-          </div>
-          
-          <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Basic Plan */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="p-8">
-                <h3 className="text-lg font-semibold text-gray-400">Basic</h3>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">$49</span>
-                  <span className="ml-1 text-xl text-gray-500">/month</span>
+        {/* Как это работает */}
+        <section className="py-12 bg-gray-50">
+          <div className="container px-4 mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              Как это работает
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4">
+                  1
                 </div>
-                <p className="mt-5 text-gray-600">Perfect for beginners starting their fitness journey.</p>
+                <h3 className="font-semibold mb-2">Выберите тариф</h3>
+                <p className="text-gray-600 text-sm">
+                  Подберите подходящий вам план на основе ваших потребностей
+                </p>
               </div>
-              <div className="px-8 pb-8">
-                <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Access to 50+ gyms</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>4 classes per month</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Basic fitness tracking</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-8" variant="outline">Choose Basic</Button>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4">
+                  2
+                </div>
+                <h3 className="font-semibold mb-2">Скачайте приложение</h3>
+                <p className="text-gray-600 text-sm">
+                  Установите наше мобильное приложение для доступа ко всем возможностям
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4">
+                  3
+                </div>
+                <h3 className="font-semibold mb-2">Найдите занятия</h3>
+                <p className="text-gray-600 text-sm">
+                  Просмотрите расписание и выберите интересующие вас занятия
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mx-auto mb-4">
+                  4
+                </div>
+                <h3 className="font-semibold mb-2">Начните тренировки</h3>
+                <p className="text-gray-600 text-sm">
+                  Просто покажите QR-код в приложении при входе в зал
+                </p>
               </div>
             </div>
             
-            {/* Premium Plan */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-primary transform scale-105">
-              <div className="bg-primary text-white text-center py-2 text-sm font-semibold">
-                MOST POPULAR
-              </div>
-              <div className="p-8">
-                <h3 className="text-lg font-semibold text-gray-400">Premium</h3>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">$79</span>
-                  <span className="ml-1 text-xl text-gray-500">/month</span>
-                </div>
-                <p className="mt-5 text-gray-600">Our recommended choice for fitness enthusiasts.</p>
-              </div>
-              <div className="px-8 pb-8">
-                <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Access to 200+ gyms</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Unlimited classes</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Advanced fitness tracking</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Bring a friend 2x per month</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-8">Choose Premium</Button>
-              </div>
-            </div>
-            
-            {/* Elite Plan */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="p-8">
-                <h3 className="text-lg font-semibold text-gray-400">Elite</h3>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-extrabold">$129</span>
-                  <span className="ml-1 text-xl text-gray-500">/month</span>
-                </div>
-                <p className="mt-5 text-gray-600">For those who want the ultimate fitness experience.</p>
-              </div>
-              <div className="px-8 pb-8">
-                <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Access to 300+ gyms</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Unlimited premium classes</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Personal training sessions (2/month)</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Bring a friend anytime</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-8" variant="outline">Choose Elite</Button>
-              </div>
+            <div className="text-center mt-10">
+              <Link to="/register">
+                <Button>
+                  Присоединиться сейчас
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Testimonials */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900">What Our Members Say</h2>
-            <p className="mt-4 text-xl text-gray-600">Join thousands of satisfied fitness enthusiasts</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 mb-6">
-                "FitPass has completely transformed how I approach fitness. I love the variety of gyms and classes available. It's perfect for my busy schedule!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-gray-200"></div>
-                <div className="ml-4">
-                  <h5 className="font-medium">Sarah K.</h5>
-                  <p className="text-sm text-gray-500">Premium Member</p>
-                </div>
-              </div>
+        {/* Популярные фитнес-клубы */}
+        <section className="py-12 bg-white">
+          <div className="container px-4 mx-auto">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold">Популярные залы</h2>
+              <Link to="/gyms" className="text-primary flex items-center text-sm font-medium">
+                Все залы
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 mb-6">
-                "As someone who travels for work, FitPass has been a game-changer. I can access quality gyms wherever I go in the city. Worth every penny!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-gray-200"></div>
-                <div className="ml-4">
-                  <h5 className="font-medium">Michael T.</h5>
-                  <p className="text-sm text-gray-500">Elite Member</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featured_gyms.map((gym) => (
+                <Card key={gym.id} className="overflow-hidden">
+                  <div className="h-40 overflow-hidden">
+                    <img 
+                      src={gym.image} 
+                      alt={gym.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium">{gym.name}</h3>
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 mr-1" />
+                        <span className="text-sm">{gym.rating}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center text-gray-500 text-xs mb-3">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {gym.address}
+                    </div>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {gym.classes.map((cls, idx) => (
+                        <span key={idx} className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                          {cls}
+                        </span>
+                      ))}
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                      Посмотреть расписание
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* Отзывы */}
+        <section className="py-12 bg-gray-50">
+          <div className="container px-4 mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+              Что говорят наши пользователи
+            </h2>
             
-            <div className="bg-white p-8 rounded-xl shadow-md">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 mb-6">
-                "The variety of classes keeps my workouts interesting. I've tried everything from yoga to CrossFit and met amazing people along the way!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 rounded-full bg-gray-200"></div>
-                <div className="ml-4">
-                  <h5 className="font-medium">Jessica M.</h5>
-                  <p className="text-sm text-gray-500">Basic Member</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((testimonial) => (
+                <Card key={testimonial.id} className="overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <img 
+                        src={testimonial.image} 
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full object-cover mr-4"
+                      />
+                      <div>
+                        <h3 className="font-medium">{testimonial.name}</h3>
+                        <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-4 w-4 ${i < testimonial.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+                        />
+                      ))}
+                    </div>
+                    
+                    <p className="text-gray-600">"{testimonial.content}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-12 bg-primary text-white">
+          <div className="container px-4 mx-auto text-center">
+            <h2 className="text-2xl md:text-4xl font-bold mb-6">
+              Готовы начать тренироваться по-новому?
+            </h2>
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              Присоединяйтесь к тысячам людей, которые уже изменили свой подход к фитнесу с GoodFit. Первая неделя бесплатно!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/register">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+                  Бесплатная регистрация
+                </Button>
+              </Link>
+              <Link to="/pricing">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary">
+                  Сравнить тарифы
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Часто задаваемые вопросы - только заголовок для мобильной версии */}
+        <section className="py-12 bg-white">
+          <div className="container px-4 mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-6">
+              Часто задаваемые вопросы
+            </h2>
+            <p className="text-center mb-8 text-gray-600">
+              Не нашли ответ на свой вопрос? <Link to="/contact" className="text-primary">Свяжитесь с нами</Link>
+            </p>
+            
+            <div className="max-w-3xl mx-auto">
+              <div className="space-y-4">
+                <details className="group border rounded-lg">
+                  <summary className="flex justify-between items-center px-4 py-3 cursor-pointer">
+                    <span className="font-medium">Как работает единый абонемент GoodFit?</span>
+                    <ChevronRight className="h-5 w-5 text-gray-500 group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="px-4 pb-4">
+                    <p className="text-gray-600">
+                      Единый абонемент GoodFit даёт вам доступ к сети партнёрских фитнес-клубов и студий. После оформления подписки вы получаете возможность посещать любые доступные занятия в любом из партнёрских заведений через наше приложение.
+                    </p>
+                  </div>
+                </details>
+                
+                <details className="group border rounded-lg">
+                  <summary className="flex justify-between items-center px-4 py-3 cursor-pointer">
+                    <span className="font-medium">Есть ли ограничение на количество посещений?</span>
+                    <ChevronRight className="h-5 w-5 text-gray-500 group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="px-4 pb-4">
+                    <p className="text-gray-600">
+                      Ограничения зависят от выбранного тарифа. В базовом тарифе доступно 4 занятия в месяц. В тарифах "Премиум" и "Элитный" количество занятий не ограничено.
+                    </p>
+                  </div>
+                </details>
+                
+                <details className="group border rounded-lg">
+                  <summary className="flex justify-between items-center px-4 py-3 cursor-pointer">
+                    <span className="font-medium">Как отменить запись на занятие?</span>
+                    <ChevronRight className="h-5 w-5 text-gray-500 group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="px-4 pb-4">
+                    <p className="text-gray-600">
+                      Вы можете отменить запись через приложение не позднее, чем за 2 часа до начала занятия. Для этого перейдите в раздел "Мои записи", найдите нужное занятие и нажмите кнопку "Отменить".
+                    </p>
+                  </div>
+                </details>
+                
+                <details className="group border rounded-lg">
+                  <summary className="flex justify-between items-center px-4 py-3 cursor-pointer">
+                    <span className="font-medium">Можно ли поставить подписку на паузу?</span>
+                    <ChevronRight className="h-5 w-5 text-gray-500 group-open:rotate-90 transition-transform" />
+                  </summary>
+                  <div className="px-4 pb-4">
+                    <p className="text-gray-600">
+                      Да, вы можете приостановить подписку на срок до 30 дней в год. Для этого перейдите в раздел "Профиль" > "Подписка" и выберите опцию "Приостановить подписку".
+                    </p>
+                  </div>
+                </details>
+                
+                <div className="text-center mt-8">
+                  <Link to="/faq">
+                    <Button variant="outline">
+                      Все вопросы и ответы
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-primary text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Fitness Journey?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Join thousands of members who are experiencing fitness freedom with FitPass.
-            Your first week is on us!
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Link to="/register">
-              <Button size="lg" variant="secondary">Start Free Trial</Button>
-            </Link>
-            <Link to="/contact">
-              <Button size="lg" variant="outline" className="bg-transparent">
-                Contact Sales
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
+      {/* Футер */}
       <footer className="bg-gray-900 text-gray-300">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container px-4 py-12 mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <h5 className="text-lg font-semibold mb-4">Company</h5>
+              <h3 className="text-lg font-semibold mb-4">О компании</h3>
               <ul className="space-y-2">
-                <li><Link to="/about" className="hover:text-white">About Us</Link></li>
-                <li><Link to="/careers" className="hover:text-white">Careers</Link></li>
-                <li><Link to="/blog" className="hover:text-white">Blog</Link></li>
-                <li><Link to="/press" className="hover:text-white">Press</Link></li>
+                <li><Link to="/about" className="hover:text-white">О нас</Link></li>
+                <li><Link to="/careers" className="hover:text-white">Карьера</Link></li>
+                <li><Link to="/blog" className="hover:text-white">Блог</Link></li>
               </ul>
             </div>
             
             <div>
-              <h5 className="text-lg font-semibold mb-4">Support</h5>
+              <h3 className="text-lg font-semibold mb-4">Поддержка</h3>
               <ul className="space-y-2">
-                <li><Link to="/contact" className="hover:text-white">Contact Us</Link></li>
-                <li><Link to="/help" className="hover:text-white">Help Center</Link></li>
+                <li><Link to="/contact" className="hover:text-white">Связаться с нами</Link></li>
+                <li><Link to="/help" className="hover:text-white">Центр помощи</Link></li>
                 <li><Link to="/faq" className="hover:text-white">FAQ</Link></li>
-                <li><Link to="/community" className="hover:text-white">Community</Link></li>
               </ul>
             </div>
             
             <div>
-              <h5 className="text-lg font-semibold mb-4">Legal</h5>
+              <h3 className="text-lg font-semibold mb-4">Правовая информация</h3>
               <ul className="space-y-2">
-                <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
-                <li><Link to="/cookies" className="hover:text-white">Cookie Policy</Link></li>
-                <li><Link to="/compliance" className="hover:text-white">Compliance</Link></li>
+                <li><Link to="/terms" className="hover:text-white">Условия использования</Link></li>
+                <li><Link to="/privacy" className="hover:text-white">Политика конфиденциальности</Link></li>
+                <li><Link to="/cookies" className="hover:text-white">Политика cookies</Link></li>
               </ul>
             </div>
             
             <div>
-              <h5 className="text-lg font-semibold mb-4">Stay Connected</h5>
+              <h3 className="text-lg font-semibold mb-4">Контакты</h3>
               <div className="flex space-x-4 mb-4">
-                {/* Social Media Icons would go here */}
+                {/* Иконки социальных сетей */}
                 <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary">
-                  <span>FB</span>
+                  <span>VK</span>
                 </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary">
-                  <span>IG</span>
+                  <span>TG</span>
                 </a>
                 <a href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary">
-                  <span>TW</span>
+                  <span>YT</span>
                 </a>
               </div>
-              <p className="text-sm">Get our fitness tips and offers:</p>
-              <form className="mt-2 flex">
-                <Input
-                  type="email"
-                  placeholder="Email address"
-                  className="bg-gray-800 border-gray-700 text-white"
-                />
-                <Button type="submit" className="ml-2">
-                  Subscribe
-                </Button>
-              </form>
+              <p className="text-sm">support@goodfit.ru</p>
+              <p className="text-sm">+7 (800) 123-45-67</p>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; 2023 FitPass. All rights reserved.</p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <Link to="/terms" className="text-sm hover:text-white">Terms</Link>
-              <Link to="/privacy" className="text-sm hover:text-white">Privacy</Link>
-              <Link to="/cookies" className="text-sm hover:text-white">Cookies</Link>
-            </div>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center md:text-left">
+            <p>&copy; 2023 GoodFit. Все права защищены.</p>
           </div>
         </div>
       </footer>
