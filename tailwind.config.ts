@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -51,6 +52,14 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				// Fitness platform specific colors
+				fitness: {
+					primary: '#3b82f6',
+					secondary: '#10b981',
+					accent: '#8b5cf6',
+					dark: '#1f2937',
+					light: '#f9fafb',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
