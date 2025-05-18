@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 import { Calendar, ArrowRight, Bell, Star, Map, Dumbbell } from "lucide-react";
+import OnlineStatusBadge from "@/components/common/OnlineStatusBadge";
+import InstallPWA from "@/components/pwa/InstallPWA";
 
 const ClientDashboard = () => {
   const { user } = useAuth();
@@ -52,6 +54,9 @@ const ClientDashboard = () => {
 
   return (
     <div className="space-y-6 pb-16">
+      {/* Индикатор статуса онлайн/оффлайн */}
+      <OnlineStatusBadge />
+
       {/* Приветствие и статистика */}
       <div className="bg-primary text-white p-6 rounded-lg">
         <h1 className="text-xl font-bold mb-2">Добро пожаловать, {user?.name || "Фитнес-энтузиаст"}!</h1>
