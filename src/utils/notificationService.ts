@@ -2,6 +2,8 @@
 /**
  * Сервис для работы с уведомлениями в PWA
  */
+import { useState, useEffect } from 'react';
+
 export const notificationService = {
   /**
    * Запрос разрешения на отправку уведомлений
