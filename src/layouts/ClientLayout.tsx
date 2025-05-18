@@ -33,22 +33,22 @@ const ClientLayout = () => {
   };
 
   const menu_items = [
-    { label: "Dashboard", icon: <Home size={18} />, path: "/app" },
-    { label: "Gyms", icon: <Dumbbell size={18} />, path: "/app/gyms" },
-    { label: "Classes", icon: <Calendar size={18} />, path: "/app/classes" },
-    { label: "Bookings", icon: <BookOpen size={18} />, path: "/app/bookings" },
-    { label: "Subscription", icon: <CreditCard size={18} />, path: "/app/subscription" },
-    { label: "Support", icon: <MessageSquare size={18} />, path: "/app/support" },
-    { label: "Profile", icon: <User size={18} />, path: "/app/profile" },
+    { label: "Главная", icon: <Home size={18} />, path: "/app" },
+    { label: "Залы", icon: <Dumbbell size={18} />, path: "/app/gyms" },
+    { label: "Тренировки", icon: <Calendar size={18} />, path: "/app/classes" },
+    { label: "Мои записи", icon: <BookOpen size={18} />, path: "/app/bookings" },
+    { label: "Подписка", icon: <CreditCard size={18} />, path: "/app/subscription" },
+    { label: "Поддержка", icon: <MessageSquare size={18} />, path: "/app/support" },
+    { label: "Профиль", icon: <User size={18} />, path: "/app/profile" },
   ];
 
   return (
     <ProtectedRoute roles={["user"]}>
       <div className="min-h-screen bg-gray-50">
-        {/* Mobile Header */}
+        {/* Мобильная шапка */}
         <header className="bg-white p-4 border-b lg:hidden sticky top-0 z-30">
           <div className="flex justify-between items-center">
-            <Link to="/app" className="text-xl font-bold text-primary">Fitness App</Link>
+            <Link to="/app" className="text-xl font-bold text-primary">GoodFit</Link>
             <button
               onClick={() => set_mobile_menu_open(!mobile_menu_open)}
               className="p-2 focus:outline-none"
@@ -57,7 +57,7 @@ const ClientLayout = () => {
             </button>
           </div>
           
-          {/* Mobile Menu */}
+          {/* Мобильное меню */}
           {mobile_menu_open && (
             <nav className="mt-4">
               <ul className="space-y-3">
@@ -83,7 +83,7 @@ const ClientLayout = () => {
                     className="w-full flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                   >
                     <LogOut size={18} />
-                    <span className="ml-3">Logout</span>
+                    <span className="ml-3">Выйти</span>
                   </button>
                 </li>
               </ul>
@@ -93,10 +93,10 @@ const ClientLayout = () => {
 
         {/* Desktop Layout */}
         <div className="flex h-screen">
-          {/* Sidebar - Hidden on mobile */}
+          {/* Боковое меню - скрыто на мобильных */}
           <aside className="hidden lg:block w-64 bg-white border-r border-gray-200 h-screen fixed">
             <div className="p-4 border-b border-gray-200">
-              <Link to="/app" className="text-xl font-bold text-primary">Fitness App</Link>
+              <Link to="/app" className="text-xl font-bold text-primary">GoodFit</Link>
             </div>
             
             <div className="px-3 py-4 overflow-y-auto h-[calc(100vh-132px)]">
@@ -127,13 +127,13 @@ const ClientLayout = () => {
                   {user?.profile_image && (
                     <img 
                       src={user.profile_image} 
-                      alt={user.name || "User"} 
+                      alt={user.name || "Пользователь"} 
                       className="w-full h-full object-cover"
                     />
                   )}
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700">{user?.name || "User"}</p>
+                  <p className="text-sm font-medium text-gray-700">{user?.name || "Пользователь"}</p>
                   <p className="text-xs text-gray-500">{user?.email || user?.phone}</p>
                 </div>
               </div>
@@ -143,7 +143,7 @@ const ClientLayout = () => {
                 onClick={handle_logout}
               >
                 <LogOut size={16} className="mr-2" />
-                Logout
+                Выйти
               </Button>
             </div>
           </aside>
