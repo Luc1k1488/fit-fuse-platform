@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ const featured_gyms = [
     id: "gym2",
     name: "Йога Хаус",
     address: "ул. Пушкина, 15, Москва",
-    image: "https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8eW9nYSUyMHN0dWRpb3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
+    image: "https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60",
     classes: ["Хатха-йога", "Кундалини", "Пилатес"],
     rating: 4.8,
   },
@@ -484,7 +483,7 @@ const LandingPage = () => {
                   </summary>
                   <div className="px-4 pb-4">
                     <p className="text-gray-600">
-                      Да, вы можете приостановить подписку на срок до 30 дней в год. Для этого перейдите в раздел "Профиль" > "Подписка" и выберите опцию "Приостановить подписку".
+                      Да, вы можете приостановить подписку на срок до 30 дней в год. Для этого перейдите в раздел "Профиль" {'>'}  "Подписка" и выберите опцию "Приостановить подписку".
                     </p>
                   </div>
                 </details>
