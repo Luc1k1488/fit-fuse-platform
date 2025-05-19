@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 const PricingPage = () => {
@@ -82,7 +81,7 @@ const PricingPage = () => {
       <div className="px-4 py-6 max-w-md mx-auto">
         {/* Заголовок и описание */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-3">Выберите свой абонемент</h2>
+          <h2 className="text-2xl font-bold mb-3 gradient-text">Выберите свой абонемент</h2>
           <p className="text-gray-600">
             Доступ к лучшим фитнес-клубам и студиям по единому абонементу
           </p>
@@ -92,7 +91,7 @@ const PricingPage = () => {
         <div className="mb-8 flex justify-center">
           <div className="bg-gray-100 p-1 rounded-full inline-flex">
             <button
-              className={`px-4 py-2 text-sm rounded-full ${
+              className={`px-4 py-2 text-sm rounded-full transition-all ${
                 billingPeriod === "monthly"
                   ? "bg-white text-primary shadow-sm"
                   : "text-gray-600"
@@ -102,7 +101,7 @@ const PricingPage = () => {
               Ежемесячно
             </button>
             <button
-              className={`px-4 py-2 text-sm rounded-full ${
+              className={`px-4 py-2 text-sm rounded-full transition-all ${
                 billingPeriod === "yearly"
                   ? "bg-white text-primary shadow-sm"
                   : "text-gray-600"
@@ -115,16 +114,16 @@ const PricingPage = () => {
         </div>
 
         {/* Карточки с тарифами */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {pricingPlans.map((plan) => (
             <Card
               key={plan.id}
-              className={`overflow-hidden ${
-                plan.popular ? "border-primary" : ""
+              className={`overflow-hidden rounded-2xl transition-all hover:shadow-lg ${
+                plan.popular ? "card-gradient shadow-md" : ""
               }`}
             >
               {plan.popular && (
-                <div className="bg-primary text-white text-xs font-medium text-center py-1">
+                <div className="bg-gradient-primary text-white text-xs font-medium text-center py-1.5">
                   ПОПУЛЯРНЫЙ ВЫБОР
                 </div>
               )}
@@ -136,7 +135,7 @@ const PricingPage = () => {
                     <p className="text-sm text-gray-500">{plan.description}</p>
                   </div>
                   {billingPeriod === "yearly" && (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
+                    <Badge variant="outline" className="bg-accent/30 text-primary border-accent/30">
                       {plan.yearlyDiscount}
                     </Badge>
                   )}
@@ -145,21 +144,21 @@ const PricingPage = () => {
               
               <CardContent className="pt-2">
                 <div className="flex items-baseline mb-4">
-                  <span className="text-2xl font-bold">
+                  <span className="text-3xl font-bold text-primary">
                     {billingPeriod === "monthly"
                       ? plan.monthlyPrice
                       : plan.yearlyPrice}
                   </span>
-                  <span className="ml-1 text-gray-500">₽</span>
+                  <span className="ml-1 text-primary">₽</span>
                   <span className="ml-1 text-sm text-gray-500">
                     / {billingPeriod === "monthly" ? "месяц" : "год"}
                   </span>
                 </div>
                 
-                <ul className="space-y-2 mb-6">
+                <ul className="space-y-2.5 mb-6">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <Check className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                      <Check className="mr-2 h-5 w-5 text-secondary flex-shrink-0" />
                       <span className="text-gray-600 text-sm">{feature}</span>
                     </li>
                   ))}
@@ -169,7 +168,7 @@ const PricingPage = () => {
               <CardFooter>
                 <Button
                   variant={plan.buttonVariant}
-                  className="w-full"
+                  className={`w-full rounded-xl ${plan.popular ? 'bg-gradient-primary hover:opacity-90 transition-opacity border-0' : 'border-primary text-primary hover:bg-primary/5'}`}
                   asChild
                 >
                   <Link to="/register">{plan.buttonText}</Link>
@@ -180,8 +179,8 @@ const PricingPage = () => {
         </div>
 
         {/* FAQ секция */}
-        <div className="mt-12">
-          <h3 className="text-lg font-medium mb-4">Часто задаваемые вопросы</h3>
+        <div className="mt-14">
+          <h3 className="text-xl font-bold mb-6 text-center gradient-text">Часто задаваемые вопросы</h3>
           
           <div className="space-y-3">
             {[
@@ -204,7 +203,7 @@ const PricingPage = () => {
             ].map((item, index) => (
               <details
                 key={index}
-                className="bg-white rounded-lg border overflow-hidden group"
+                className="bg-white rounded-xl border overflow-hidden group transition-all hover:shadow-sm"
               >
                 <summary className="flex justify-between items-center p-4 cursor-pointer">
                   <span className="font-medium">{item.question}</span>
@@ -219,13 +218,13 @@ const PricingPage = () => {
         </div>
 
         {/* Контактная информация */}
-        <div className="mt-10 text-center">
+        <div className="mt-12 text-center">
           <p className="text-gray-500 text-sm">
             Остались вопросы? Свяжитесь с нами
           </p>
           <div className="mt-2">
             <Button variant="link" className="text-primary">
-              support@fitfuse.ru
+              support@goodfit.ru
             </Button>
           </div>
         </div>

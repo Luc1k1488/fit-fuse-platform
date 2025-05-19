@@ -1,3 +1,4 @@
+
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -105,7 +106,7 @@ const ClientLayout = () => {
                 <ChevronLeft size={24} />
               </button>
             ) : (
-              <Link to="/app" className="text-xl font-bold text-primary">
+              <Link to="/app" className="text-xl font-bold gradient-text">
                 GoodFit
               </Link>
             )}

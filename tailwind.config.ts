@@ -55,11 +55,15 @@ export default {
 				},
 				// Fitness platform specific colors
 				fitness: {
-					primary: '#3b82f6',
-					secondary: '#10b981',
-					accent: '#8b5cf6',
+					primary: '#6366f1',
+					secondary: '#8b5cf6',
+					accent: '#c4b5fd',
 					dark: '#1f2937',
 					light: '#f9fafb',
+					gradient: {
+						from: '#8b5cf6',
+						to: '#6366f1',
+					}
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -78,7 +82,7 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
-				'accordion-down': {
+				"accordion-down": {
 					from: {
 						height: '0'
 					},
@@ -86,18 +90,42 @@ export default {
 						height: 'var(--radix-accordion-content-height)'
 					}
 				},
-				'accordion-up': {
+				"accordion-up": {
 					from: {
 						height: 'var(--radix-accordion-content-height)'
 					},
 					to: {
 						height: '0'
 					}
+				},
+				"fade-in": {
+					"0%": {
+						opacity: "0",
+						transform: "translateY(10px)"
+					},
+					"100%": {
+						opacity: "1",
+						transform: "translateY(0)"
+					}
+				},
+				"pulse-light": {
+					"0%, 100%": {
+						opacity: "1"
+					},
+					"50%": {
+						opacity: "0.7"
+					}
 				}
 			},
 			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				"accordion-down": 'accordion-down 0.2s ease-out',
+				"accordion-up": 'accordion-up 0.2s ease-out',
+				"fade-in": 'fade-in 0.3s ease-out',
+				"pulse-light": 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+			},
+			backgroundImage: {
+				'gradient-primary': 'linear-gradient(to right, #8b5cf6, #6366f1)',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
 			}
 		}
 	},
