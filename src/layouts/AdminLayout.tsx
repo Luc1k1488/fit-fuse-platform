@@ -36,43 +36,43 @@ const AdminLayout = () => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Menu items based on user role
+  // Элементы меню в зависимости от роли пользователя
   const get_menu_items = () => {
-    // Admin has access to everything
+    // Администратор имеет доступ ко всему
     if (user_role === "admin") {
       return [
-        { label: "Dashboard", icon: <Home size={18} />, path: "/admin/dashboard" },
-        { label: "Users", icon: <Users size={18} />, path: "/admin/users" },
-        { label: "Gyms", icon: <Dumbbell size={18} />, path: "/admin/gyms" },
-        { label: "Classes", icon: <Calendar size={18} />, path: "/admin/classes" },
-        { label: "Bookings", icon: <BookOpen size={18} />, path: "/admin/bookings" },
-        { label: "Subscriptions", icon: <CreditCard size={18} />, path: "/admin/subscriptions" },
-        { label: "Partners", icon: <HeartHandshake size={18} />, path: "/admin/partners" },
-        { label: "Support", icon: <MessageSquare size={18} />, path: "/admin/support" },
-        { label: "Reviews", icon: <Star size={18} />, path: "/admin/reviews" },
-        { label: "Analytics", icon: <BarChart3 size={18} />, path: "/admin/analytics" },
+        { label: "Панель управления", icon: <Home size={18} />, path: "/admin/dashboard" },
+        { label: "Пользователи", icon: <Users size={18} />, path: "/admin/users" },
+        { label: "Фитнес-залы", icon: <Dumbbell size={18} />, path: "/admin/gyms" },
+        { label: "Тренировки", icon: <Calendar size={18} />, path: "/admin/classes" },
+        { label: "Бронирования", icon: <BookOpen size={18} />, path: "/admin/bookings" },
+        { label: "Абонементы", icon: <CreditCard size={18} />, path: "/admin/subscriptions" },
+        { label: "Партнеры", icon: <HeartHandshake size={18} />, path: "/admin/partners" },
+        { label: "Поддержка", icon: <MessageSquare size={18} />, path: "/admin/support" },
+        { label: "Отзывы", icon: <Star size={18} />, path: "/admin/reviews" },
+        { label: "Аналитика", icon: <BarChart3 size={18} />, path: "/admin/analytics" },
       ];
     }
     
-    // Partner menu items
+    // Пункты меню для партнера
     if (user_role === "partner") {
       return [
-        { label: "Dashboard", icon: <Home size={18} />, path: "/admin/partner" },
-        { label: "My Gyms", icon: <Dumbbell size={18} />, path: "/admin/partner/gyms" },
-        { label: "Classes", icon: <Calendar size={18} />, path: "/admin/partner/classes" },
-        { label: "Bookings", icon: <BookOpen size={18} />, path: "/admin/partner/bookings" },
-        { label: "Reviews", icon: <Star size={18} />, path: "/admin/partner/reviews" },
-        { label: "Analytics", icon: <BarChart3 size={18} />, path: "/admin/partner/analytics" },
+        { label: "Панель управления", icon: <Home size={18} />, path: "/admin/partner" },
+        { label: "Мои залы", icon: <Dumbbell size={18} />, path: "/admin/partner/gyms" },
+        { label: "Тренировки", icon: <Calendar size={18} />, path: "/admin/partner/classes" },
+        { label: "Бронирования", icon: <BookOpen size={18} />, path: "/admin/partner/bookings" },
+        { label: "Отзывы", icon: <Star size={18} />, path: "/admin/partner/reviews" },
+        { label: "Аналитика", icon: <BarChart3 size={18} />, path: "/admin/partner/analytics" },
       ];
     }
     
-    // Support menu items
+    // Пункты меню для службы поддержки
     if (user_role === "support") {
       return [
-        { label: "Dashboard", icon: <Home size={18} />, path: "/admin/support-portal" },
-        { label: "Tickets", icon: <MessageSquare size={18} />, path: "/admin/support-portal/tickets" },
-        { label: "Users", icon: <Users size={18} />, path: "/admin/support-portal/users" },
-        { label: "Chats", icon: <MessageSquare size={18} />, path: "/admin/support-portal/chats" },
+        { label: "Панель управления", icon: <Home size={18} />, path: "/admin/support-portal" },
+        { label: "Обращения", icon: <MessageSquare size={18} />, path: "/admin/support-portal/tickets" },
+        { label: "Пользователи", icon: <Users size={18} />, path: "/admin/support-portal/users" },
+        { label: "Чаты", icon: <MessageSquare size={18} />, path: "/admin/support-portal/chats" },
       ];
     }
     
@@ -82,7 +82,7 @@ const AdminLayout = () => {
   return (
     <ProtectedRoute roles={["admin", "partner", "support"]}>
       <div className="min-h-screen bg-gray-50">
-        {/* Top Navigation Bar */}
+        {/* Верхняя навигационная панель */}
         <nav className="bg-white border-b border-gray-200 fixed w-full z-30">
           <div className="px-3 py-3 lg:px-5 lg:pl-3 flex justify-between items-center">
             <div className="flex items-center">
@@ -94,7 +94,7 @@ const AdminLayout = () => {
                 <Menu className="text-gray-600" />
               </button>
               <div className="flex items-center ml-3 lg:ml-0">
-                <span className="text-xl font-semibold text-gray-800">Fitness Admin</span>
+                <span className="text-xl font-semibold text-gray-800">GoodFit Управление</span>
                 {!sidebar_open && (
                   <button
                     onClick={() => set_sidebar_open(true)}
@@ -108,7 +108,7 @@ const AdminLayout = () => {
             
             <div className="flex items-center">
               <span className="mr-2 text-sm text-gray-600">
-                {user?.name} ({user_role})
+                {user?.name} ({user_role === "admin" ? "Администратор" : user_role === "partner" ? "Партнер" : "Поддержка"})
               </span>
               <Button variant="ghost" size="icon" onClick={handle_logout}>
                 <LogOut size={18} />
@@ -117,7 +117,7 @@ const AdminLayout = () => {
           </div>
         </nav>
 
-        {/* Sidebar */}
+        {/* Боковая панель */}
         <aside
           className={`fixed top-0 left-0 z-20 w-64 h-full pt-16 bg-white border-r border-gray-200 transition-transform ${
             sidebar_open ? "translate-x-0" : "-translate-x-full"
@@ -146,7 +146,7 @@ const AdminLayout = () => {
           </div>
         </aside>
 
-        {/* Main Content */}
+        {/* Основное содержимое */}
         <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen`}>
           <Outlet />
         </div>

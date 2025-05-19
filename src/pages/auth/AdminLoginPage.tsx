@@ -23,7 +23,7 @@ const AdminLoginPage = () => {
       await login(email, password);
       navigate("/admin/dashboard");
     } catch (err) {
-      set_error("Invalid login credentials. Please try again.");
+      set_error("Неверные учетные данные. Пожалуйста, попробуйте снова.");
     } finally {
       set_is_loading(false);
     }
@@ -33,9 +33,9 @@ const AdminLoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Вход для администраторов</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the admin dashboard
+            Введите ваши учетные данные для доступа к панели управления
           </CardDescription>
         </CardHeader>
         <form onSubmit={handle_submit}>
@@ -61,13 +61,13 @@ const AdminLoginPage = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label htmlFor="password" className="text-sm font-medium">
-                  Password
+                  Пароль
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-800"
                 >
-                  Forgot password?
+                  Забыли пароль?
                 </Link>
               </div>
               <Input
@@ -86,7 +86,7 @@ const AdminLoginPage = () => {
               className="w-full"
               disabled={is_loading}
             >
-              {is_loading ? "Logging in..." : "Login to Admin"}
+              {is_loading ? "Выполняется вход..." : "Войти в систему"}
             </Button>
           </CardFooter>
         </form>
