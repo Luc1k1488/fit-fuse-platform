@@ -6,6 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,13 +178,15 @@ export const RecurringBookingDialog: React.FC<RecurringBookingDialogProps> = ({
                           day_selected: "bg-primary text-white hover:bg-primary hover:text-white",
                         }}
                       />
-                      <Button 
-                        id="dialog-close-btn" 
-                        className="hidden" 
-                        type="button"
-                      >
-                        Close
-                      </Button>
+                      <DialogClose asChild>
+                        <Button 
+                          id="dialog-close-btn" 
+                          className="hidden" 
+                          type="button"
+                        >
+                          Close
+                        </Button>
+                      </DialogClose>
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -226,13 +230,15 @@ export const RecurringBookingDialog: React.FC<RecurringBookingDialogProps> = ({
                           day_selected: "bg-primary text-white hover:bg-primary hover:text-white",
                         }}
                       />
-                      <Button 
-                        id="end-dialog-close-btn" 
-                        className="hidden" 
-                        type="button"
-                      >
-                        Close
-                      </Button>
+                      <DialogClose asChild>
+                        <Button 
+                          id="end-dialog-close-btn" 
+                          className="hidden" 
+                          type="button"
+                        >
+                          Close
+                        </Button>
+                      </DialogClose>
                     </DialogContent>
                   </Dialog>
                 </div>

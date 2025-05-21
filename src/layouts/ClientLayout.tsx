@@ -1,3 +1,4 @@
+
 import {
   Home,
   Calendar,
@@ -11,7 +12,13 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { MainNav } from "@/components/main-nav";
-import { Sidebar, SidebarNavItem } from "@/components/ui/sidebar";
+import { 
+  Sidebar, 
+  SidebarContent, 
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton 
+} from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/auth_context";
 
 interface ClientLayoutProps {
@@ -89,17 +96,18 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
               {user?.email || "example@email.com"}
             </p>
           </div>
-          <div className="flex flex-col space-y-2">
-            {navigationItems.map((item) => (
-              <SidebarNavItem
-                key={item.href}
-                title={item.title}
-                href={item.href}
-                icon={item.icon}
-                description={item.description}
-              />
-            ))}
-          </div>
+          <SidebarContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton href={item.href} className="flex items-center gap-2">
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
         </MainNav>
       </Sidebar>
       <div className="flex-1 p-4">

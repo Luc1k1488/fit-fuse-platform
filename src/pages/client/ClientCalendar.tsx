@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -75,7 +74,7 @@ const ClientCalendar = () => {
     const formattedDate = format(date, "yyyy-MM-dd");
     return bookingDates.includes(formattedDate) 
       ? "bg-primary/20 rounded-full font-bold text-primary" 
-      : undefined;
+      : "";
   };
   
   // Обработчики действий
@@ -157,7 +156,7 @@ const ClientCalendar = () => {
               classNames={{
                 day_today: "bg-primary/20 text-primary font-bold",
                 day_selected: "bg-primary text-white hover:bg-primary/90 hover:text-white",
-                day: dayClassName
+                day: (date) => dayClassName(date)
               }}
               showOutsideDays
             />
