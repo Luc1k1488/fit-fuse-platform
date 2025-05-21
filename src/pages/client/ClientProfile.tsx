@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,7 @@ import {
   LogOut,
   Calendar
 } from "lucide-react";
+import { FitnessTrackerConnect } from "@/components/integrations/FitnessTrackerConnect";
 
 const ClientProfile = () => {
   const { user, logout } = useAuth();
@@ -314,6 +314,16 @@ const ClientProfile = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <div>
+        <h2 className="text-lg font-bold mb-3">Интеграции с устройствами</h2>
+        <FitnessTrackerConnect 
+          onConnect={(data) => {
+            console.log("Устройство подключено:", data);
+            // Здесь можно обработать данные с подключенного устройства
+          }} 
+        />
+      </div>
     </div>
   );
 };

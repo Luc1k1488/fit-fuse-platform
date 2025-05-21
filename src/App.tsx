@@ -28,6 +28,8 @@ import ClientBookings from "./pages/client/ClientBookings";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientSubscription from "./pages/client/ClientSubscription";
 import ClientSupport from "./pages/client/ClientSupport";
+import ClientCalendar from "./pages/client/ClientCalendar";
+import ClientProgress from "./pages/client/ClientProgress";
 
 // Admin routes
 import AdminLayout from "./layouts/AdminLayout";
@@ -99,6 +101,8 @@ const App = () => {
                 <Route path="profile" element={<ClientProfile />} />
                 <Route path="subscription" element={<ClientSubscription />} />
                 <Route path="support" element={<ClientSupport />} />
+                <Route path="calendar" element={<ClientCalendar />} />
+                <Route path="progress" element={<ClientProgress />} />
               </Route>
               
               {/* Admin routes - protected */}
