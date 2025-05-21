@@ -144,6 +144,42 @@
   .hover-border-glow {
     @apply transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20;
   }
+
+  /* Новые стили для улучшенных взаимодействий */
+  .btn-shine {
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-shine:after {
+    content: '';
+    @apply absolute top-0 left-0 h-full w-20 bg-white/20 -skew-x-20 transform -translate-x-40;
+    animation: btnShine 2s ease-in-out infinite;
+  }
+
+  .card-hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .card-hover-glow:hover {
+    @apply shadow-lg shadow-primary/20 border-primary/30;
+  }
+
+  .smooth-image-reveal {
+    @apply opacity-0 scale-[0.96] transition-all duration-700;
+  }
+
+  .smooth-image-reveal.revealed {
+    @apply opacity-100 scale-100;
+  }
+
+  .pulse-dot {
+    @apply relative;
+  }
+
+  .pulse-dot:before {
+    content: '';
+    @apply absolute w-2 h-2 bg-primary rounded-full -left-1 animate-pulse;
+  }
 }
 
 @layer utilities {
@@ -158,8 +194,17 @@
   .animation-delay-400 {
     animation-delay: 0.4s;
   }
+  
+  .animation-delay-600 {
+    animation-delay: 0.6s;
+  }
+  
+  .animation-delay-800 {
+    animation-delay: 0.8s;
+  }
 }
 
+/* Новые дополнительные анимации */
 @keyframes pulse-light {
   0%, 100% {
     opacity: 1;
@@ -169,6 +214,51 @@
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -500px 0;
+  }
+  100% {
+    background-position: 500px 0;
+  }
+}
+
+@keyframes btnShine {
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+  }
+  20% {
+    transform: translateX(100%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(100%) skewX(-20deg);
+  }
+}
+
 .animate-pulse-light {
   animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
 }

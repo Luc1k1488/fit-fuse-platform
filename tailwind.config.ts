@@ -108,6 +108,36 @@ export default {
 						transform: "translateY(0)"
 					}
 				},
+				"fade-out": {
+          "0%": {
+            opacity: "1",
+            transform: "translateY(0)"
+          },
+          "100%": {
+            opacity: "0",
+            transform: "translateY(10px)"
+          }
+        },
+        "fade-in-left": {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(-10px)"
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)"
+          }
+        },
+        "fade-in-right": {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(10px)"
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)"
+          }
+        },
 				"pulse-light": {
 					"0%, 100%": {
 						opacity: "1"
@@ -131,20 +161,70 @@ export default {
 					"100%": {
 						backgroundPosition: "500px 0"
 					}
-				}
+				},
+				"scale-in": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.95)"
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1)"
+          }
+        },
+        "scale-out": {
+          "0%": {
+            opacity: "1",
+            transform: "scale(1)"
+          },
+          "100%": {
+            opacity: "0",
+            transform: "scale(0.95)"
+          }
+        },
+        "spin-slow": {
+          "0%": {
+            transform: "rotate(0deg)"
+          },
+          "100%": {
+            transform: "rotate(360deg)"
+          }
+        },
+        "bounce-small": {
+          "0%, 100%": {
+            transform: "translateY(0)"
+          },
+          "50%": {
+            transform: "translateY(-3px)"
+          }
+        }
 			},
 			animation: {
 				"accordion-down": 'accordion-down 0.2s ease-out',
 				"accordion-up": 'accordion-up 0.2s ease-out',
-				"fade-in": 'fade-in 0.3s ease-out',
+				"fade-in": 'fade-in 0.3s ease-out forwards',
+				"fade-out": 'fade-out 0.3s ease-out forwards',
+				"fade-in-left": 'fade-in-left 0.3s ease-out forwards',
+				"fade-in-right": 'fade-in-right 0.3s ease-out forwards',
 				"pulse-light": 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 				"float": 'float 3s ease-in-out infinite',
-				"shimmer": 'shimmer 2s linear infinite'
+				"shimmer": 'shimmer 2s linear infinite',
+				"scale-in": 'scale-in 0.3s ease-out forwards',
+        "scale-out": 'scale-out 0.3s ease-out forwards',
+        "spin-slow": 'spin-slow 8s linear infinite',
+        "bounce-small": 'bounce-small 2s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-primary': 'linear-gradient(to right, #8b5cf6, #6366f1)',
 				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-			}
+				'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))'
+			},
+			transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+        'width': 'width',
+        'size': 'width, height'
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

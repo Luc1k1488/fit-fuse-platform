@@ -34,14 +34,14 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 }) => {
   return (
     <DarkCard 
-      className={`overflow-hidden transition-all duration-300 ${popular ? "" : ""}`}
+      className={`overflow-hidden transition-all duration-300 animate-fade-in ${popular ? "" : ""}`}
       gradient={popular}
       glow={popular}
       hoverEffect="raise"
       variant={popular ? "intense" : "default"}
     >
       {popular && (
-        <div className="py-1.5 bg-gradient-to-r from-violet-600 to-blue-500 text-white text-center text-sm font-medium">
+        <div className="py-1.5 bg-gradient-to-r from-violet-600 to-blue-500 text-white text-center text-sm font-medium animate-shimmer">
           {badge || "Самый популярный"}
         </div>
       )}
@@ -50,7 +50,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <h3 className="text-xl font-bold text-white">{title}</h3>
         
         <div className="mt-4 flex items-baseline">
-          <span className="text-4xl font-extrabold purple-blue-gradient-text">{price}</span>
+          <span className="text-4xl font-extrabold purple-blue-gradient-text hover:scale-105 transition-transform">{price}</span>
           <span className="ml-1 text-gray-400">/ {period}</span>
         </div>
         
@@ -59,7 +59,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         <div className="mt-6">
           <GradientButton
             onClick={onClick}
-            className="w-full"
+            className="w-full transition-all duration-300 hover:scale-105"
             variant={popular ? "glow" : "default"}
             size="lg"
           >
@@ -69,7 +69,12 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         
         <ul className="mt-8 space-y-4">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-start">
+            <li 
+              key={index} 
+              className={`flex items-start transform transition-all duration-300 hover:translate-x-1 ${
+                index % 2 === 0 ? 'animation-delay-200' : 'animation-delay-400'
+              }`}
+            >
               {feature.highlighted ? (
                 <ShieldCheck className="h-5 w-5 flex-shrink-0 text-primary animate-pulse-light" />
               ) : (

@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { DarkCard } from "@/components/ui/dark-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Search, Star, Map, MapPin, ChevronDown } from "lucide-react";
+import { Check, Search, Star, Map, MapPin, ChevronDown, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import {
@@ -76,6 +76,7 @@ const ClientGyms = () => {
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [minRating, setMinRating] = useState([4.0]);
   const [viewMode, setViewMode] = useState("grid");
+  const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -108,6 +109,14 @@ const ClientGyms = () => {
     setGyms(filtered);
   };
 
+  const toggleFavorite = (gymId: string) => {
+    setFavoriteGyms(prev => 
+      prev.includes(gymId) 
+        ? prev.filter(id => id !== gymId) 
+        : [...prev, gymId]
+    );
+  };
+
   // Применяем фильтры при их изменении
   useEffect(() => {
     handleFilter();
@@ -117,14 +126,14 @@ const ClientGyms = () => {
     <div className="pb-16">
       {/* Заголовок страницы */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold">Найти залы и студии</h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl font-bold animate-fade-in">Найти залы и студии</h1>
+        <p className="text-gray-600 animate-fade-in animation-delay-200">
           Выберите спортзал или студию для тренировки
         </p>
       </div>
 
       {/* Поиск и фильтры */}
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+      <div className="bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-800 mb-6 animate-fade-in animation-delay-400">
         <form onSubmit={handleSearch} className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -133,9 +142,9 @@ const ClientGyms = () => {
               placeholder="Поиск залов, студий, локаций..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-lg border-gray-200"
+              className="pl-10 pr-4 py-2 rounded-lg border-gray-700 bg-gray-800 text-white"
             />
-            <Button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <Button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 transition-all hover:scale-105">
               Поиск
             </Button>
           </div>
@@ -147,21 +156,21 @@ const ClientGyms = () => {
             <div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full bg-gray-800 border-gray-700 text-white hover:bg-gray-700 transition-colors">
                     <MapPin className="mr-2 h-4 w-4" />
                     {selectedCity || "Выберите город"}
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent className="bg-gray-800 border-gray-700 text-white">
                   {cities.map((city) => (
                     <DropdownMenuItem
                       key={city}
                       onClick={() => setSelectedCity(city)}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between hover:bg-gray-700 transition-colors"
                     >
                       {city}
-                      {city === selectedCity && <Check className="h-4 w-4 ml-2" />}
+                      {city === selectedCity && <Check className="h-4 w-4 ml-2 text-primary" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -171,13 +180,13 @@ const ClientGyms = () => {
           
           {/* Категории */}
           <Tabs defaultValue="Все" value={selectedCategory} className="w-full">
-            <TabsList className="w-full overflow-x-auto flex pb-1 mb-2">
+            <TabsList className="w-full overflow-x-auto flex pb-1 mb-2 bg-gray-800">
               {categories.map((category) => (
                 <TabsTrigger
                   key={category}
                   value={category}
                   onClick={() => setSelectedCategory(category)}
-                  className="whitespace-nowrap"
+                  className="whitespace-nowrap transition-all hover:scale-105"
                 >
                   {category}
                 </TabsTrigger>
@@ -189,60 +198,73 @@ const ClientGyms = () => {
 
       {/* Результаты */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {gyms.map((gym) => (
-          <Card key={gym.id} className="overflow-hidden">
-            <div className="relative h-40">
+        {gyms.map((gym, idx) => (
+          <DarkCard 
+            key={gym.id} 
+            className="overflow-hidden animate-fade-in" 
+            style={{ animationDelay: `${idx * 100}ms` }}
+            hoverEffect="raise"
+          >
+            <div className="relative h-40 overflow-hidden group">
               <img 
                 src={gym.main_image} 
                 alt={gym.name} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute top-2 right-2 bg-white/90 rounded-full px-2 py-1 flex items-center">
                 <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
                 <span className="text-xs font-medium">{gym.rating}</span>
               </div>
+              <button 
+                onClick={() => toggleFavorite(gym.id)} 
+                className="absolute top-2 left-2 bg-black/30 backdrop-blur-sm p-2 rounded-full transition-all hover:bg-black/50"
+              >
+                <Heart 
+                  className={`h-4 w-4 ${favoriteGyms.includes(gym.id) ? 'text-red-500 fill-red-500' : 'text-white'} transition-colors`} 
+                />
+              </button>
             </div>
-            <CardContent className="p-4">
-              <h3 className="font-medium text-lg">{gym.name}</h3>
-              <div className="flex items-center mt-1 text-sm text-gray-500">
+            <div className="p-4">
+              <h3 className="font-medium text-lg text-white">{gym.name}</h3>
+              <div className="flex items-center mt-1 text-sm text-gray-400">
                 <MapPin className="h-3 w-3 mr-1" />
                 {gym.location}, {gym.city}
               </div>
-              <div className="mt-2 text-sm text-gray-700">
+              <div className="mt-2 text-sm text-gray-400">
                 <p>{gym.review_count} отзывов</p>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {gym.features.map((feature, index) => (
                   <span 
                     key={index} 
-                    className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                    className="px-2 py-1 bg-gray-800 text-gray-300 rounded-full text-xs transition-all hover:bg-gray-700"
                   >
                     {feature}
                   </span>
                 ))}
               </div>
-            </CardContent>
-            <CardFooter className="p-4 pt-0 flex justify-between items-center">
-              <Button asChild>
+            </div>
+            <div className="p-4 pt-0 flex justify-between items-center">
+              <Button asChild variant="default" className="transition-all hover:scale-105">
                 <Link to={`/app/gyms/${gym.id}`}>Подробнее</Link>
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">
                 Расписание
               </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          </DarkCard>
         ))}
       </div>
       
       {gyms.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">Не найдено залов по вашим критериям.</p>
+        <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
+          <p className="text-gray-400 mb-4">Не найдено залов по вашим критериям.</p>
           <Button onClick={() => {
             setSearchQuery("");
             setSelectedCity("Москва");
             setSelectedCategory("Все");
             setMinRating([4.0]);
-          }}>Сбросить фильтры</Button>
+          }} className="transition-all hover:scale-105">Сбросить фильтры</Button>
         </div>
       )}
     </div>

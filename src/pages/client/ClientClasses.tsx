@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { DarkCard } from "@/components/ui/dark-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, User, Search, Dumbbell, MapPin } from "lucide-react";
+import { Calendar, Clock, User, Search, Dumbbell, MapPin, Heart } from "lucide-react";
 
 // Тестовые данные для занятий
 const mock_classes = [
@@ -88,6 +88,7 @@ const ClientClasses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("Все");
   const [selectedDay, setSelectedDay] = useState(new Date().getDay());
+  const [favoriteClasses, setFavoriteClasses] = useState<string[]>([]);
   
   // Получить дату для выбранного дня
   const getDateForDay = (dayIndex: number) => {
@@ -102,6 +103,14 @@ const ClientClasses = () => {
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('ru-RU', options);
+  };
+  
+  const toggleFavorite = (classId: string) => {
+    setFavoriteClasses(prev => 
+      prev.includes(classId) 
+        ? prev.filter(id => id !== classId) 
+        : [...prev, classId]
+    );
   };
   
   // Функция поиска
@@ -142,10 +151,10 @@ const ClientClasses = () => {
   
   return (
     <div className="pb-16">
-      <h1 className="text-2xl font-bold mb-4">Найти и забронировать тренировки</h1>
+      <h1 className="text-2xl font-bold mb-4 animate-fade-in">Найти и забронировать тренировки</h1>
       
       {/* Поиск */}
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+      <div className="bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-800 mb-6 animate-fade-in animation-delay-200">
         <form onSubmit={handleSearch} className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -154,22 +163,24 @@ const ClientClasses = () => {
               placeholder="Поиск занятий, тренеров, залов..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 rounded-lg border-gray-200"
+              className="pl-10 pr-4 py-2 rounded-lg border-gray-700 bg-gray-800 text-white"
             />
-            <Button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2">
+            <Button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 transition-all hover:scale-105">
               Поиск
             </Button>
           </div>
         </form>
         
         {/* Выбор дня */}
-        <div className="mb-4">
+        <div className="mb-4 animate-fade-in animation-delay-300">
           <div className="grid grid-cols-7 gap-1">
             {days.map((day, index) => (
               <Button
                 key={day}
                 variant={selectedDay === index ? "default" : "outline"}
-                className="p-1 h-auto flex flex-col items-center"
+                className={`p-1 h-auto flex flex-col items-center transition-all ${
+                  selectedDay === index ? "bg-primary" : "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                }`}
                 onClick={() => setSelectedDay(index)}
               >
                 <span className="text-xs">{day}</span>
@@ -182,14 +193,14 @@ const ClientClasses = () => {
         </div>
         
         {/* Типы занятий */}
-        <Tabs defaultValue="Все" value={selectedType} className="w-full">
-          <TabsList className="w-full overflow-x-auto flex pb-1">
+        <Tabs defaultValue="Все" value={selectedType} className="w-full animate-fade-in animation-delay-400">
+          <TabsList className="w-full overflow-x-auto flex pb-1 bg-gray-800">
             {class_types.map((type) => (
               <TabsTrigger
                 key={type}
                 value={type}
                 onClick={() => setSelectedType(type)}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap transition-all hover:scale-105"
               >
                 {type}
               </TabsTrigger>
@@ -200,72 +211,87 @@ const ClientClasses = () => {
       
       {/* Список занятий */}
       <div className="space-y-4">
-        <h2 className="text-lg font-medium">
+        <h2 className="text-lg font-medium text-white animate-fade-in">
           Расписание на {formatDate(getDateForDay(selectedDay))}
         </h2>
         
         {classes.length > 0 ? (
           <div className="space-y-4">
-            {classes.map((classItem) => (
-              <Card key={classItem.id} className="overflow-hidden">
+            {classes.map((classItem, idx) => (
+              <DarkCard 
+                key={classItem.id} 
+                className="overflow-hidden animate-fade-in" 
+                style={{ animationDelay: `${idx * 100}ms` }}
+                hoverEffect="raise"
+              >
                 <div className="flex flex-row">
-                  <div className="w-1/3 h-28">
+                  <div className="w-1/3 h-28 overflow-hidden group">
                     <img 
                       src={classItem.image} 
                       alt={classItem.title} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>
                   <div className="p-3 w-2/3 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start">
-                        <h3 className="font-medium">{classItem.title}</h3>
-                        <span className="text-xs bg-gray-100 rounded-full px-2 py-1">
+                        <h3 className="font-medium text-white">{classItem.title}</h3>
+                        <span className="text-xs bg-gray-800 text-gray-300 rounded-full px-2 py-1">
                           {classItem.type}
                         </span>
                       </div>
-                      <div className="flex items-center mt-1 text-xs text-gray-600">
+                      <div className="flex items-center mt-1 text-xs text-gray-400">
                         <User className="h-3 w-3 mr-1" />
                         {classItem.instructor}
                       </div>
                       <div className="flex flex-wrap mt-1 gap-2">
-                        <div className="flex items-center text-xs text-gray-600">
+                        <div className="flex items-center text-xs text-gray-400">
                           <Clock className="h-3 w-3 mr-1" />
                           {classItem.time}
                         </div>
-                        <div className="flex items-center text-xs text-gray-600">
+                        <div className="flex items-center text-xs text-gray-400">
                           <Dumbbell className="h-3 w-3 mr-1" />
                           {classItem.duration}
                         </div>
                       </div>
-                      <div className="flex items-center mt-1 text-xs text-gray-600">
+                      <div className="flex items-center mt-1 text-xs text-gray-400">
                         <MapPin className="h-3 w-3 mr-1" />
                         {classItem.gymName}, {classItem.gymLocation}
                       </div>
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <span className="text-xs text-gray-600">
-                        Осталось мест: {classItem.spots}/{classItem.totalSpots}
+                      <span className="text-xs text-gray-400">
+                        Осталось мест: <span className={classItem.spots < 3 ? 'text-red-400 font-medium' : ''}>{classItem.spots}/{classItem.totalSpots}</span>
                       </span>
-                      <Button size="sm" className="text-xs py-0 h-7">
-                        Записаться
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleFavorite(classItem.id)} 
+                          className="p-1.5 rounded-full hover:bg-gray-800 transition-colors"
+                        >
+                          <Heart 
+                            className={`h-4 w-4 ${favoriteClasses.includes(classItem.id) ? 'text-red-500 fill-red-500' : 'text-gray-400'} transition-colors`} 
+                          />
+                        </button>
+                        <Button size="sm" className="text-xs py-0 h-7 transition-all hover:scale-105">
+                          Записаться
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </DarkCard>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg">
-            <Calendar className="h-12 w-12 mx-auto text-gray-300" />
-            <p className="mt-2 text-gray-500">Нет занятий по выбранным критериям</p>
+          <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
+            <Calendar className="h-12 w-12 mx-auto text-gray-500" />
+            <p className="mt-2 text-gray-400">Нет занятий по выбранным критериям</p>
             <Button 
               onClick={() => {
                 setSearchQuery("");
                 setSelectedType("Все");
               }} 
-              className="mt-4"
+              className="mt-4 transition-all hover:scale-105"
             >
               Сбросить фильтры
             </Button>
