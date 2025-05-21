@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,85 +58,93 @@ import SupportChats from "./pages/support/SupportChats";
 
 // Context providers
 import { AuthProvider } from "./contexts/auth_context";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/gyms" element={<GymsPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/faq" element={<FaqPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            
-            {/* Auth routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/login/phone" element={<PhoneLoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            
-            {/* Client app routes - protected */}
-            <Route path="/app" element={<ClientLayout />}>
-              <Route index element={<ClientDashboard />} />
-              <Route path="gyms" element={<ClientGyms />} />
-              <Route path="gyms/:id" element={<ClientGymDetail />} />
-              <Route path="classes" element={<ClientClasses />} />
-              <Route path="bookings" element={<ClientBookings />} />
-              <Route path="profile" element={<ClientProfile />} />
-              <Route path="subscription" element={<ClientSubscription />} />
-              <Route path="support" element={<ClientSupport />} />
-            </Route>
-            
-            {/* Admin routes - protected */}
-            <Route path="/admin" element={<AdminLayout />}>
-              {/* Admin specific routes */}
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="gyms" element={<AdminGyms />} />
-              <Route path="classes" element={<AdminClasses />} />
-              <Route path="bookings" element={<AdminBookings />} />
-              <Route path="subscriptions" element={<AdminSubscriptions />} />
-              <Route path="partners" element={<AdminPartners />} />
-              <Route path="support" element={<AdminSupport />} />
-              <Route path="reviews" element={<AdminReviews />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
+const App = () => {
+  // Принудительно установить темную тему
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner theme="dark" />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/gyms" element={<GymsPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/faq" element={<FaqPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               
-              {/* Partner routes (inside admin layout) */}
-              <Route path="partner">
-                <Route index element={<PartnerDashboard />} />
-                <Route path="gyms" element={<PartnerGyms />} />
-                <Route path="classes" element={<PartnerClasses />} />
-                <Route path="bookings" element={<PartnerBookings />} />
-                <Route path="reviews" element={<PartnerReviews />} />
-                <Route path="analytics" element={<PartnerAnalytics />} />
+              {/* Auth routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/login/phone" element={<PhoneLoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              
+              {/* Client app routes - protected */}
+              <Route path="/app" element={<ClientLayout />}>
+                <Route index element={<ClientDashboard />} />
+                <Route path="gyms" element={<ClientGyms />} />
+                <Route path="gyms/:id" element={<ClientGymDetail />} />
+                <Route path="classes" element={<ClientClasses />} />
+                <Route path="bookings" element={<ClientBookings />} />
+                <Route path="profile" element={<ClientProfile />} />
+                <Route path="subscription" element={<ClientSubscription />} />
+                <Route path="support" element={<ClientSupport />} />
               </Route>
               
-              {/* Support routes (inside admin layout) */}
-              <Route path="support-portal">
-                <Route index element={<SupportDashboard />} />
-                <Route path="tickets" element={<SupportTickets />} />
-                <Route path="users" element={<SupportUsers />} />
-                <Route path="chats" element={<SupportChats />} />
+              {/* Admin routes - protected */}
+              <Route path="/admin" element={<AdminLayout />}>
+                {/* Admin specific routes */}
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="gyms" element={<AdminGyms />} />
+                <Route path="classes" element={<AdminClasses />} />
+                <Route path="bookings" element={<AdminBookings />} />
+                <Route path="subscriptions" element={<AdminSubscriptions />} />
+                <Route path="partners" element={<AdminPartners />} />
+                <Route path="support" element={<AdminSupport />} />
+                <Route path="reviews" element={<AdminReviews />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                
+                {/* Partner routes (inside admin layout) */}
+                <Route path="partner">
+                  <Route index element={<PartnerDashboard />} />
+                  <Route path="gyms" element={<PartnerGyms />} />
+                  <Route path="classes" element={<PartnerClasses />} />
+                  <Route path="bookings" element={<PartnerBookings />} />
+                  <Route path="reviews" element={<PartnerReviews />} />
+                  <Route path="analytics" element={<PartnerAnalytics />} />
+                </Route>
+                
+                {/* Support routes (inside admin layout) */}
+                <Route path="support-portal">
+                  <Route index element={<SupportDashboard />} />
+                  <Route path="tickets" element={<SupportTickets />} />
+                  <Route path="users" element={<SupportUsers />} />
+                  <Route path="chats" element={<SupportChats />} />
+                </Route>
+                
+                {/* Admin index redirect */}
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
               </Route>
               
-              {/* Admin index redirect */}
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            </Route>
-            
-            {/* 404 route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+              {/* 404 route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -13,7 +13,6 @@ import {
   CreditCard,
   MessageSquare,
   LogOut,
-  X,
   ChevronLeft
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -90,10 +89,10 @@ const ClientLayout = () => {
 
   return (
     <ProtectedRoute roles={["user"]}>
-      <div className="min-h-screen bg-gray-50 pb-16">
+      <div className="min-h-screen bg-background pb-16">
         {/* Фиксированный хедер */}
         <header 
-          className={`bg-white px-4 py-3 border-b fixed top-0 left-0 right-0 z-30 transition-transform duration-300 ${
+          className={`bg-gray-900/90 backdrop-blur-md px-4 py-3 border-b border-gray-800 fixed top-0 left-0 right-0 z-30 transition-transform duration-300 ${
             showHeader ? 'transform-none' : '-translate-y-full'
           }`}
         >
@@ -101,16 +100,16 @@ const ClientLayout = () => {
             {showBackButton() ? (
               <button 
                 onClick={() => navigate(-1)} 
-                className="p-2 -ml-2 focus:outline-none"
+                className="p-2 -ml-2 focus:outline-none text-white"
               >
                 <ChevronLeft size={24} />
               </button>
             ) : (
-              <Link to="/app" className="text-xl font-bold gradient-text">
+              <Link to="/app" className="text-xl font-bold purple-blue-gradient-text">
                 GoodFit
               </Link>
             )}
-            <h1 className="text-lg font-medium absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="text-lg font-medium absolute left-1/2 transform -translate-x-1/2 text-white">
               {getPageTitle()}
             </h1>
             <div className="w-8">
@@ -130,7 +129,7 @@ const ClientLayout = () => {
         <InstallPWA />
 
         {/* Нижняя панель навигации (мобильная) */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t z-30">
+        <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 z-30">
           <div className="flex justify-between">
             {menuItems.map((item) => (
               <Link
@@ -139,7 +138,7 @@ const ClientLayout = () => {
                 className={`flex flex-col items-center py-2 flex-1 ${
                   isActive(item.path)
                     ? "text-primary"
-                    : "text-gray-500"
+                    : "text-gray-400 hover:text-gray-200"
                 }`}
               >
                 <div className="mb-1">{item.icon}</div>
@@ -151,15 +150,15 @@ const ClientLayout = () => {
 
         {/* Дополнительное меню с настройками, для доступа со страницы профиля */}
         <div className="hidden">
-          <Link to="/app/subscription">
+          <Link to="/app/subscription" className="flex items-center gap-2 text-gray-200 hover:text-white">
             <CreditCard size={18} />
             <span>Подписка</span>
           </Link>
-          <Link to="/app/support">
+          <Link to="/app/support" className="flex items-center gap-2 text-gray-200 hover:text-white">
             <MessageSquare size={18} />
             <span>Поддержка</span>
           </Link>
-          <Button onClick={handleLogout}>
+          <Button onClick={handleLogout} variant="destructive" className="w-full mt-4">
             <LogOut size={16} className="mr-2" />
             Выйти
           </Button>
