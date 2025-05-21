@@ -156,13 +156,9 @@ const ClientCalendar = () => {
               classNames={{
                 day_today: "bg-primary/20 text-primary font-bold",
                 day_selected: "bg-primary text-white hover:bg-primary/90 hover:text-white",
-                day: {
-                  // Use a string property instead of a function
-                  className: "day-base"
-                }
+                day: "day-base" // Fixed: Using a string instead of an object
               }}
               modifiers={{
-                // Use modifiers for conditional styling
                 hasBooking: bookingDates.map(date => new Date(date))
               }}
               modifiersClassNames={{
