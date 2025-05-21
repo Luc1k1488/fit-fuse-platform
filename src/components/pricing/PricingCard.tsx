@@ -32,7 +32,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     <div
       className={`rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-5px] ${
         popular
-          ? "border-2 border-primary shadow-xl shadow-primary/20"
+          ? "border-2 border-primary shadow-xl shadow-primary/30"
           : "border border-gray-800 hover:border-gray-700"
       }`}
     >
@@ -42,11 +42,11 @@ export const PricingCard: React.FC<PricingCardProps> = ({
         </div>
       )}
       
-      <div className={`p-6 bg-gray-900 ${popular ? "bg-gray-900/80" : ""}`}>
+      <div className={`p-6 bg-gray-900/95 backdrop-blur-sm ${popular ? "bg-gradient-to-br from-gray-900 to-gray-800" : ""}`}>
         <h3 className="text-xl font-bold text-white">{title}</h3>
         
         <div className="mt-4 flex items-baseline">
-          <span className="text-3xl font-extrabold text-white">{price}</span>
+          <span className="text-3xl font-extrabold purple-blue-gradient-text">{price}</span>
           <span className="ml-1 text-gray-400">/ {period}</span>
         </div>
         
@@ -56,7 +56,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
           <GradientButton
             onClick={onClick}
             className="w-full"
-            variant={popular ? "default" : "secondary"}
+            variant={popular ? "glow" : "default"}
           >
             {buttonText}
           </GradientButton>

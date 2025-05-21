@@ -1,14 +1,17 @@
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { GradientButton } from "@/components/ui/gradient-button";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 import { Calendar, ArrowRight, Bell, Star, Map, Dumbbell } from "lucide-react";
 import OnlineStatusBadge from "@/components/common/OnlineStatusBadge";
-import InstallPWA from "@/components/pwa/InstallPWA";
+import { DarkCard, DarkCardContent } from "@/components/ui/dark-card";
+import { toast } from "sonner";
 
 const ClientDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Пример данных для демонстрации
   const upcoming_classes = [
@@ -52,21 +55,40 @@ const ClientDashboard = () => {
     }
   ];
 
+  // Обработчики для кнопок быстрых действий
+  const handleFindGym = () => {
+    navigate("/app/gyms");
+  };
+
+  const handleBookClass = () => {
+    navigate("/app/classes");
+  };
+
+  const handleShowReviews = () => {
+    toast.info("Открываем ваши отзывы");
+    // В будущем здесь будет переход на страницу с отзывами
+  };
+
+  const handleShowReminders = () => {
+    toast.info("Открываем ваши напоминания");
+    // В будущем здесь будет переход на страницу с напоминаниями
+  };
+
   return (
     <div className="space-y-6 pb-16">
       {/* Индикатор статуса онлайн/оффлайн */}
       <OnlineStatusBadge />
 
       {/* Приветствие и статистика */}
-      <div className="bg-primary text-white p-6 rounded-lg">
+      <div className="bg-gradient-to-r from-violet-600 to-blue-500 text-white p-6 rounded-xl shadow-lg shadow-primary/20">
         <h1 className="text-xl font-bold mb-2">Добро пожаловать, {user?.name || "Фитнес-энтузиаст"}!</h1>
         <p>Ваш фитнес-прогресс отлично выглядит! Вот что происходит сегодня.</p>
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-md">
+          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
             <p className="text-white/80 text-sm">Активная подписка</p>
             <p className="font-bold mt-1">Премиум</p>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-md">
+          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
             <p className="text-white/80 text-sm">Занятий в этом месяце</p>
             <p className="font-bold mt-1">12 / Безлимит</p>
           </div>
@@ -86,7 +108,7 @@ const ClientDashboard = () => {
         {upcoming_classes.length > 0 ? (
           <div className="space-y-4">
             {upcoming_classes.map((class_item) => (
-              <Card key={class_item.id} className="overflow-hidden">
+              <DarkCard key={class_item.id} className="overflow-hidden">
                 <div className="flex flex-row">
                   <div className="w-1/3 h-24">
                     <img 
@@ -97,35 +119,35 @@ const ClientDashboard = () => {
                   </div>
                   <div className="p-3 w-2/3 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-medium text-sm">{class_item.title}</h3>
-                      <p className="text-gray-500 text-xs">{class_item.gym_name}</p>
-                      <div className="flex items-center mt-1 text-xs">
-                        <Calendar className="h-3 w-3 mr-1 text-gray-500" />
+                      <h3 className="font-medium text-sm text-white">{class_item.title}</h3>
+                      <p className="text-gray-400 text-xs">{class_item.gym_name}</p>
+                      <div className="flex items-center mt-1 text-xs text-gray-400">
+                        <Calendar className="h-3 w-3 mr-1" />
                         {class_item.date}
                       </div>
                     </div>
                     <div className="flex justify-between items-center">
-                      <Button variant="outline" size="sm" className="text-xs py-0 h-7">Отменить</Button>
-                      <Button variant="ghost" size="sm" className="p-0 h-7 w-7">
+                      <Button variant="outline" size="sm" className="text-xs py-0 h-7 border-gray-700 text-gray-300">Отменить</Button>
+                      <Button variant="ghost" size="sm" className="p-0 h-7 w-7 text-gray-300">
                         <Bell className="h-4 w-4" />
                         <span className="sr-only">Напоминание</span>
                       </Button>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </DarkCard>
             ))}
           </div>
         ) : (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Calendar className="h-12 w-12 mx-auto text-gray-300" />
-              <p className="mt-2 text-gray-500">Нет предстоящих занятий</p>
+          <DarkCard gradient>
+            <DarkCardContent className="p-6 text-center">
+              <Calendar className="h-12 w-12 mx-auto text-gray-500" />
+              <p className="mt-2 text-gray-400">Нет предстоящих занятий</p>
               <Link to="/app/classes">
-                <Button className="mt-4">Найти занятия</Button>
+                <GradientButton className="mt-4">Найти занятия</GradientButton>
               </Link>
-            </CardContent>
-          </Card>
+            </DarkCardContent>
+          </DarkCard>
         )}
       </div>
 
@@ -141,31 +163,31 @@ const ClientDashboard = () => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {recommended_gyms.map((gym) => (
-            <Card key={gym.id} className="overflow-hidden">
+            <DarkCard key={gym.id} className="overflow-hidden" gradient>
               <div className="relative h-32">
                 <img 
                   src={gym.image} 
                   alt={gym.name} 
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-2 right-2 bg-white/90 rounded-full px-2 py-1 flex items-center">
+                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
                   <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
-                  <span className="text-xs font-medium">{gym.rating}</span>
+                  <span className="text-xs font-medium text-white">{gym.rating}</span>
                 </div>
               </div>
-              <CardContent className="p-3">
-                <h3 className="font-medium">{gym.name}</h3>
-                <div className="flex items-center mt-1 text-xs text-gray-500">
+              <DarkCardContent className="p-4">
+                <h3 className="font-medium text-white">{gym.name}</h3>
+                <div className="flex items-center mt-1 text-xs text-gray-400">
                   <Map className="h-3 w-3 mr-1" />
                   {gym.location}
                 </div>
-              </CardContent>
-              <CardFooter className="px-3 pb-3 pt-0">
-                <Button variant="outline" className="w-full text-sm" asChild>
-                  <Link to={`/app/gyms/${gym.id}`}>Подробнее</Link>
-                </Button>
-              </CardFooter>
-            </Card>
+                <Link to={`/app/gyms/${gym.id}`} className="mt-3 block">
+                  <GradientButton variant="outline" className="w-full text-sm">
+                    Подробнее
+                  </GradientButton>
+                </Link>
+              </DarkCardContent>
+            </DarkCard>
           ))}
         </div>
       </div>
@@ -174,30 +196,53 @@ const ClientDashboard = () => {
       <div>
         <h2 className="text-lg font-bold mb-3">Быстрые действия</h2>
         <div className="grid grid-cols-2 gap-3">
-          <Card className="shadow-sm">
-            <CardContent className="p-4 text-center flex flex-col items-center">
-              <Dumbbell className="h-6 w-6 mb-2 text-primary" />
-              <p className="font-medium text-sm">Найти зал</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm">
-            <CardContent className="p-4 text-center flex flex-col items-center">
-              <Calendar className="h-6 w-6 mb-2 text-primary" />
-              <p className="font-medium text-sm">Забронировать</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm">
-            <CardContent className="p-4 text-center flex flex-col items-center">
-              <Star className="h-6 w-6 mb-2 text-primary" />
-              <p className="font-medium text-sm">Мои отзывы</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm">
-            <CardContent className="p-4 text-center flex flex-col items-center">
-              <Bell className="h-6 w-6 mb-2 text-primary" />
-              <p className="font-medium text-sm">Напоминания</p>
-            </CardContent>
-          </Card>
+          <DarkCard 
+            onClick={handleFindGym} 
+            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            <DarkCardContent className="p-4 text-center flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
+                <Dumbbell className="h-5 w-5 text-white" />
+              </div>
+              <p className="font-medium text-sm text-white">Найти зал</p>
+            </DarkCardContent>
+          </DarkCard>
+          
+          <DarkCard 
+            onClick={handleBookClass} 
+            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            <DarkCardContent className="p-4 text-center flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
+                <Calendar className="h-5 w-5 text-white" />
+              </div>
+              <p className="font-medium text-sm text-white">Забронировать</p>
+            </DarkCardContent>
+          </DarkCard>
+          
+          <DarkCard 
+            onClick={handleShowReviews} 
+            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            <DarkCardContent className="p-4 text-center flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
+                <Star className="h-5 w-5 text-white" />
+              </div>
+              <p className="font-medium text-sm text-white">Мои отзывы</p>
+            </DarkCardContent>
+          </DarkCard>
+          
+          <DarkCard 
+            onClick={handleShowReminders} 
+            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
+          >
+            <DarkCardContent className="p-4 text-center flex flex-col items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
+                <Bell className="h-5 w-5 text-white" />
+              </div>
+              <p className="font-medium text-sm text-white">Напоминания</p>
+            </DarkCardContent>
+          </DarkCard>
         </div>
       </div>
     </div>

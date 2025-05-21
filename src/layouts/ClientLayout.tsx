@@ -36,7 +36,7 @@ const ClientLayout = () => {
     if (path === "/app/profile") return "Профиль";
     if (path === "/app/subscription") return "Подписка";
     if (path === "/app/support") return "Поддержка";
-    return "GoodFit";
+    return "GoFit";
   };
 
   // Обработчик выхода из аккаунта
@@ -105,8 +105,8 @@ const ClientLayout = () => {
                 <ChevronLeft size={24} />
               </button>
             ) : (
-              <Link to="/app" className="text-xl font-bold purple-blue-gradient-text">
-                GoodFit
+              <Link to="/app" className="text-2xl font-bold purple-blue-gradient-text">
+                GoFit
               </Link>
             )}
             <h1 className="text-lg font-medium absolute left-1/2 transform -translate-x-1/2 text-white">
@@ -129,7 +129,7 @@ const ClientLayout = () => {
         <InstallPWA />
 
         {/* Нижняя панель навигации (мобильная) */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 z-30">
+        <nav className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-800 z-30">
           <div className="flex justify-between">
             {menuItems.map((item) => (
               <Link
