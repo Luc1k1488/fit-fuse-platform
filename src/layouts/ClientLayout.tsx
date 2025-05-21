@@ -9,7 +9,7 @@ import {
   Activity,
 } from "lucide-react";
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 
 import { MainNav } from "@/components/main-nav";
 import { 
@@ -100,9 +100,11 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton href={item.href} className="flex items-center gap-2">
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.href} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
