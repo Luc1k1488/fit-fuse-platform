@@ -1,10 +1,12 @@
 
 import React from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ShieldCheck } from "lucide-react";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { DarkCard } from "@/components/ui/dark-card";
 
 interface PricingFeature {
   text: string;
+  highlighted?: boolean;
 }
 
 interface PricingCardProps {
@@ -16,6 +18,7 @@ interface PricingCardProps {
   popular?: boolean;
   onClick: () => void;
   buttonText: string;
+  badge?: string;
 }
 
 export const PricingCard: React.FC<PricingCardProps> = ({
@@ -27,50 +30,58 @@ export const PricingCard: React.FC<PricingCardProps> = ({
   popular = false,
   onClick,
   buttonText,
+  badge,
 }) => {
   return (
-    <div
-      className={`rounded-2xl overflow-hidden transition-all duration-300 hover:translate-y-[-5px] ${
-        popular
-          ? "border-2 border-primary shadow-xl shadow-primary/30"
-          : "border border-gray-800 hover:border-gray-700"
-      }`}
+    <DarkCard 
+      className={`overflow-hidden transition-all duration-300 ${popular ? "" : ""}`}
+      gradient={popular}
+      glow={popular}
+      hoverEffect="raise"
+      variant={popular ? "intense" : "default"}
     >
       {popular && (
         <div className="py-1.5 bg-gradient-to-r from-violet-600 to-blue-500 text-white text-center text-sm font-medium">
-          Самый популярный
+          {badge || "Самый популярный"}
         </div>
       )}
       
-      <div className={`p-6 bg-gray-900/95 backdrop-blur-sm ${popular ? "bg-gradient-to-br from-gray-900 to-gray-800" : ""}`}>
+      <div className="p-6">
         <h3 className="text-xl font-bold text-white">{title}</h3>
         
         <div className="mt-4 flex items-baseline">
-          <span className="text-3xl font-extrabold purple-blue-gradient-text">{price}</span>
+          <span className="text-4xl font-extrabold purple-blue-gradient-text">{price}</span>
           <span className="ml-1 text-gray-400">/ {period}</span>
         </div>
         
-        <p className="mt-4 text-gray-400">{description}</p>
+        <p className="mt-4 text-gray-400 min-h-[48px]">{description}</p>
         
         <div className="mt-6">
           <GradientButton
             onClick={onClick}
             className="w-full"
             variant={popular ? "glow" : "default"}
+            size="lg"
           >
             {buttonText}
           </GradientButton>
         </div>
         
-        <ul className="mt-6 space-y-4">
+        <ul className="mt-8 space-y-4">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start">
-              <CheckCircle className="h-5 w-5 flex-shrink-0 text-primary" />
-              <span className="ml-3 text-gray-300">{feature.text}</span>
+              {feature.highlighted ? (
+                <ShieldCheck className="h-5 w-5 flex-shrink-0 text-primary animate-pulse-light" />
+              ) : (
+                <CheckCircle className="h-5 w-5 flex-shrink-0 text-primary" />
+              )}
+              <span className={`ml-3 ${feature.highlighted ? "text-white font-medium" : "text-gray-300"}`}>
+                {feature.text}
+              </span>
             </li>
           ))}
         </ul>
       </div>
-    </div>
+    </DarkCard>
   );
 };

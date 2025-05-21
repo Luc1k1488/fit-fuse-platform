@@ -115,13 +115,31 @@ export default {
 					"50%": {
 						opacity: "0.7"
 					}
+				},
+				"float": {
+					"0%, 100%": {
+						transform: "translateY(0)"
+					},
+					"50%": {
+						transform: "translateY(-5px)"
+					}
+				},
+				"shimmer": {
+					"0%": {
+						backgroundPosition: "-500px 0"
+					},
+					"100%": {
+						backgroundPosition: "500px 0"
+					}
 				}
 			},
 			animation: {
 				"accordion-down": 'accordion-down 0.2s ease-out',
 				"accordion-up": 'accordion-up 0.2s ease-out',
 				"fade-in": 'fade-in 0.3s ease-out',
-				"pulse-light": 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+				"pulse-light": 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				"float": 'float 3s ease-in-out infinite',
+				"shimmer": 'shimmer 2s linear infinite'
 			},
 			backgroundImage: {
 				'gradient-primary': 'linear-gradient(to right, #8b5cf6, #6366f1)',

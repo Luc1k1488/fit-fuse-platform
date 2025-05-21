@@ -5,17 +5,25 @@ import { cn } from "@/lib/utils";
 interface DarkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   gradient?: boolean;
   glow?: boolean;
+  hoverEffect?: "raise" | "scale" | "border" | "none";
+  variant?: "default" | "subtle" | "glass" | "intense";
 }
 
 const DarkCard = React.forwardRef<HTMLDivElement, DarkCardProps>(
-  ({ className, gradient = false, glow = false, ...props }, ref) => (
+  ({ className, gradient = false, glow = false, hoverEffect = "none", variant = "default", ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border border-gray-800 shadow-lg backdrop-blur-sm",
-        gradient && "bg-gradient-to-br from-gray-900 to-gray-800",
-        !gradient && "bg-gray-900",
+        "rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-300",
+        variant === "default" && "border-gray-800 bg-gray-900",
+        variant === "subtle" && "border-gray-800/50 bg-gray-900/90",
+        variant === "glass" && "border-white/10 bg-black/40 backdrop-blur-xl",
+        variant === "intense" && "border-gray-700 bg-gradient-to-br from-gray-800 to-gray-950",
+        gradient && !variant.includes("glass") && "bg-gradient-to-br from-gray-900 to-gray-800",
         glow && "shadow-primary/20",
+        hoverEffect === "raise" && "hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10",
+        hoverEffect === "scale" && "hover:scale-[1.02] hover:shadow-xl",
+        hoverEffect === "border" && "hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5",
         className
       )}
       {...props}
