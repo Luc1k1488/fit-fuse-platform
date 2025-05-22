@@ -81,9 +81,9 @@ const AdminLayout = () => {
 
   return (
     <ProtectedRoute roles={["admin", "partner", "support"]}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-900 text-gray-100">
         {/* Верхняя навигационная панель */}
-        <nav className="bg-white border-b border-gray-200 fixed w-full z-30">
+        <nav className="bg-gray-800 border-b border-gray-700 fixed w-full z-30">
           <div className="px-3 py-3 lg:px-5 lg:pl-3 flex justify-between items-center">
             <div className="flex items-center">
               <button
@@ -91,26 +91,26 @@ const AdminLayout = () => {
                 aria-expanded={sidebar_open}
                 className="p-2 rounded-md lg:hidden focus:outline-none"
               >
-                <Menu className="text-gray-600" />
+                <Menu className="text-gray-300" />
               </button>
               <div className="flex items-center ml-3 lg:ml-0">
-                <span className="text-xl font-semibold text-gray-800">GoodFit Управление</span>
+                <span className="text-xl font-semibold text-white">GoodFit Управление</span>
                 {!sidebar_open && (
                   <button
                     onClick={() => set_sidebar_open(true)}
                     className="p-2 ml-3 focus:outline-none lg:hidden"
                   >
-                    <Menu className="text-gray-600" />
+                    <Menu className="text-gray-300" />
                   </button>
                 )}
               </div>
             </div>
             
             <div className="flex items-center">
-              <span className="mr-2 text-sm text-gray-600">
+              <span className="mr-2 text-sm text-gray-300">
                 {user?.name} ({user_role === "admin" ? "Администратор" : user_role === "partner" ? "Партнер" : "Поддержка"})
               </span>
-              <Button variant="ghost" size="icon" onClick={handle_logout}>
+              <Button variant="ghost" size="icon" onClick={handle_logout} className="text-gray-300 hover:text-white">
                 <LogOut size={18} />
               </Button>
             </div>
@@ -119,7 +119,7 @@ const AdminLayout = () => {
 
         {/* Боковая панель */}
         <aside
-          className={`fixed top-0 left-0 z-20 w-64 h-full pt-16 bg-white border-r border-gray-200 transition-transform ${
+          className={`fixed top-0 left-0 z-20 w-64 h-full pt-16 bg-gray-800 border-r border-gray-700 transition-transform ${
             sidebar_open ? "translate-x-0" : "-translate-x-full"
           } lg:translate-x-0`}
         >
@@ -132,7 +132,7 @@ const AdminLayout = () => {
                     className={`flex items-center p-2 text-base font-normal rounded-lg ${
                       is_active(item.path)
                         ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
+                        : "text-gray-300 hover:bg-gray-700"
                     }`}
                   >
                     <span className="w-6 h-6 flex items-center justify-center">

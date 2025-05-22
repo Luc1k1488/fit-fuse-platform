@@ -4,13 +4,13 @@
 
 export type User = {
   id: string;
-  email?: string | null;
-  phone?: string | null;
-  name?: string | null;
+  email: string | null;
+  phone: string | null;
+  name: string | null;
   role: "user" | "admin" | "partner" | "support";
   created_at: string | null;
-  profile_image?: string | null;
-  subscription_id?: string | null;
+  profile_image: string | null;
+  subscription_id: string | null;
 };
 
 export type Gym = {
@@ -78,8 +78,8 @@ export type SupportTicket = {
   status: "open" | "in_progress" | "resolved" | "closed";
   subject: string | null;
   message: string | null;
-  assigned_support_id?: string | null;
-  resolved_at?: string | null;
+  assigned_support_id: string | null;
+  resolved_at: string | null;
 };
 
 export type ChatMessage = {
