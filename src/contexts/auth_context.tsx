@@ -88,6 +88,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(mockUser);
         setUserRole("support");
         return { success: true };
+      } else if (email === "user@example.com" && password === "password") {
+        // Add a regular user for mobile app testing
+        const mockUser: User = {
+          id: "mobile-user-123",
+          email: "user@example.com",
+          phone: null,
+          name: "Mobile User",
+          role: "user",
+          created_at: new Date().toISOString(),
+          profile_image: null,
+          subscription_id: null,
+        };
+
+        setUser(mockUser);
+        setUserRole("user");
+        return { success: true };
       }
 
       return { success: false, error: "Неверные учетные данные" };

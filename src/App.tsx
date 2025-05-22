@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import AdminLoginPage from "./pages/auth/AdminLoginPage";
 import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import MobileLoginPage from "./pages/auth/MobileLoginPage";
 
 // Client app routes
 import ClientLayout from "./layouts/ClientLayout";
@@ -89,6 +91,7 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route path="/login/phone" element={<PhoneLoginPage />} />
+              <Route path="/login/mobile" element={<MobileLoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               
               {/* Client app routes - protected */}

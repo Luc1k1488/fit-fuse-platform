@@ -56,13 +56,21 @@ const LoginPage = () => {
                   </div>
                 </div>
                 
-                <div>
+                <div className="space-y-2">
                   <Button 
                     variant="outline" 
                     className="w-full"
                     onClick={() => navigate("/register")}
                   >
                     Создать новый аккаунт
+                  </Button>
+                  
+                  <Button 
+                    variant="secondary" 
+                    className="w-full"
+                    onClick={() => navigate("/login/mobile")}
+                  >
+                    Войти в мобильное приложение
                   </Button>
                 </div>
               </TabsContent>
