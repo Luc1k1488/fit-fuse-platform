@@ -195,7 +195,7 @@ const AdminDashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{gymsData?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              В {gymsData?.reduce((acc, gym) => new Set([...acc, gym.city]).size, 0) || 0} городах
+              В {gymsData && gymsData.length > 0 ? [...new Set(gymsData.map(gym => gym.city).filter(Boolean))].length : 0} городах
             </p>
           </CardContent>
         </Card>

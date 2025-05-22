@@ -13,7 +13,7 @@ const PhoneLoginPage = () => {
   const [is_code_sent, set_is_code_sent] = useState(false);
   const [error, set_error] = useState("");
   const [is_loading, set_is_loading] = useState(false);
-  const { login_with_phone } = useAuth();
+  const { phoneLogin, login_with_phone } = useAuth();
   const navigate = useNavigate();
 
   const handle_send_code = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,10 +22,13 @@ const PhoneLoginPage = () => {
     set_is_loading(true);
 
     try {
-      // В реальном приложении здесь был бы отправлен SMS с кодом
-      // Для демо имитируем процесс
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      set_is_code_sent(true);
+      const result = await phoneLogin(phone);
+      
+      if (result.success) {
+        set_is_code_sent(true);
+      } else {
+        set_error(result.error || "Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз.");
+      }
     } catch (err) {
       set_error("Не удалось отправить код подтверждения. Пожалуйста, попробуйте еще раз.");
     } finally {
@@ -39,8 +42,13 @@ const PhoneLoginPage = () => {
     set_is_loading(true);
 
     try {
-      await login_with_phone(phone, verification_code);
-      navigate("/app");
+      const result = await login_with_phone(phone, verification_code);
+      
+      if (result.success) {
+        navigate("/app");
+      } else {
+        set_error(result.error || "Неверный код подтверждения. Пожалуйста, попробуйте еще раз.");
+      }
     } catch (err) {
       set_error("Неверный код подтверждения. Пожалуйста, попробуйте еще раз.");
     } finally {

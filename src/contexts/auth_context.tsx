@@ -8,6 +8,8 @@ type AuthContextType = {
   user: User | null;
   user_role: "user" | "admin" | "partner" | "support" | null;
   loading: boolean;
+  is_authenticated: boolean;  // Added is_authenticated property
+  is_loading: boolean;        // Added is_loading property alias for consistency
   login: (email: string, password: string) => Promise<{
     success: boolean;
     error?: string;
@@ -16,6 +18,10 @@ type AuthContextType = {
     success: boolean;
     error?: string;
   }>;
+  login_with_phone: (phone: string, code: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;  // Added login_with_phone property
   register: (email: string, password: string, name: string) => Promise<{
     success: boolean;
     error?: string;
@@ -90,11 +96,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Mock function for phone login
+  // Mock function for phone login (sending code)
   const phoneLogin = async (phone: string) => {
     try {
       // Demo login for phone
       if (phone === "+79001234567") {
+        // In a real app, this would send an SMS code
+        return { success: true };
+      }
+      return { success: false, error: "Invalid phone number" };
+    } catch (error) {
+      return { success: false, error: "Phone authentication failed" };
+    }
+  };
+
+  // Mock function for phone verification (using received code)
+  const login_with_phone = async (phone: string, code: string) => {
+    try {
+      // Demo verification for phone code
+      if (phone === "+79001234567" && code === "123456") {
         const mockUser: User = {
           id: "user-id-123",
           email: null,
@@ -110,9 +130,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserRole("user");
         return { success: true };
       }
-      return { success: false, error: "Invalid phone number" };
+      return { success: false, error: "Invalid verification code" };
     } catch (error) {
-      return { success: false, error: "Phone authentication failed" };
+      return { success: false, error: "Phone verification failed" };
     }
   };
 
@@ -169,8 +189,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     user_role,
     loading,
+    is_loading: loading,          // Added alias for consistency
+    is_authenticated: !!user,     // Added is_authenticated property
     login,
     phoneLogin,
+    login_with_phone,             // Added login_with_phone function
     register,
     logout,
   };

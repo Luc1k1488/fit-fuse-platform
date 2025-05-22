@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, roles = [] }: ProtectedRouteProps) => {
-  const { is_authenticated, user, is_loading } = useAuth();
+  const { user, is_authenticated, is_loading } = useAuth();
   const location = useLocation();
 
   // Show loading state
