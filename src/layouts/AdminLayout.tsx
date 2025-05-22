@@ -18,14 +18,16 @@ import {
   BarChart3,
   Settings,
   Menu,
+  X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const AdminLayout = () => {
   const { user, logout, user_role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebar_open, set_sidebar_open] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const handle_logout = () => {
     logout();
@@ -35,6 +37,33 @@ const AdminLayout = () => {
   const is_active = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
+
+  // Определение мобильного представления
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+      if (window.innerWidth < 768) {
+        set_sidebar_open(false);
+      }
+    };
+    
+    // Первичная проверка
+    checkIsMobile();
+    
+    // Слушаем изменения размера экрана
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Проверяем, запускается ли приложение через Capacitor
+    const isCapacitor = window.location.href.includes('capacitor://');
+    if (isCapacitor) {
+      setIsMobileView(true);
+      set_sidebar_open(false);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
 
   // Элементы меню в зависимости от роли пользователя
   const get_menu_items = () => {
@@ -89,25 +118,17 @@ const AdminLayout = () => {
               <button
                 onClick={() => set_sidebar_open(!sidebar_open)}
                 aria-expanded={sidebar_open}
-                className="p-2 rounded-md lg:hidden focus:outline-none"
+                className="p-2 rounded-md focus:outline-none"
               >
-                <Menu className="text-gray-300" />
+                {sidebar_open && isMobileView ? <X className="text-gray-300" /> : <Menu className="text-gray-300" />}
               </button>
               <div className="flex items-center ml-3 lg:ml-0">
-                <span className="text-xl font-semibold text-white">GoodFit Управление</span>
-                {!sidebar_open && (
-                  <button
-                    onClick={() => set_sidebar_open(true)}
-                    className="p-2 ml-3 focus:outline-none lg:hidden"
-                  >
-                    <Menu className="text-gray-300" />
-                  </button>
-                )}
+                <span className="text-xl font-semibold text-white">GoodFit</span>
               </div>
             </div>
             
             <div className="flex items-center">
-              <span className="mr-2 text-sm text-gray-300">
+              <span className="mr-2 text-sm text-gray-300 hidden md:inline">
                 {user?.name} ({user_role === "admin" ? "Администратор" : user_role === "partner" ? "Партнер" : "Поддержка"})
               </span>
               <Button variant="ghost" size="icon" onClick={handle_logout} className="text-gray-300 hover:text-white">
@@ -117,18 +138,31 @@ const AdminLayout = () => {
           </div>
         </nav>
 
-        {/* Боковая панель */}
+        {/* Боковая панель - адаптивная для мобильных устройств */}
         <aside
           className={`fixed top-0 left-0 z-20 w-64 h-full pt-16 bg-gray-800 border-r border-gray-700 transition-transform ${
             sidebar_open ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
+          } lg:translate-x-0 ${isMobileView ? "w-full md:w-64" : ""}`}
         >
           <div className="px-3 py-4 overflow-y-auto">
+            {isMobileView && (
+              <div className="flex justify-between items-center mb-4 px-2">
+                <span className="text-lg font-semibold">Меню</span>
+                <button
+                  onClick={() => set_sidebar_open(false)}
+                  className="p-1 rounded-md hover:bg-gray-700"
+                >
+                  <X className="text-gray-300" size={20} />
+                </button>
+              </div>
+            )}
+            
             <ul className="space-y-2">
               {get_menu_items().map((item) => (
                 <li key={item.path}>
                   <Link
                     to={item.path}
+                    onClick={() => isMobileView && set_sidebar_open(false)}
                     className={`flex items-center p-2 text-base font-normal rounded-lg ${
                       is_active(item.path)
                         ? "bg-primary text-white"
@@ -146,8 +180,8 @@ const AdminLayout = () => {
           </div>
         </aside>
 
-        {/* Основное содержимое */}
-        <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen`}>
+        {/* Основное содержимое с отступами для мобильных устройств */}
+        <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen ${isMobileView ? "pb-20" : ""}`}>
           <Outlet />
         </div>
       </div>

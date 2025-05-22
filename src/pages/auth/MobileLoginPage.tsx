@@ -30,7 +30,13 @@ const MobileLoginPage = () => {
           description: "Вы успешно вошли в систему",
           variant: "default",
         });
-        navigate("/app"); // Redirect to client app dashboard
+        
+        // Проверяем роль пользователя для перенаправления
+        if (email === "admin@example.com" || email.includes("partner") || email.includes("support")) {
+          navigate("/admin");
+        } else {
+          navigate("/app"); // Redirect to client app dashboard
+        }
       } else {
         setError(result.error || "Неверные учетные данные. Пожалуйста, попробуйте снова.");
       }
@@ -103,9 +109,10 @@ const MobileLoginPage = () => {
                 />
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Для тестирования используйте:<br/>
-                Email: user@example.com<br/>
-                Пароль: password
+                Для входа используйте:<br/>
+                <strong>Клиент:</strong> user@example.com / password<br/>
+                <strong>Админ:</strong> admin@example.com / admin123<br/>
+                <strong>Партнер:</strong> partner@example.com / password
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">

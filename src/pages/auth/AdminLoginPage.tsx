@@ -29,6 +29,8 @@ const AdminLoginPage = () => {
           description: "Вы успешно вошли в систему",
           variant: "default",
         });
+        // Проверяем, запускается ли приложение в мобильном режиме
+        const isMobileApp = window.location.href.includes('capacitor://');
         navigate("/admin/dashboard");
       } else {
         set_error(result.error || "Неверные учетные данные. Пожалуйста, попробуйте снова.");
@@ -91,6 +93,11 @@ const AdminLoginPage = () => {
                 required
                 className="dark:bg-gray-800 dark:border-gray-700"
               />
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Для входа в панель администратора используйте:<br/>
+              Email: admin@example.com<br/>
+              Пароль: admin123
             </div>
           </CardContent>
           <CardFooter>
