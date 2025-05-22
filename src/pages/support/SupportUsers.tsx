@@ -51,8 +51,28 @@ interface SupabaseSupportTicket {
   resolved_at: string | null;
 }
 
+// Extended type for user data coming from Supabase
+interface SupabaseUser {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  name: string | null;
+  role: string | null;
+  created_at: string | null;
+  profile_image: string | null;
+  subscription_id: string | null;
+}
+
 // Extended type for user with tickets
-interface UserWithTickets extends User {
+interface UserWithTickets {
+  id: string;
+  email?: string | null;
+  phone?: string | null;
+  name?: string | null;
+  role: "user" | "admin" | "partner" | "support";
+  created_at: string | null;
+  profile_image?: string | null;
+  subscription_id?: string | null;
   tickets: SupportTicket[];
   ticketCount: number;
   openTickets: number;
@@ -66,7 +86,7 @@ const SupportUsers = () => {
   // Загрузка пользователей с их обращениями в поддержку
   const fetchUsersWithTickets = async () => {
     // Запрос пользователей
-    const { data: users, error: usersError } = await supabase
+    const { data: usersData, error: usersError } = await supabase
       .from("users")
       .select("*")
       .order("created_at", { ascending: false });
@@ -107,15 +127,26 @@ const SupportUsers = () => {
     }, {});
     
     // Объединение данных о пользователях и их обращениях
-    const usersWithTicketsData = users.map((user) => ({
-      ...user,
-      tickets: ticketsByUser[user.id] || [],
-      ticketCount: ticketsByUser[user.id]?.length || 0,
-      openTickets: ticketsByUser[user.id]?.filter(t => t.status === "open" || t.status === "in_progress").length || 0,
-      recentActivity: ticketsByUser[user.id]?.some(t => 
-        t.created_at && isAfter(parseISO(t.created_at), subDays(new Date(), 7))
-      ) || false
-    }));
+    const users = usersData as SupabaseUser[];
+    const usersWithTicketsData = users.map((user) => {
+      // Ensure the role is one of the allowed values
+      const validRole: User['role'] = 
+        user.role === "user" ? "user" : 
+        user.role === "admin" ? "admin" : 
+        user.role === "partner" ? "partner" : 
+        user.role === "support" ? "support" : "user";  // Default to "user" if invalid
+        
+      return {
+        ...user,
+        role: validRole,
+        tickets: ticketsByUser[user.id] || [],
+        ticketCount: ticketsByUser[user.id]?.length || 0,
+        openTickets: ticketsByUser[user.id]?.filter(t => t.status === "open" || t.status === "in_progress").length || 0,
+        recentActivity: ticketsByUser[user.id]?.some(t => 
+          t.created_at && isAfter(parseISO(t.created_at), subDays(new Date(), 7))
+        ) || false
+      } as UserWithTickets;
+    });
     
     // Фильтрация по поисковому запросу
     if (searchQuery) {
@@ -232,7 +263,7 @@ const SupportUsers = () => {
                   </TableHeader>
                   <TableBody>
                     {usersData && usersData.length > 0 ? (
-                      usersData.map((user: UserWithTickets) => (
+                      usersData.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
