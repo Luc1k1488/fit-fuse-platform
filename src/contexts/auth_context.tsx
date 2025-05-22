@@ -21,7 +21,7 @@ type AuthContextType = {
   login_with_phone: (phone: string, code: string) => Promise<{
     success: boolean;
     error?: string;
-  }>;  // Added login_with_phone property
+  }>;  
   register: (email: string, password: string, name: string) => Promise<{
     success: boolean;
     error?: string;
@@ -42,8 +42,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       // Here we would normally call supabase.auth.signInWithPassword
-      // For demo purposes, we're setting a mock user based on email
-      if (email === "admin@example.com" && password === "password") {
+      // For demo purposes, we're setting a mock user based on email and password
+      if (email === "admin@example.com" && password === "admin123") {
         const mockUser: User = {
           id: "admin-id-123",
           email: "admin@example.com",
@@ -90,9 +90,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: true };
       }
 
-      return { success: false, error: "Invalid credentials" };
+      return { success: false, error: "Неверные учетные данные" };
     } catch (error) {
-      return { success: false, error: "Authentication failed" };
+      return { success: false, error: "Ошибка аутентификации" };
     }
   };
 
