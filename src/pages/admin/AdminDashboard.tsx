@@ -1,459 +1,376 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/auth_context";
-import { BarChart, Users, Dumbbell, Calendar, Star, CreditCard } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { User, Gym, Booking, Subscription } from "@/types";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { format, parseISO, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Activity as ActivityIcon } from "lucide-react";
-
-// Type for platform stats
-interface PlatformStats {
-  userCount: number;
-  userGrowth: number;
-  gymCount: number;
-  newGyms: number;
-  classesToday: number;
-  fullyBooked: number;
-  monthlyRevenue: number;
-  revenueGrowth: number;
-}
-
-// Type for recent activity
-interface ActivityItem {
-  id: string;
-  type: "user_joined" | "booking_created" | "class_created" | "review_added";
-  title: string;
-  description: string;
-  time: string;
-  icon: JSX.Element;
-}
-
-// Type for top gym
-interface TopGym {
-  id: string;
-  name: string;
-  location: string;
-  bookings: number;
-  rating: number;
-  image?: string;
-}
+import { CheckCircle2, Users, Dumbbell, Calendar, CreditCard } from "lucide-react";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  // Fetch data for dashboard
+  const { data: userData } = useQuery({
+    queryKey: ["dashboard-users"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      return data as User[];
+    },
+  });
 
-  // Fetch platform stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["admin-dashboard-stats"],
-    queryFn: async (): Promise<PlatformStats> => {
-      // Get total users
-      const { count: userCount, error: userError } = await supabase
-        .from("users")
-        .select("*", { count: 'exact', head: true });
-      
-      if (userError) throw userError;
-      
-      // Get new users in last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { count: newUserCount, error: newUserError } = await supabase
-        .from("users")
-        .select("*", { count: 'exact', head: true })
-        .gte("created_at", thirtyDaysAgo.toISOString());
-      
-      if (newUserError) throw newUserError;
-      
-      // Get gyms count
-      const { count: gymCount, error: gymError } = await supabase
-        .from("gyms")
-        .select("*", { count: 'exact', head: true });
-      
-      if (gymError) throw gymError;
-      
-      // Get classes for today
-      const today = new Date();
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      const { count: classTodayCount, error: classError } = await supabase
-        .from("classes")
-        .select("*", { count: 'exact', head: true })
-        .gte("start_time", today.toISOString())
-        .lt("start_time", tomorrow.toISOString());
-      
-      if (classError) throw classError;
-      
-      // Get fully booked classes
-      const { count: fullyBookedCount, error: fullyBookedError } = await supabase
-        .from("classes")
-        .select("*", { count: 'exact', head: true })
-        .eq("booked_count", "capacity");
-      
-      if (fullyBookedError) throw fullyBookedError;
-      
-      // Mock revenue data for now - would be replaced with actual subscription data
-      const monthlyRevenue = 248920;
-      const revenueGrowth = 18;
-      
-      return {
-        userCount: userCount || 0,
-        userGrowth: newUserCount ? Math.round((newUserCount / userCount) * 100) : 0,
-        gymCount: gymCount || 0,
-        newGyms: 5, // Mock data
-        classesToday: classTodayCount || 0,
-        fullyBooked: fullyBookedCount || 0,
-        monthlyRevenue,
-        revenueGrowth
-      };
-    }
-  });
-  
-  // Fetch recent activity
-  const { data: recentActivity, isLoading: activityLoading } = useQuery({
-    queryKey: ["admin-dashboard-activity"],
-    queryFn: async (): Promise<ActivityItem[]> => {
-      // Get recent users
-      const { data: recentUsers, error: userError } = await supabase
-        .from("users")
-        .select("id, name, created_at")
-        .order("created_at", { ascending: false })
-        .limit(2);
-      
-      if (userError) throw userError;
-      
-      // Get recent bookings
-      const { data: recentBookings, error: bookingError } = await supabase
+  const { data: bookingsData } = useQuery({
+    queryKey: ["dashboard-bookings"],
+    queryFn: async () => {
+      const { data } = await supabase
         .from("bookings")
-        .select(`
-          id, 
-          created_at,
-          user:user_id (name),
-          class:class_id (title)
-        `)
-        .order("created_at", { ascending: false })
-        .limit(2);
+        .select("*")
+        .order("date_time", { ascending: false });
       
-      if (bookingError) throw bookingError;
-      
-      // Get recent reviews
-      const { data: recentReviews, error: reviewError } = await supabase
-        .from("reviews")
-        .select(`
-          id,
-          created_at,
-          user:user_id (name),
-          gym:gym_id (name),
-          rating
-        `)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      
-      if (reviewError) throw reviewError;
-      
-      const activities: ActivityItem[] = [];
-      
-      // Add user registrations to activity
-      recentUsers?.forEach(user => {
-        activities.push({
-          id: `user-${user.id}`,
-          type: "user_joined",
-          title: "Зарегистрирован новый пользователь",
-          description: `${user.name || 'Пользователь'} присоединился к платформе`,
-          time: user.created_at || new Date().toISOString(),
-          icon: <Users className="h-5 w-5 text-blue-500" />
-        });
-      });
-      
-      // Add bookings to activity
-      recentBookings?.forEach(booking => {
-        activities.push({
-          id: `booking-${booking.id}`,
-          type: "booking_created",
-          title: "Новое бронирование",
-          description: `${booking.user?.name || 'Пользователь'} забронировал ${booking.class?.title || 'тренировку'}`,
-          time: booking.created_at || new Date().toISOString(),
-          icon: <Calendar className="h-5 w-5 text-green-500" />
-        });
-      });
-      
-      // Add reviews to activity
-      recentReviews?.forEach(review => {
-        activities.push({
-          id: `review-${review.id}`,
-          type: "review_added",
-          title: "Новый отзыв",
-          description: `${review.user?.name || 'Пользователь'} оставил отзыв на ${review.gym?.name || 'зал'} с оценкой ${review.rating}/5`,
-          time: review.created_at || new Date().toISOString(),
-          icon: <Star className="h-5 w-5 text-yellow-500" />
-        });
-      });
-      
-      // Sort by time (newest first)
-      return activities.sort((a, b) => 
-        new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
-    }
+      return data as Booking[];
+    },
   });
-  
-  // Fetch top gyms
-  const { data: topGyms, isLoading: gymsLoading } = useQuery({
-    queryKey: ["admin-dashboard-top-gyms"],
-    queryFn: async (): Promise<TopGym[]> => {
-      const { data: gyms, error } = await supabase
+
+  const { data: gymsData } = useQuery({
+    queryKey: ["dashboard-gyms"],
+    queryFn: async () => {
+      const { data } = await supabase
         .from("gyms")
-        .select("id, name, location, rating, review_count, main_image")
-        .order("rating", { ascending: false })
-        .limit(5);
+        .select("*")
+        .order("created_at", { ascending: false });
       
-      if (error) throw error;
-      
-      // Get booking counts for these gyms
-      const gymIds = gyms?.map(gym => gym.id) || [];
-      
-      const { data: bookingCounts, error: bookingError } = await supabase
-        .from("bookings")
-        .select("gym_id, count")
-        .in("gym_id", gymIds)
-        .group("gym_id");
-      
-      if (bookingError) throw bookingError;
-      
-      // Map booking counts to gyms
-      return gyms?.map(gym => ({
-        id: gym.id,
-        name: gym.name || "Неизвестный зал",
-        location: gym.location || "",
-        bookings: bookingCounts?.find(b => b.gym_id === gym.id)?.count || 0,
-        rating: gym.rating || 0,
-        image: gym.main_image || undefined
-      })) || [];
-    }
+      return data as Gym[];
+    },
   });
+
+  const { data: subscriptionsData } = useQuery({
+    queryKey: ["dashboard-subscriptions"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("start_date", { ascending: false });
+      
+      return data as Subscription[];
+    },
+  });
+
+  // Get count of users registered in the last 30 days
+  const newUsersCount = userData?.filter(user => {
+    if (!user.created_at) return false;
+    const creationDate = parseISO(user.created_at);
+    const thirtyDaysAgo = subDays(new Date(), 30);
+    return creationDate >= thirtyDaysAgo;
+  }).length || 0;
+
+  // Get active bookings count
+  const activeBookingsCount = bookingsData?.filter(booking => 
+    booking.status === "confirmed"
+  ).length || 0;
+
+  // Calculate booking completion rate
+  const totalBookings = bookingsData?.length || 0;
+  const completionRate = totalBookings > 0 
+    ? Math.round((activeBookingsCount / totalBookings) * 100) 
+    : 0;
+
+  // Recent activity data
+  const recentUsers = userData?.slice(0, 5) || [];
+  const recentBookings = bookingsData?.slice(0, 5) || [];
+
+  // Prepare chart data
+  const bookingsByStatus = [
+    { name: 'Подтверждено', value: bookingsData?.filter(b => b.status === 'confirmed').length || 0, color: '#22c55e' },
+    { name: 'Ожидание', value: bookingsData?.filter(b => b.status === 'pending').length || 0, color: '#eab308' },
+    { name: 'Отменено', value: bookingsData?.filter(b => b.status === 'cancelled').length || 0, color: '#ef4444' },
+  ];
+
+  // Fake user activity data (for demonstration)
+  const userActivityData = [
+    { day: 'Пн', count: 120 },
+    { day: 'Вт', count: 145 },
+    { day: 'Ср', count: 160 },
+    { day: 'Чт', count: 190 },
+    { day: 'Пт', count: 210 },
+    { day: 'Сб', count: 250 },
+    { day: 'Вс', count: 180 },
+  ];
+
+  // Calculate revenue (for demonstration)
+  const totalRevenue = subscriptionsData?.reduce((sum, subscription) => {
+    return sum + (subscription.price || 0);
+  }, 0) || 0;
 
   // Format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
     try {
-      const date = parseISO(dateString);
-      const now = new Date();
-      const diffHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-      
-      if (diffHours < 1) {
-        return "Несколько минут назад";
-      } else if (diffHours < 24) {
-        return `${Math.floor(diffHours)} ч назад`;
-      } else {
-        return format(date, "d MMMM, HH:mm", { locale: ru });
-      }
+      return format(parseISO(dateString), "d MMM yyyy", { locale: ru });
     } catch {
       return dateString;
     }
   };
 
+  // Get daily bookings for the last 7 days
+  const getDailyBookingsData = () => {
+    if (!bookingsData) return [];
+    
+    // Get the last 7 days
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const date = subDays(new Date(), i);
+      return {
+        day: format(date, "E", { locale: ru }),
+        date: format(date, "yyyy-MM-dd"),
+        count: 0,
+      };
+    }).reverse();
+    
+    // Count bookings for each day
+    bookingsData.forEach(booking => {
+      if (!booking.date_time) return;
+      
+      const bookingDate = format(parseISO(booking.date_time), "yyyy-MM-dd");
+      const dayIndex = days.findIndex(d => d.date === bookingDate);
+      
+      if (dayIndex >= 0) {
+        days[dayIndex].count++;
+      }
+    });
+    
+    // Return just the day and count for the chart
+    return days.map(d => ({
+      day: d.day,
+      count: d.count,
+    }));
+  };
+
+  const dailyBookingsData = getDailyBookingsData();
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Панель управления</h1>
-        <span className="text-gray-400">С возвращением, {user?.name || "Администратор"}</span>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Панель управления</h1>
+      
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Пользователей</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userData?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              +{newUsersCount} за последние 30 дней
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Залы</CardTitle>
+            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{gymsData?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              В {gymsData?.reduce((acc, gym) => new Set([...acc, gym.city]).size, 0) || 0} городах
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Тренировки</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{activeBookingsCount}</div>
+            <p className="text-xs text-muted-foreground">
+              {completionRate}% успешно завершены
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Доход</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalRevenue.toLocaleString()} ₽</div>
+            <p className="text-xs text-muted-foreground">
+              Активных абонементов: {subscriptionsData?.filter(s => s.status === 'active').length || 0}
+            </p>
+          </CardContent>
+        </Card>
       </div>
-
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Обзор</TabsTrigger>
-          <TabsTrigger value="analytics">Аналитика</TabsTrigger>
-          <TabsTrigger value="reports">Отчеты</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-6">
-          {/* Быстрая статистика */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">Всего пользователей</p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {statsLoading ? "..." : stats?.userCount.toLocaleString()}
-                    </h3>
-                    <p className="text-xs text-green-500 mt-1">
-                      +{statsLoading ? "..." : stats?.userGrowth}% с прошлого месяца
-                    </p>
-                  </div>
-                  <div className="p-3 bg-blue-900/20 rounded-md">
-                    <Users className="h-6 w-6 text-blue-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">Активные залы</p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {statsLoading ? "..." : stats?.gymCount.toLocaleString()}
-                    </h3>
-                    <p className="text-xs text-green-500 mt-1">
-                      +{statsLoading ? "..." : stats?.newGyms} новых на этой неделе
-                    </p>
-                  </div>
-                  <div className="p-3 bg-green-900/20 rounded-md">
-                    <Dumbbell className="h-6 w-6 text-green-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">Тренировки сегодня</p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {statsLoading ? "..." : stats?.classesToday.toLocaleString()}
-                    </h3>
-                    <p className="text-xs text-blue-500 mt-1">
-                      {statsLoading ? "..." : stats?.fullyBooked} полностью забронированы
-                    </p>
-                  </div>
-                  <div className="p-3 bg-purple-900/20 rounded-md">
-                    <Calendar className="h-6 w-6 text-purple-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">Доход (ежемесячно)</p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {statsLoading ? "..." : stats?.monthlyRevenue.toLocaleString()} ₽
-                    </h3>
-                    <p className="text-xs text-green-500 mt-1">
-                      +{statsLoading ? "..." : stats?.revenueGrowth}% с прошлого месяца
-                    </p>
-                  </div>
-                  <div className="p-3 bg-yellow-900/20 rounded-md">
-                    <CreditCard className="h-6 w-6 text-yellow-500" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Двухколоночный макет */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Недавняя активность */}
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Недавняя активность</CardTitle>
-                <CardDescription>Последние действия на платформе</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {activityLoading ? (
-                  <div className="flex justify-center items-center h-[300px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-                  </div>
-                ) : recentActivity?.length === 0 ? (
-                  <div className="text-center py-8">
-                    <ActivityIcon className="h-12 w-12 mx-auto text-gray-500 mb-4" />
-                    <p className="text-gray-400">Нет недавней активности</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {recentActivity?.map((item) => (
-                      <div key={item.id} className="flex items-start">
-                        <div className="p-2 bg-gray-800 rounded-md mr-4">
-                          {item.icon}
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.title}</p>
-                          <p className="text-sm text-gray-400">{item.description}</p>
-                          <p className="text-xs text-gray-500">{formatDate(item.time)}</p>
-                        </div>
-                      </div>
+      
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Статус тренировок</CardTitle>
+            <CardDescription>Распределение бронирований по статусам</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={bookingsByStatus}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {bookingsByStatus.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Лучшие залы */}
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Лучшие фитнес-залы</CardTitle>
-                <CardDescription>По бронированиям и рейтингам</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {gymsLoading ? (
-                  <div className="flex justify-center items-center h-[300px]">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-                  </div>
-                ) : topGyms?.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Dumbbell className="h-12 w-12 mx-auto text-gray-500 mb-4" />
-                    <p className="text-gray-400">Нет данных о залах</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {topGyms?.map((gym, index) => (
-                      <div key={gym.id} className="flex items-center justify-between border-b border-gray-800 pb-4 last:border-0 last:pb-0">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded bg-gray-800 flex-shrink-0 mr-3 overflow-hidden">
-                            {gym.image ? (
-                              <img src={gym.image} alt={gym.name} className="w-full h-full object-cover" />
-                            ) : null}
-                          </div>
-                          <div>
-                            <p className="font-medium">{gym.name}</p>
-                            <p className="text-sm text-gray-400">{gym.location} • {gym.bookings} бронирований</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 font-medium">{gym.rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} бронирований`, '']} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="analytics" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Статистика использования</CardTitle>
-              <CardDescription>Показатели использования платформы за период</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center flex flex-col items-center space-y-2">
-                <BarChart className="h-16 w-16 text-gray-500" />
-                <p className="text-gray-400">Здесь будут отображаться графики аналитики</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Тренировки по дням</CardTitle>
+            <CardDescription>Количество тренировок за последние 7 дней</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer>
+                <BarChart data={dailyBookingsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip 
+                    formatter={(value) => [`${value} тренировок`, '']}
+                    labelFormatter={(label) => `День: ${label}`}
+                  />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Recent activity */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Последние пользователи</CardTitle>
+            <CardDescription>Недавно зарегистрированные пользователи</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {recentUsers.map(user => (
+                <li key={user.id} className="flex items-center gap-3 border-b border-gray-700 pb-2">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-800 flex items-center justify-center">
+                    {user.profile_image ? (
+                      <img 
+                        src={user.profile_image} 
+                        alt={user.name || ""} 
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-lg font-medium text-gray-400">
+                        {user.name?.charAt(0) || "U"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex-grow">
+                    <div className="font-medium">{user.name || "Неизвестный пользователь"}</div>
+                    <div className="text-sm text-gray-400">
+                      {user.email || user.phone || "Нет контактной информации"}
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-400">
+                    {formatDate(user.created_at)}
+                  </div>
+                </li>
+              ))}
+              
+              {recentUsers.length === 0 && (
+                <li className="text-center py-4 text-gray-400">Нет данных о пользователях</li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
         
-        <TabsContent value="reports" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Сформированные отчеты</CardTitle>
-              <CardDescription>Скачайте подробные отчеты</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-gray-400">Отчеты пока не сформированы</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Card>
+          <CardHeader>
+            <CardTitle>Последние бронирования</CardTitle>
+            <CardDescription>Недавние бронирования в системе</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {recentBookings.map(booking => (
+                <li key={booking.id} className="flex items-center gap-3 border-b border-gray-700 pb-2">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-800 flex items-center justify-center">
+                    {booking.status === 'confirmed' ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    ) : booking.status === 'pending' ? (
+                      <Calendar className="h-5 w-5 text-yellow-500" />
+                    ) : (
+                      <Calendar className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-grow">
+                    <div className="font-medium">
+                      Бронирование #{booking.id.substring(0, 8)}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {booking.status === 'confirmed' ? 'Подтверждено' : 
+                       booking.status === 'pending' ? 'Ожидание' : 'Отменено'}
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-400">
+                    {formatDate(booking.date_time)}
+                  </div>
+                </li>
+              ))}
+              
+              {recentBookings.length === 0 && (
+                <li className="text-center py-4 text-gray-400">Нет данных о бронированиях</li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

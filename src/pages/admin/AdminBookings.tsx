@@ -113,7 +113,7 @@ const AdminBookings = () => {
         .order('date_time', { ascending: false });
 
       if (bookingsError) {
-        throw new bookingsError;
+        throw bookingsError;
       }
 
       return bookingsData as BookingWithDetails[];
@@ -273,15 +273,15 @@ const AdminBookings = () => {
         </div>
         
         <div className="flex gap-4">
-          <Select value={statusFilter || ""} onValueChange={(value) => {
-            setStatusFilter(value || null);
+          <Select value={statusFilter || "all"} onValueChange={(value) => {
+            setStatusFilter(value === "all" ? null : value);
             setPage(1);
           }}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Фильтр по статусу" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все статусы</SelectItem>
+              <SelectItem value="all">Все статусы</SelectItem>
               <SelectItem value="pending">Ожидающие</SelectItem>
               <SelectItem value="confirmed">Подтвержденные</SelectItem>
               <SelectItem value="cancelled">Отмененные</SelectItem>

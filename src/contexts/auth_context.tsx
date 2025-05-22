@@ -1,144 +1,185 @@
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types";
 
-interface AuthContextType {
+// Define the shape of the auth context
+type AuthContextType = {
   user: User | null;
-  is_loading: boolean;
-  is_authenticated: boolean;
-  user_role: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  login_with_phone: (phone: string, code: string) => Promise<void>;
+  user_role: "user" | "admin" | "partner" | "support" | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  phoneLogin: (phone: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  register: (email: string, password: string, name: string) => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
   logout: () => void;
-  check_admin_access: () => boolean;
-  check_partner_access: () => boolean;
-  check_support_access: () => boolean;
-  check_user_access: () => boolean;
-}
+};
 
+// Create the auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Auth provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, set_user] = useState<User | null>(null);
-  const [is_loading, set_is_loading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [user_role, setUserRole] = useState<"user" | "admin" | "partner" | "support" | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Mock function to simulate user login
+  const login = async (email: string, password: string) => {
+    try {
+      // Here we would normally call supabase.auth.signInWithPassword
+      // For demo purposes, we're setting a mock user based on email
+      if (email === "admin@example.com" && password === "password") {
+        const mockUser: User = {
+          id: "admin-id-123",
+          email: "admin@example.com",
+          phone: null,
+          name: "Admin User",
+          role: "admin",
+          created_at: new Date().toISOString(),
+          profile_image: null,
+          subscription_id: null,
+        };
+
+        setUser(mockUser);
+        setUserRole("admin");
+        return { success: true };
+      } else if (email === "partner@example.com" && password === "password") {
+        const mockUser: User = {
+          id: "partner-id-456",
+          email: "partner@example.com",
+          phone: null,
+          name: "Partner User",
+          role: "partner",
+          created_at: new Date().toISOString(),
+          profile_image: null,
+          subscription_id: null,
+        };
+
+        setUser(mockUser);
+        setUserRole("partner");
+        return { success: true };
+      } else if (email === "support@example.com" && password === "password") {
+        const mockUser: User = {
+          id: "support-id-789",
+          email: "support@example.com",
+          phone: null,
+          name: "Support Agent",
+          role: "support",
+          created_at: new Date().toISOString(),
+          profile_image: null,
+          subscription_id: null,
+        };
+
+        setUser(mockUser);
+        setUserRole("support");
+        return { success: true };
+      }
+
+      return { success: false, error: "Invalid credentials" };
+    } catch (error) {
+      return { success: false, error: "Authentication failed" };
+    }
+  };
+
+  // Mock function for phone login
+  const phoneLogin = async (phone: string) => {
+    try {
+      // Demo login for phone
+      if (phone === "+79001234567") {
+        const mockUser: User = {
+          id: "user-id-123",
+          email: null,
+          phone: "+79001234567",
+          name: "Phone User",
+          role: "user",
+          created_at: new Date().toISOString(),
+          profile_image: null,
+          subscription_id: null,
+        };
+
+        setUser(mockUser);
+        setUserRole("user");
+        return { success: true };
+      }
+      return { success: false, error: "Invalid phone number" };
+    } catch (error) {
+      return { success: false, error: "Phone authentication failed" };
+    }
+  };
+
+  // Mock function for user registration
+  const register = async (email: string, password: string, name: string) => {
+    try {
+      // Here we would normally call supabase.auth.signUp
+      const mockUser: User = {
+        id: "new-user-id",
+        email: email,
+        phone: null,
+        name: name,
+        role: "user",
+        created_at: new Date().toISOString(),
+        profile_image: null,
+        subscription_id: null,
+      };
+      
+      setUser(mockUser);
+      setUserRole("user");
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Registration failed" };
+    }
+  };
+
+  // Logout function
+  const logout = () => {
+    setUser(null);
+    setUserRole(null);
+  };
+
+  // Check for existing session on mount
   useEffect(() => {
-    // Here we would check for existing sessions with Supabase
-    // For now, just simulating a check
-    const check_existing_session = async () => {
+    // Mock auto-login for demonstration
+    // In production, this would check supabase session
+    const checkSession = async () => {
       try {
-        // This would be replaced with actual Supabase auth check
-        const stored_user = localStorage.getItem("fitness_user");
-        if (stored_user) {
-          set_user(JSON.parse(stored_user));
-        }
+        // Simulating session check - In production use supabase.auth.getSession()
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
       } catch (error) {
         console.error("Session check error:", error);
-      } finally {
-        set_is_loading(false);
+        setLoading(false);
       }
     };
 
-    check_existing_session();
+    checkSession();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // This would connect to Supabase auth
-    // For demonstration, using localStorage
-    try {
-      set_is_loading(true);
-      
-      // Simulate login delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock admin user for demo
-      const admin_user: User = {
-        id: "admin-123",
-        email: email,
-        name: "Admin User",
-        role: "admin",
-        created_at: new Date().toISOString(),
-        profile_image: "/placeholder.svg",
-      };
-      
-      set_user(admin_user);
-      localStorage.setItem("fitness_user", JSON.stringify(admin_user));
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    } finally {
-      set_is_loading(false);
-    }
-  };
-
-  const login_with_phone = async (phone: string, code: string) => {
-    // This would connect to Supabase auth with OTP
-    try {
-      set_is_loading(true);
-      
-      // Simulate login delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock client user for demo
-      const client_user: User = {
-        id: "client-123",
-        phone: phone,
-        name: "Client User",
-        role: "user",
-        created_at: new Date().toISOString(),
-        profile_image: "/placeholder.svg",
-      };
-      
-      set_user(client_user);
-      localStorage.setItem("fitness_user", JSON.stringify(client_user));
-    } catch (error) {
-      console.error("Phone login error:", error);
-      throw error;
-    } finally {
-      set_is_loading(false);
-    }
-  };
-
-  const logout = () => {
-    // This would connect to Supabase auth for logout
-    set_user(null);
-    localStorage.removeItem("fitness_user");
-  };
-
-  const check_admin_access = () => {
-    return user?.role === "admin";
-  };
-
-  const check_partner_access = () => {
-    return user?.role === "partner" || user?.role === "admin";
-  };
-
-  const check_support_access = () => {
-    return user?.role === "support" || user?.role === "admin";
-  };
-
-  const check_user_access = () => {
-    return !!user;
-  };
-
+  // Context value
   const value = {
     user,
-    is_loading,
-    is_authenticated: !!user,
-    user_role: user?.role || null,
+    user_role,
+    loading,
     login,
-    login_with_phone,
+    phoneLogin,
+    register,
     logout,
-    check_admin_access,
-    check_partner_access,
-    check_support_access,
-    check_user_access,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextType => {
+// Hook to use the auth context
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
