@@ -41,6 +41,20 @@ import {
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 
+// Define a more specific interface for the Gym data returned from Supabase
+interface GymMinimal {
+  id: string;
+  name: string | null;
+  location: string | null;
+  city: string | null;
+  main_image: string | null;
+}
+
+// Define a more specific interface for the Class data with joined Gym
+interface ClassWithGym extends Omit<Class, 'gyms'> {
+  gyms: GymMinimal;
+}
+
 const AdminClasses = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,7 +89,8 @@ const AdminClasses = () => {
       throw new Error(error.message);
     }
     
-    return data as (Class & { gyms: Gym })[];
+    // Assert the type to match our interface
+    return data as unknown as ClassWithGym[];
   };
 
   const { 

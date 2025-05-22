@@ -39,6 +39,26 @@ import { Search, MoreVertical, MessageSquare, Calendar, AlertTriangle } from "lu
 import { format, parseISO, isAfter, subDays } from "date-fns";
 import { ru } from "date-fns/locale";
 
+// Extended type for support tickets from Supabase
+interface SupabaseSupportTicket {
+  id: string;
+  user_id: string | null;
+  created_at: string | null;
+  status: string | null;  // This comes as string from Supabase
+  subject: string | null;
+  message: string | null;
+  assigned_support_id: string | null;
+  resolved_at: string | null;
+}
+
+// Extended type for user with tickets
+interface UserWithTickets extends User {
+  tickets: SupportTicket[];
+  ticketCount: number;
+  openTickets: number;
+  recentActivity: boolean;
+}
+
 const SupportUsers = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,11 +74,26 @@ const SupportUsers = () => {
     if (usersError) throw new Error(usersError.message);
     
     // Запрос обращений в поддержку
-    const { data: tickets, error: ticketsError } = await supabase
+    const { data: ticketsData, error: ticketsError } = await supabase
       .from("support_tickets")
       .select("*");
     
     if (ticketsError) throw new Error(ticketsError.message);
+    
+    // Convert raw Supabase ticket data to SupportTicket type
+    const tickets = (ticketsData as SupabaseSupportTicket[]).map(ticket => {
+      // Ensure the status is one of the allowed values
+      const validStatus: SupportTicket['status'] = 
+        ticket.status === "open" ? "open" : 
+        ticket.status === "in_progress" ? "in_progress" : 
+        ticket.status === "resolved" ? "resolved" : 
+        ticket.status === "closed" ? "closed" : "open";  // Default to "open" if invalid
+        
+      return {
+        ...ticket,
+        status: validStatus
+      } as SupportTicket;
+    });
     
     // Группировка обращений по ID пользователя
     const ticketsByUser = tickets.reduce((acc: Record<string, SupportTicket[]>, ticket) => {
@@ -197,7 +232,7 @@ const SupportUsers = () => {
                   </TableHeader>
                   <TableBody>
                     {usersData && usersData.length > 0 ? (
-                      usersData.map((user: any) => (
+                      usersData.map((user: UserWithTickets) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
