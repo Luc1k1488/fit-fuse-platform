@@ -47,32 +47,75 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user_role, setUserRole] = useState<"user" | "admin" | "partner" | "support" | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Function to fetch or create user profile
+  const fetchOrCreateUserProfile = async (authUser: any) => {
+    try {
+      console.log("Fetching user profile for:", authUser.id);
+      
+      // First try to get existing user
+      let { data: userProfile, error: profileError } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
+
+      // If user doesn't exist, create them
+      if (profileError && profileError.code === 'PGRST116') {
+        console.log("User not found, creating new user profile");
+        
+        const { data: newUser, error: createError } = await supabase
+          .from("users")
+          .insert({
+            id: authUser.id,
+            email: authUser.email,
+            name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Пользователь',
+            role: 'user'
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error("Error creating user profile:", createError);
+          return null;
+        }
+        
+        userProfile = newUser;
+      } else if (profileError) {
+        console.error("Error fetching user profile:", profileError);
+        return null;
+      }
+
+      return userProfile;
+    } catch (error) {
+      console.error("Error in fetchOrCreateUserProfile:", error);
+      return null;
+    }
+  };
+
   // Real Supabase login function
   const login = async (email: string, password: string) => {
     try {
+      console.log("Attempting login for:", email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Login error:", error);
         return { success: false, error: error.message };
       }
 
       if (data.user) {
-        // Fetch user profile from our users table
-        const { data: userProfile, error: profileError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching user profile:", profileError);
+        console.log("Auth login successful, fetching profile...");
+        
+        const userProfile = await fetchOrCreateUserProfile(data.user);
+        
+        if (!userProfile) {
           return { success: false, error: "Ошибка загрузки профиля пользователя" };
         }
 
-        // Create user object with validated role
         const userWithValidatedRole: User = {
           ...userProfile,
           role: validateRole(userProfile.role)
@@ -80,6 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(userWithValidatedRole);
         setUserRole(validateRole(userProfile.role));
+        console.log("Login successful, user role:", userProfile.role);
         return { success: true };
       }
 
@@ -121,19 +165,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data.user) {
-        // Fetch user profile from our users table
-        const { data: userProfile, error: profileError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching user profile:", profileError);
+        const userProfile = await fetchOrCreateUserProfile(data.user);
+        
+        if (!userProfile) {
           return { success: false, error: "Ошибка загрузки профиля пользователя" };
         }
 
-        // Create user object with validated role
         const userWithValidatedRole: User = {
           ...userProfile,
           role: validateRole(userProfile.role)
@@ -153,6 +190,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // User registration
   const register = async (email: string, password: string, name: string) => {
     try {
+      console.log("Attempting registration for:", email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -164,10 +203,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
+        console.error("Registration error:", error);
         return { success: false, error: error.message };
       }
 
       if (data.user) {
+        console.log("Registration successful");
         return { success: true };
       }
 
@@ -191,25 +232,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Check for existing session on mount and listen to auth changes
   useEffect(() => {
+    console.log("Setting up auth state listener...");
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session: Session | null) => {
-        console.log("Auth state changed:", event, session);
+        console.log("Auth state changed:", event, session?.user?.id);
         
         if (session?.user) {
-          // Fetch user profile from our users table
-          const { data: userProfile, error: profileError } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error("Error fetching user profile:", profileError);
-            setUser(null);
-            setUserRole(null);
-          } else {
-            // Create user object with validated role
+          const userProfile = await fetchOrCreateUserProfile(session.user);
+          
+          if (userProfile) {
             const userWithValidatedRole: User = {
               ...userProfile,
               role: validateRole(userProfile.role)
@@ -217,8 +250,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             setUser(userWithValidatedRole);
             setUserRole(validateRole(userProfile.role));
+            console.log("User authenticated with role:", userProfile.role);
+          } else {
+            setUser(null);
+            setUserRole(null);
           }
         } else {
+          console.log("No user session");
           setUser(null);
           setUserRole(null);
         }
@@ -229,7 +267,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      // The onAuthStateChange will handle setting the user
+      console.log("Checking existing session:", !!session);
       if (!session) {
         setLoading(false);
       }
