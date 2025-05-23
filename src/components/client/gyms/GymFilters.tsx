@@ -29,11 +29,13 @@ export const GymFilters = ({
         />
       </div>
       
-      <CategoryTabs
-        categories={categories}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <div className="mb-2">
+        <CategoryTabs
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />
+      </div>
     </div>
   );
 };

@@ -19,38 +19,51 @@ const ClientGyms = () => {
 
   // Функция для получения залов из Supabase
   const fetchGyms = async () => {
-    let query = supabase.from("gyms").select("*");
-    
-    // Применение фильтров
-    if (selectedCity && selectedCity !== "Все") {
-      query = query.eq("city", selectedCity);
-    }
-    
-    if (selectedCategory && selectedCategory !== "Все") {
-      query = query.eq("category", selectedCategory);
-    }
-    
-    if (minRating[0] > 0) {
-      query = query.gte("rating", minRating[0]);
-    }
-    
-    if (searchQuery) {
-      query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
-    }
-    
-    const { data, error } = await query.order("name");
-    
-    if (error) {
-      console.error("Ошибка при загрузке залов:", error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Не удалось загрузить список залов",
+    try {
+      console.log("Fetching gyms with filters:", {
+        city: selectedCity,
+        category: selectedCategory,
+        minRating: minRating[0],
+        searchQuery
       });
+      
+      let query = supabase.from("gyms").select("*");
+      
+      // Применение фильтров
+      if (selectedCity && selectedCity !== "Все") {
+        query = query.eq("city", selectedCity);
+      }
+      
+      if (selectedCategory && selectedCategory !== "Все") {
+        query = query.eq("category", selectedCategory);
+      }
+      
+      if (minRating[0] > 0) {
+        query = query.gte("rating", minRating[0]);
+      }
+      
+      if (searchQuery) {
+        query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
+      }
+      
+      const { data, error } = await query.order("name");
+      
+      if (error) {
+        console.error("Ошибка при загрузке залов:", error);
+        toast({
+          variant: "destructive",
+          title: "Ошибка",
+          description: "Не удалось загрузить список залов",
+        });
+        return [];
+      }
+      
+      console.log("Gyms loaded:", data?.length || 0);
+      return data as Gym[];
+    } catch (error) {
+      console.error("Ошибка загрузки данных:", error);
       return [];
     }
-    
-    return data as Gym[];
   };
 
   const { 
