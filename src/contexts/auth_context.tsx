@@ -55,6 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(mockUser);
         setUserRole("admin");
+        // Сохраняем в localStorage для персистентности
+        localStorage.setItem('mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('mock_user_role', 'admin');
         return { success: true };
       } else if (email === "partner@example.com" && password === "password") {
         const mockUser: User = {
@@ -70,6 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(mockUser);
         setUserRole("partner");
+        localStorage.setItem('mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('mock_user_role', 'partner');
         return { success: true };
       } else if (email === "support@example.com" && password === "password") {
         const mockUser: User = {
@@ -85,6 +90,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(mockUser);
         setUserRole("support");
+        localStorage.setItem('mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('mock_user_role', 'support');
         return { success: true };
       } else if (email === "user@example.com" && password === "password") {
         // Используем тестового пользователя из базы данных
@@ -101,6 +108,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(mockUser);
         setUserRole("user");
+        localStorage.setItem('mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('mock_user_role', 'user');
         return { success: true };
       }
 
@@ -142,6 +151,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(mockUser);
         setUserRole("user");
+        localStorage.setItem('mock_user', JSON.stringify(mockUser));
+        localStorage.setItem('mock_user_role', 'user');
         return { success: true };
       }
       return { success: false, error: "Invalid verification code" };
@@ -167,6 +178,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       setUser(mockUser);
       setUserRole("user");
+      localStorage.setItem('mock_user', JSON.stringify(mockUser));
+      localStorage.setItem('mock_user_role', 'user');
       return { success: true };
     } catch (error) {
       return { success: false, error: "Registration failed" };
@@ -177,18 +190,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setUser(null);
     setUserRole(null);
+    localStorage.removeItem('mock_user');
+    localStorage.removeItem('mock_user_role');
   };
 
   // Check for existing session on mount
   useEffect(() => {
-    // Mock auto-login for demonstration
-    // In production, this would check supabase session
     const checkSession = async () => {
       try {
-        // Simulating session check - In production use supabase.auth.getSession()
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
+        // Проверяем моковую сессию в localStorage
+        const savedUser = localStorage.getItem('mock_user');
+        const savedRole = localStorage.getItem('mock_user_role');
+        
+        if (savedUser && savedRole) {
+          const parsedUser = JSON.parse(savedUser);
+          setUser(parsedUser);
+          setUserRole(savedRole as "user" | "admin" | "partner" | "support");
+          console.log("Restored mock user session:", parsedUser);
+        }
+        
+        setLoading(false);
       } catch (error) {
         console.error("Session check error:", error);
         setLoading(false);
