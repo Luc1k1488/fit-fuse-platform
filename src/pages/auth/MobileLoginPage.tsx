@@ -32,8 +32,12 @@ const MobileLoginPage = () => {
         });
         
         // Проверяем роль пользователя для перенаправления
-        if (email === "admin@example.com" || email.includes("partner") || email.includes("support")) {
-          navigate("/admin");
+        if (email === "admin@example.com") {
+          navigate("/admin/dashboard");
+        } else if (email.includes("partner")) {
+          navigate("/admin/partner");
+        } else if (email.includes("support")) {
+          navigate("/admin/support-portal");
         } else {
           navigate("/app"); // Redirect to client app dashboard
         }
