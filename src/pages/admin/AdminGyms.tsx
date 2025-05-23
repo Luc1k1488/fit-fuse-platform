@@ -29,11 +29,14 @@ import { Gym } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Search, MoreVertical, Plus, MapPin, Filter, Star, StarHalf } from "lucide-react";
+import { GymForm } from "@/components/admin/GymForm";
 
 const AdminGyms = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [isAddGymOpen, setIsAddGymOpen] = useState(false);
+  const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
   
   const fetchGyms = async () => {
     let query = supabase.from("gyms").select("*");
@@ -77,6 +80,53 @@ const AdminGyms = () => {
     setCategoryFilter(category);
     refetch();
   };
+
+  const handleAddGym = () => {
+    setSelectedGym(null);
+    setIsAddGymOpen(true);
+  };
+
+  const handleEditGym = (gym: Gym) => {
+    setSelectedGym(gym);
+    setIsAddGymOpen(true);
+  };
+
+  const handleGymSuccess = (gym: Gym) => {
+    refetch();
+    toast({
+      title: "Успешно!",
+      description: selectedGym 
+        ? "Фитнес-зал успешно обновлен" 
+        : "Фитнес-зал успешно добавлен",
+    });
+  };
+
+  const handleDeleteGym = async (gymId: string) => {
+    try {
+      const { error } = await supabase
+        .from("gyms")
+        .delete()
+        .eq("id", gymId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Успешно!",
+        description: "Фитнес-зал успешно удален",
+      });
+      
+      refetch();
+    } catch (error) {
+      console.error("Ошибка при удалении зала:", error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка!",
+        description: "Не удалось удалить фитнес-зал",
+      });
+    }
+  };
   
   // Функция для отрисовки рейтинга звездами
   const renderRating = (rating: number) => {
@@ -98,7 +148,7 @@ const AdminGyms = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Управление фитнес-залами</h1>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleAddGym}>
           <Plus size={16} />
           Добавить зал
         </Button>
@@ -230,10 +280,14 @@ const AdminGyms = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Просмотр деталей</DropdownMenuItem>
-                              <DropdownMenuItem>Редактировать</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditGym(gym)}>
+                                Редактировать
+                              </DropdownMenuItem>
                               <DropdownMenuItem>Управление тренировками</DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-500">
+                              <DropdownMenuItem 
+                                className="text-red-500"
+                                onClick={() => handleDeleteGym(gym.id)}
+                              >
                                 Удалить зал
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -254,6 +308,16 @@ const AdminGyms = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Модальное окно для добавления/редактирования зала */}
+      {isAddGymOpen && (
+        <GymForm 
+          open={isAddGymOpen}
+          onClose={() => setIsAddGymOpen(false)}
+          onSuccess={handleGymSuccess}
+          initialData={selectedGym || undefined}
+        />
+      )}
     </div>
   );
 };
