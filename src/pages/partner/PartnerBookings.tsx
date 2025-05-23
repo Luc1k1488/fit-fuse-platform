@@ -43,7 +43,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Extended type for bookings with user, gym and class details
 interface BookingWithDetails extends Booking {
@@ -87,7 +87,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const PartnerBookings = () => {
-  const { user } = useAuth();
+  const { user, is_authenticated } = useAuth();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -101,6 +101,8 @@ const PartnerBookings = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["partner-bookings", user?.id],
     queryFn: async () => {
+      if (!user?.id || !is_authenticated) return [];
+
       // First, fetch gyms owned by this partner
       const { data: partnerGyms, error: gymsError } = await supabase
         .from("gyms")
@@ -131,7 +133,7 @@ const PartnerBookings = () => {
 
       return bookingsData as BookingWithDetails[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && is_authenticated,
   });
 
   // Filter bookings based on search and status
@@ -191,6 +193,20 @@ const PartnerBookings = () => {
       return dateString;
     }
   };
+
+  if (!is_authenticated) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold mb-6">Booking Management</h1>
+        <div className="text-center py-12 bg-gray-900 rounded-lg">
+          <p className="text-gray-400 mb-4">Необходимо войти в систему</p>
+          <Button asChild>
+            <a href="/login">Войти в систему</a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

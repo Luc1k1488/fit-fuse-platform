@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +14,6 @@ import { ru } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, User, Star } from "lucide-react";
-import { createTestUser } from "@/utils/testUser";
 
 const class_types = ["Все", "Фитнес", "Йога", "КроссФит", "Пилатес", "Бокс"];
 
@@ -23,7 +23,7 @@ interface ClassWithGym extends Class {
 }
 
 const ClientClasses = () => {
-  const { user } = useAuth();
+  const { user, is_authenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,11 +32,6 @@ const ClientClasses = () => {
   const [favoriteClasses, setFavoriteClasses] = useState<string[]>([]);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithGym | null>(null);
-
-  // Создаем тестового пользователя при загрузке компонента
-  useEffect(() => {
-    createTestUser();
-  }, []);
 
   // Получаем дату для выбранного дня
   const getDateForDay = (dayIndex: number) => {
@@ -103,7 +98,10 @@ const ClientClasses = () => {
           status: "confirmed"
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Booking creation error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -144,7 +142,7 @@ const ClientClasses = () => {
   };
 
   const handleBookClass = (classItem: ClassWithGym) => {
-    if (!user) {
+    if (!is_authenticated) {
       toast({
         variant: "destructive",
         title: "Необходимо войти в систему",

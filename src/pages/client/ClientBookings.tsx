@@ -25,7 +25,7 @@ const formatDate = (dateString: string | null) => {
 };
 
 const ClientBookings = () => {
-  const { user } = useAuth();
+  const { user, is_authenticated } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("upcoming");
   const queryClient = useQueryClient();
@@ -34,7 +34,7 @@ const ClientBookings = () => {
   const { data: bookings, isLoading, isError } = useQuery({
     queryKey: ["user-bookings", user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id || !is_authenticated) return [];
       
       console.log("Fetching bookings for user:", user.id);
       
@@ -56,7 +56,7 @@ const ClientBookings = () => {
       console.log("Bookings loaded:", data);
       return data as BookingWithDetails[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && is_authenticated,
   });
 
   // Мутация для отмены бронирования
@@ -120,6 +120,20 @@ const ClientBookings = () => {
   const upcomingBookings = filterBookingsByStatus("upcoming");
   const pastBookings = filterBookingsByStatus("past");
   const cancelledBookings = filterBookingsByStatus("cancelled");
+
+  if (!is_authenticated) {
+    return (
+      <div className="pb-16">
+        <h1 className="text-2xl font-bold mb-4">Мои бронирования</h1>
+        <div className="text-center py-12 bg-gray-900 rounded-lg">
+          <p className="text-gray-400 mb-4">Необходимо войти в систему для просмотра бронирований</p>
+          <Button asChild>
+            <a href="/login">Войти в систему</a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

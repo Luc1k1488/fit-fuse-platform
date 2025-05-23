@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types";
+import type { Session } from "@supabase/supabase-js";
 
 // Define the shape of the auth context
 type AuthContextType = {
@@ -38,185 +39,177 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user_role, setUserRole] = useState<"user" | "admin" | "partner" | "support" | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock function to simulate user login with valid UUIDs
+  // Real Supabase login function
   const login = async (email: string, password: string) => {
     try {
-      if (email === "admin@example.com" && password === "admin123") {
-        const mockUser: User = {
-          id: "550e8400-e29b-41d4-a716-446655440001",
-          email: "admin@example.com",
-          phone: null,
-          name: "Admin User",
-          role: "admin",
-          created_at: new Date().toISOString(),
-          profile_image: null,
-          subscription_id: null,
-        };
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        setUser(mockUser);
-        setUserRole("admin");
-        // Сохраняем в localStorage для персистентности
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_user_role', 'admin');
-        return { success: true };
-      } else if (email === "partner@example.com" && password === "password") {
-        const mockUser: User = {
-          id: "550e8400-e29b-41d4-a716-446655440002",
-          email: "partner@example.com",
-          phone: null,
-          name: "Partner User",
-          role: "partner",
-          created_at: new Date().toISOString(),
-          profile_image: null,
-          subscription_id: null,
-        };
+      if (error) {
+        return { success: false, error: error.message };
+      }
 
-        setUser(mockUser);
-        setUserRole("partner");
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_user_role', 'partner');
-        return { success: true };
-      } else if (email === "support@example.com" && password === "password") {
-        const mockUser: User = {
-          id: "550e8400-e29b-41d4-a716-446655440003",
-          email: "support@example.com",
-          phone: null,
-          name: "Support Agent",
-          role: "support",
-          created_at: new Date().toISOString(),
-          profile_image: null,
-          subscription_id: null,
-        };
+      if (data.user) {
+        // Fetch user profile from our users table
+        const { data: userProfile, error: profileError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
 
-        setUser(mockUser);
-        setUserRole("support");
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_user_role', 'support');
-        return { success: true };
-      } else if (email === "user@example.com" && password === "password") {
-        // Используем тестового пользователя из базы данных
-        const mockUser: User = {
-          id: "550e8400-e29b-41d4-a716-446655440000",
-          email: "test@example.com",
-          phone: null,
-          name: "Тестовый пользователь",
-          role: "user",
-          created_at: new Date().toISOString(),
-          profile_image: null,
-          subscription_id: null,
-        };
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          return { success: false, error: "Ошибка загрузки профиля пользователя" };
+        }
 
-        setUser(mockUser);
-        setUserRole("user");
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_user_role', 'user');
+        setUser(userProfile);
+        setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
         return { success: true };
       }
 
-      return { success: false, error: "Неверные учетные данные" };
+      return { success: false, error: "Ошибка аутентификации" };
     } catch (error) {
+      console.error("Login error:", error);
       return { success: false, error: "Ошибка аутентификации" };
     }
   };
 
-  // Mock function for phone login (sending code)
+  // Phone login (sending code)
   const phoneLogin = async (phone: string) => {
     try {
-      // Demo login for phone
-      if (phone === "+79001234567") {
-        // In a real app, this would send an SMS code
-        return { success: true };
+      const { error } = await supabase.auth.signInWithOtp({
+        phone,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
       }
-      return { success: false, error: "Invalid phone number" };
-    } catch (error) {
-      return { success: false, error: "Phone authentication failed" };
-    }
-  };
 
-  // Mock function for phone verification (using received code)
-  const login_with_phone = async (phone: string, code: string) => {
-    try {
-      // Demo verification for phone code
-      if (phone === "+79001234567" && code === "123456") {
-        const mockUser: User = {
-          id: "550e8400-e29b-41d4-a716-446655440004",
-          email: null,
-          phone: "+79001234567",
-          name: "Phone User",
-          role: "user",
-          created_at: new Date().toISOString(),
-          profile_image: null,
-          subscription_id: null,
-        };
-
-        setUser(mockUser);
-        setUserRole("user");
-        localStorage.setItem('mock_user', JSON.stringify(mockUser));
-        localStorage.setItem('mock_user_role', 'user');
-        return { success: true };
-      }
-      return { success: false, error: "Invalid verification code" };
-    } catch (error) {
-      return { success: false, error: "Phone verification failed" };
-    }
-  };
-
-  // Mock function for user registration
-  const register = async (email: string, password: string, name: string) => {
-    try {
-      // Here we would normally call supabase.auth.signUp
-      const mockUser: User = {
-        id: "550e8400-e29b-41d4-a716-446655440005",
-        email: email,
-        phone: null,
-        name: name,
-        role: "user",
-        created_at: new Date().toISOString(),
-        profile_image: null,
-        subscription_id: null,
-      };
-      
-      setUser(mockUser);
-      setUserRole("user");
-      localStorage.setItem('mock_user', JSON.stringify(mockUser));
-      localStorage.setItem('mock_user_role', 'user');
       return { success: true };
     } catch (error) {
-      return { success: false, error: "Registration failed" };
+      return { success: false, error: "Ошибка отправки SMS" };
+    }
+  };
+
+  // Phone verification (using received code)
+  const login_with_phone = async (phone: string, code: string) => {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone,
+        token: code,
+        type: 'sms'
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        // Fetch user profile from our users table
+        const { data: userProfile, error: profileError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          return { success: false, error: "Ошибка загрузки профиля пользователя" };
+        }
+
+        setUser(userProfile);
+        setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
+        return { success: true };
+      }
+
+      return { success: false, error: "Ошибка верификации" };
+    } catch (error) {
+      return { success: false, error: "Ошибка верификации кода" };
+    }
+  };
+
+  // User registration
+  const register = async (email: string, password: string, name: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+          }
+        }
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        return { success: true };
+      }
+
+      return { success: false, error: "Ошибка регистрации" };
+    } catch (error) {
+      console.error("Registration error:", error);
+      return { success: false, error: "Ошибка регистрации" };
     }
   };
 
   // Logout function
-  const logout = () => {
-    setUser(null);
-    setUserRole(null);
-    localStorage.removeItem('mock_user');
-    localStorage.removeItem('mock_user_role');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setUserRole(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
-  // Check for existing session on mount
+  // Check for existing session on mount and listen to auth changes
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        // Проверяем моковую сессию в localStorage
-        const savedUser = localStorage.getItem('mock_user');
-        const savedRole = localStorage.getItem('mock_user_role');
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session: Session | null) => {
+        console.log("Auth state changed:", event, session);
         
-        if (savedUser && savedRole) {
-          const parsedUser = JSON.parse(savedUser);
-          setUser(parsedUser);
-          setUserRole(savedRole as "user" | "admin" | "partner" | "support");
-          console.log("Restored mock user session:", parsedUser);
+        if (session?.user) {
+          // Fetch user profile from our users table
+          const { data: userProfile, error: profileError } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error("Error fetching user profile:", profileError);
+            setUser(null);
+            setUserRole(null);
+          } else {
+            setUser(userProfile);
+            setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
+          }
+        } else {
+          setUser(null);
+          setUserRole(null);
         }
         
         setLoading(false);
-      } catch (error) {
-        console.error("Session check error:", error);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      // The onAuthStateChange will handle setting the user
+      if (!session) {
         setLoading(false);
       }
-    };
+    });
 
-    checkSession();
+    return () => subscription.unsubscribe();
   }, []);
 
   // Context value
