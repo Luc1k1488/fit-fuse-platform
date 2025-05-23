@@ -12,23 +12,42 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user, user_role } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  if (user) {
+    console.log("User already authenticated, redirecting...", user.role);
+    if (user.role === "admin") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/app");
+    }
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
+    console.log("Attempting login with:", email);
+
     try {
       const result = await login(email, password);
       
+      console.log("Login result:", result);
+      
       if (result.success) {
-        navigate("/app");
+        console.log("Login successful, waiting for auth state update...");
+        // Don't navigate immediately, let the auth context handle the redirect
+        // The useEffect in auth context will handle the navigation
       } else {
+        console.error("Login failed:", result.error);
         setError(result.error || "Неверный email или пароль");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("Произошла ошибка при входе");
     } finally {
       setIsLoading(false);
@@ -86,6 +105,11 @@ const LoginPage = () => {
                   required
                 />
               </div>
+              <div className="text-sm text-gray-600">
+                Для тестирования используйте:<br/>
+                Email: boldarevsergei228@gmail.com<br/>
+                Пароль: ваш пароль при регистрации
+              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button
@@ -102,14 +126,6 @@ const LoginPage = () => {
                     Зарегистрироваться
                   </Link>
                 </div>
-                {/* Временно скрываем вход по телефону, пока не настроен */}
-                {/*
-                <div>
-                  <Link to="/login/phone" className="text-primary hover:underline">
-                    Войти по номеру телефона
-                  </Link>
-                </div>
-                */}
               </div>
             </CardFooter>
           </form>
