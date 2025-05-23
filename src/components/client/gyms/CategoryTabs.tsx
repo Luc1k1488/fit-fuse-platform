@@ -1,5 +1,5 @@
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BaseTabs } from "@/components/shared/BaseTabs";
 
 interface CategoryTabsProps {
   categories: string[];
@@ -9,19 +9,11 @@ interface CategoryTabsProps {
 
 export const CategoryTabs = ({ categories, selectedCategory, setSelectedCategory }: CategoryTabsProps) => {
   return (
-    <Tabs defaultValue={selectedCategory} value={selectedCategory} className="w-full">
-      <TabsList className="w-full overflow-x-auto flex pb-1 mb-2 bg-gray-800">
-        {categories.map((category) => (
-          <TabsTrigger
-            key={category}
-            value={category}
-            onClick={() => setSelectedCategory(category)}
-            className="whitespace-nowrap transition-all hover:scale-105"
-          >
-            {category}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <BaseTabs
+      items={categories}
+      selectedItem={selectedCategory}
+      setSelectedItem={setSelectedCategory}
+      className="w-full"
+    />
   );
 };
