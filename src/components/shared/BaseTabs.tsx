@@ -7,6 +7,7 @@ interface BaseTabsProps<T extends string> {
   setSelectedItem: (item: T) => void;
   className?: string;
   itemClassName?: string;
+  animationDelay?: string;
 }
 
 export const BaseTabs = <T extends string>({
@@ -14,7 +15,8 @@ export const BaseTabs = <T extends string>({
   selectedItem,
   setSelectedItem,
   className,
-  itemClassName
+  itemClassName,
+  animationDelay
 }: BaseTabsProps<T>) => {
   return (
     <div className={cn("flex w-full overflow-x-auto pb-1 no-scrollbar", className)}>
@@ -28,7 +30,8 @@ export const BaseTabs = <T extends string>({
               selectedItem === item
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted hover:bg-muted/80 text-muted-foreground",
-              itemClassName
+              itemClassName,
+              animationDelay && `animate-fade-in animation-delay-${animationDelay}`
             )}
           >
             {item}
