@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,20 +11,43 @@ const RegisterPage = () => {
   const [name, set_name] = useState("");
   const [phone, set_phone] = useState("");
   const [email, set_email] = useState("");
+  const [password, set_password] = useState("");
+  const [confirmPassword, set_confirmPassword] = useState("");
   const [error, set_error] = useState("");
   const [is_loading, set_is_loading] = useState(false);
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handle_submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     set_error("");
+
+    // Валидация
+    if (!email || !password || !name) {
+      set_error("Пожалуйста, заполните все обязательные поля");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      set_error("Пароли не совпадают");
+      return;
+    }
+
+    if (password.length < 6) {
+      set_error("Пароль должен содержать минимум 6 символов");
+      return;
+    }
+
     set_is_loading(true);
 
     try {
-      // В реальном приложении здесь была бы регистрация через API
-      // Для демо имитируем процесс
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      navigate("/login/phone");
+      const result = await register(email, password, name);
+      
+      if (result.success) {
+        navigate("/login");
+      } else {
+        set_error(result.error || "Регистрация не удалась. Пожалуйста, попробуйте еще раз.");
+      }
     } catch (err) {
       set_error("Регистрация не удалась. Пожалуйста, попробуйте еще раз.");
     } finally {
@@ -35,9 +59,9 @@ const RegisterPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="max-w-md w-full">
         <div className="mb-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center text-gray-600">
+          <Link to="/login" className="flex items-center text-gray-600">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            На главную
+            Назад к входу
           </Link>
           <h1 className="text-2xl font-bold text-center">GoodFit</h1>
         </div>
@@ -58,7 +82,7 @@ const RegisterPage = () => {
               )}
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">
-                  Имя и фамилия
+                  Имя и фамилия *
                 </label>
                 <Input
                   id="name"
@@ -70,21 +94,8 @@ const RegisterPage = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  Номер телефона
-                </label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => set_phone(e.target.value)}
-                  placeholder="+7 (999) 123-45-67"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
-                  Email (необязательно)
+                  Email *
                 </label>
                 <Input
                   id="email"
@@ -92,6 +103,45 @@ const RegisterPage = () => {
                   value={email}
                   onChange={(e) => set_email(e.target.value)}
                   placeholder="ivan@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Пароль *
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => set_password(e.target.value)}
+                  placeholder="Минимум 6 символов"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="text-sm font-medium">
+                  Подтвердите пароль *
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => set_confirmPassword(e.target.value)}
+                  placeholder="Повторите пароль"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="phone" className="text-sm font-medium">
+                  Номер телефона (необязательно)
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => set_phone(e.target.value)}
+                  placeholder="+7 (999) 123-45-67"
                 />
               </div>
               <div className="text-sm text-gray-600">
