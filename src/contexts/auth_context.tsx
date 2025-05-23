@@ -8,8 +8,8 @@ type AuthContextType = {
   user: User | null;
   user_role: "user" | "admin" | "partner" | "support" | null;
   loading: boolean;
-  is_authenticated: boolean;  // Added is_authenticated property
-  is_loading: boolean;        // Added is_loading property alias for consistency
+  is_authenticated: boolean;
+  is_loading: boolean;
   login: (email: string, password: string) => Promise<{
     success: boolean;
     error?: string;
@@ -38,14 +38,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user_role, setUserRole] = useState<"user" | "admin" | "partner" | "support" | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock function to simulate user login
+  // Mock function to simulate user login with valid UUIDs
   const login = async (email: string, password: string) => {
     try {
-      // Here we would normally call supabase.auth.signInWithPassword
-      // For demo purposes, we're setting a mock user based on email and password
       if (email === "admin@example.com" && password === "admin123") {
         const mockUser: User = {
-          id: "admin-id-123",
+          id: "550e8400-e29b-41d4-a716-446655440001",
           email: "admin@example.com",
           phone: null,
           name: "Admin User",
@@ -60,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: true };
       } else if (email === "partner@example.com" && password === "password") {
         const mockUser: User = {
-          id: "partner-id-456",
+          id: "550e8400-e29b-41d4-a716-446655440002",
           email: "partner@example.com",
           phone: null,
           name: "Partner User",
@@ -75,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: true };
       } else if (email === "support@example.com" && password === "password") {
         const mockUser: User = {
-          id: "support-id-789",
+          id: "550e8400-e29b-41d4-a716-446655440003",
           email: "support@example.com",
           phone: null,
           name: "Support Agent",
@@ -89,12 +87,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserRole("support");
         return { success: true };
       } else if (email === "user@example.com" && password === "password") {
-        // Add a regular user for mobile app testing
+        // Используем тестового пользователя из базы данных
         const mockUser: User = {
-          id: "mobile-user-123",
-          email: "user@example.com",
+          id: "550e8400-e29b-41d4-a716-446655440000",
+          email: "test@example.com",
           phone: null,
-          name: "Mobile User",
+          name: "Тестовый пользователь",
           role: "user",
           created_at: new Date().toISOString(),
           profile_image: null,
@@ -132,7 +130,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Demo verification for phone code
       if (phone === "+79001234567" && code === "123456") {
         const mockUser: User = {
-          id: "user-id-123",
+          id: "550e8400-e29b-41d4-a716-446655440004",
           email: null,
           phone: "+79001234567",
           name: "Phone User",
@@ -157,7 +155,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Here we would normally call supabase.auth.signUp
       const mockUser: User = {
-        id: "new-user-id",
+        id: "550e8400-e29b-41d4-a716-446655440005",
         email: email,
         phone: null,
         name: name,
@@ -205,11 +203,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     user_role,
     loading,
-    is_loading: loading,          // Added alias for consistency
-    is_authenticated: !!user,     // Added is_authenticated property
+    is_loading: loading,
+    is_authenticated: !!user,
     login,
     phoneLogin,
-    login_with_phone,             // Added login_with_phone function
+    login_with_phone,
     register,
     logout,
   };

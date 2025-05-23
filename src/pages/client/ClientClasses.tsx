@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth_context";
@@ -32,6 +31,11 @@ const ClientClasses = () => {
   const [favoriteClasses, setFavoriteClasses] = useState<string[]>([]);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<ClassWithGym | null>(null);
+
+  // Создаем тестового пользователя при загрузке компонента
+  useEffect(() => {
+    createTestUser();
+  }, []);
 
   // Получаем дату для выбранного дня
   const getDateForDay = (dayIndex: number) => {
