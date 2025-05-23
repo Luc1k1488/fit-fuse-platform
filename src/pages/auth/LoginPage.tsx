@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,28 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, user, user_role } = useAuth();
+  const { login, user, user_role, is_loading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
-  if (user) {
-    console.log("User already authenticated, redirecting...", user.role);
-    if (user.role === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/app");
+  // Handle redirection after auth state changes
+  useEffect(() => {
+    if (!is_loading && user) {
+      console.log("User authenticated, redirecting based on role:", user.role);
+      if (user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/app", { replace: true });
+      }
     }
-    return null;
+  }, [user, user_role, is_loading, navigate]);
+
+  // Show loading while auth state is being determined
+  if (is_loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,9 +49,8 @@ const LoginPage = () => {
       console.log("Login result:", result);
       
       if (result.success) {
-        console.log("Login successful, waiting for auth state update...");
-        // Don't navigate immediately, let the auth context handle the redirect
-        // The useEffect in auth context will handle the navigation
+        console.log("Login successful, auth context will handle redirect");
+        // Don't navigate here - let useEffect handle it
       } else {
         console.error("Login failed:", result.error);
         setError(result.error || "Неверный email или пароль");

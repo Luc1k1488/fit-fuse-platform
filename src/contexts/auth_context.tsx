@@ -3,7 +3,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types";
 import type { Session } from "@supabase/supabase-js";
-import { useNavigate, useLocation } from "react-router-dom";
 
 // Define the shape of the auth context
 type AuthContextType = {
@@ -110,32 +109,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data.user) {
-        console.log("Auth login successful, fetching profile...");
-        
-        const userProfile = await fetchOrCreateUserProfile(data.user);
-        
-        if (!userProfile) {
-          return { success: false, error: "Ошибка загрузки профиля пользователя" };
-        }
-
-        const userWithValidatedRole: User = {
-          ...userProfile,
-          role: validateRole(userProfile.role)
-        };
-
-        setUser(userWithValidatedRole);
-        setUserRole(validateRole(userProfile.role));
-        console.log("Login successful, user role:", userProfile.role);
-        
-        // Navigate based on role
-        setTimeout(() => {
-          if (userProfile.role === "admin") {
-            window.location.href = "/admin/dashboard";
-          } else {
-            window.location.href = "/app";
-          }
-        }, 100);
-        
+        console.log("Auth login successful, user will be set via onAuthStateChange");
         return { success: true };
       }
 
