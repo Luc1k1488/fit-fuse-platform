@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -48,6 +47,11 @@ const PartnerGyms = () => {
     const { data, error } = await query.order("name");
     
     if (error) {
+      toast({
+        variant: "destructive",
+        title: "Ошибка!",
+        description: "Не удалось загрузить фитнес-залы: " + error.message,
+      });
       throw new Error(error.message);
     }
     
@@ -99,6 +103,11 @@ const PartnerGyms = () => {
         .eq("owner_id", user?.id); // Для безопасности добавлена проверка владельца
 
       if (error) {
+        toast({
+          variant: "destructive",
+          title: "Ошибка!",
+          description: "Не удалось удалить зал: " + error.message,
+        });
         throw error;
       }
 
@@ -197,16 +206,24 @@ const PartnerGyms = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
-                              {gym.main_image && (
+                              {gym.main_image ? (
                                 <img 
                                   src={gym.main_image} 
                                   alt={gym.name || ""} 
                                   className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    // Если изображение не загружается, показываем запасной вариант
+                                    (e.target as HTMLImageElement).src = "https://placehold.co/200x200?text=No+Image";
+                                  }}
                                 />
+                              ) : (
+                                <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                  Нет фото
+                                </div>
                               )}
                             </div>
                             <div>
-                              <p className="font-medium">{gym.name}</p>
+                              <p className="font-medium">{gym.name || "Без названия"}</p>
                               <p className="text-xs text-gray-500">ID: {gym.id.substring(0, 8)}...</p>
                             </div>
                           </div>
@@ -214,28 +231,34 @@ const PartnerGyms = () => {
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <MapPin size={12} className="text-gray-500" />
-                            <span>{gym.city}, {gym.location}</span>
+                            <span>{gym.city || "Не указан"}{gym.location ? `, ${gym.location}` : ""}</span>
                           </div>
-                          <p className="text-xs text-gray-500">{gym.address}</p>
+                          <p className="text-xs text-gray-500">{gym.address || "Адрес не указан"}</p>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{gym.category}</Badge>
+                          <Badge variant="outline">{gym.category || "Не указана"}</Badge>
                         </TableCell>
                         <TableCell>
                           {renderRating(gym.rating || 0)}
-                          <p className="text-xs text-gray-500">{gym.review_count} отзывов</p>
+                          <p className="text-xs text-gray-500">{gym.review_count || 0} отзывов</p>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1 max-w-[200px]">
-                            {gym.features && gym.features.slice(0, 3).map((feature, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {feature}
-                              </Badge>
-                            ))}
-                            {gym.features && gym.features.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{gym.features.length - 3}
-                              </Badge>
+                            {gym.features && gym.features.length > 0 ? (
+                              <>
+                                {gym.features.slice(0, 3).map((feature, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {feature}
+                                  </Badge>
+                                ))}
+                                {gym.features.length > 3 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{gym.features.length - 3}
+                                  </Badge>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-xs text-gray-400">Нет особенностей</span>
                             )}
                           </div>
                         </TableCell>
