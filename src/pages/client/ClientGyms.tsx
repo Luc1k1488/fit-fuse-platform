@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ const ClientGyms = () => {
   const [minRating, setMinRating] = useState([4.0]);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
-  // Функция для получения залов из Supabase
+  // Enhanced function for getting gyms from Supabase with better error handling
   const fetchGyms = async () => {
     try {
       console.log("Fetching gyms with filters:", {
@@ -29,7 +29,7 @@ const ClientGyms = () => {
       
       let query = supabase.from("gyms").select("*");
       
-      // Применение фильтров
+      // Apply filters only if they're not set to "Все" (All)
       if (selectedCity && selectedCity !== "Все") {
         query = query.eq("city", selectedCity);
       }
@@ -38,7 +38,7 @@ const ClientGyms = () => {
         query = query.eq("category", selectedCategory);
       }
       
-      if (minRating[0] > 0) {
+      if (minRating && minRating[0] > 0) {
         query = query.gte("rating", minRating[0]);
       }
       
@@ -49,23 +49,36 @@ const ClientGyms = () => {
       const { data, error } = await query.order("name");
       
       if (error) {
-        console.error("Ошибка при загрузке залов:", error);
+        console.error("Error fetching gyms:", error);
         toast({
           variant: "destructive",
           title: "Ошибка",
           description: "Не удалось загрузить список залов",
         });
+        throw error;
+      }
+      
+      console.log("Gyms loaded successfully:", data?.length || 0, data);
+      
+      // If no data is returned but there's no error, return an empty array
+      if (!data || data.length === 0) {
+        console.log("No gyms found matching the criteria");
         return [];
       }
       
-      console.log("Gyms loaded:", data?.length || 0);
       return data as Gym[];
     } catch (error) {
-      console.error("Ошибка загрузки данных:", error);
+      console.error("Error in fetchGyms:", error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка загрузки",
+        description: "Произошла ошибка при получении данных о залах",
+      });
       return [];
     }
   };
 
+  // Add refetchOnMount and refetchOnWindowFocus for better data loading
   const { 
     data: gyms, 
     isLoading, 
@@ -75,7 +88,15 @@ const ClientGyms = () => {
   } = useQuery({
     queryKey: ["client-gyms", searchQuery, selectedCity, selectedCategory, minRating],
     queryFn: fetchGyms,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 5, // Consider data stale after 5 minutes
   });
+
+  // Ensure we have data when component mounts
+  useEffect(() => {
+    refetch();
+  }, []);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -95,19 +116,21 @@ const ClientGyms = () => {
     setSelectedCity("Москва");
     setSelectedCategory("Все");
     setMinRating([4.0]);
+    // Force refetch after resetting filters
+    setTimeout(() => refetch(), 0);
   };
 
   return (
     <div className="pb-16">
-      {/* Заголовок страницы */}
+      {/* Page header */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold animate-fade-in">Найти залы и студии</h1>
-        <p className="text-gray-600 animate-fade-in animation-delay-200">
+        <p className="text-gray-600 dark:text-gray-400 animate-fade-in animation-delay-200">
           Выберите спортзал или студию для тренировки
         </p>
       </div>
 
-      {/* Поиск и фильтры */}
+      {/* Search and filters */}
       <div className="bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-800 mb-6 animate-fade-in animation-delay-400">
         <GymSearchForm 
           searchQuery={searchQuery} 
@@ -125,7 +148,7 @@ const ClientGyms = () => {
         />
       </div>
 
-      {/* Результаты */}
+      {/* Results */}
       <GymResults
         gyms={gyms}
         isLoading={isLoading}

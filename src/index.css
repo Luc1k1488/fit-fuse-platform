@@ -78,6 +78,26 @@
   animation-delay: 0.4s;
 }
 
+.animation-delay-100ms {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200ms {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300ms {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400ms {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500ms {
+  animation-delay: 500ms;
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in forwards;
 }

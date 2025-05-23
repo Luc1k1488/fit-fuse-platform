@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Gym } from "@/types";
 import { GymCard } from "./GymCard";
+import { Loader2 } from "lucide-react";
 
 interface GymResultsProps {
   gyms: Gym[] | undefined;
@@ -27,6 +28,7 @@ export const GymResults = ({
   if (isLoading) {
     return (
       <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
         <p className="text-gray-400">Загрузка списка залов...</p>
       </div>
     );
@@ -35,9 +37,9 @@ export const GymResults = ({
   if (isError) {
     return (
       <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
-        <p className="text-red-400">Ошибка при загрузке данных</p>
-        <p className="text-sm text-gray-500 mt-2">{error?.message}</p>
-        <Button onClick={refetch} className="mt-4 transition-all hover:scale-105">
+        <p className="text-red-400 mb-2">Ошибка при загрузке данных</p>
+        <p className="text-sm text-gray-500 mb-4">{error?.message || "Неизвестная ошибка"}</p>
+        <Button onClick={refetch} className="mt-2 transition-all hover:scale-105">
           Попробовать снова
         </Button>
       </div>
@@ -46,9 +48,11 @@ export const GymResults = ({
 
   if (!gyms || gyms.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in col-span-2">
+      <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
         <p className="text-gray-400 mb-4">Не найдено залов по вашим критериям.</p>
-        <Button onClick={resetFilters} className="transition-all hover:scale-105">Сбросить фильтры</Button>
+        <Button onClick={resetFilters} className="transition-all hover:scale-105">
+          Сбросить фильтры
+        </Button>
       </div>
     );
   }
