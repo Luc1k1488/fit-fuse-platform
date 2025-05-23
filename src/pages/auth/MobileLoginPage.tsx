@@ -31,7 +31,8 @@ const MobileLoginPage = () => {
           variant: "default",
         });
         
-        // Проверяем роль пользователя для перенаправления
+        // Обычные пользователи всегда направляются в клиентское приложение,
+        // а администраторы, партнеры и поддержка - в их соответствующие панели
         if (email === "admin@example.com") {
           navigate("/admin/dashboard");
         } else if (email.includes("partner")) {
@@ -39,7 +40,7 @@ const MobileLoginPage = () => {
         } else if (email.includes("support")) {
           navigate("/admin/support-portal");
         } else {
-          navigate("/app"); // Redirect to client app dashboard
+          navigate("/app"); // Все обычные пользователи направляются в клиентское приложение
         }
       } else {
         setError(result.error || "Неверные учетные данные. Пожалуйста, попробуйте снова.");

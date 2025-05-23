@@ -53,13 +53,6 @@ const AdminLayout = () => {
     // Слушаем изменения размера экрана
     window.addEventListener('resize', checkIsMobile);
     
-    // Проверяем, запускается ли приложение через Capacitor
-    const isCapacitor = window.location.href.includes('capacitor://');
-    if (isCapacitor) {
-      setIsMobileView(true);
-      set_sidebar_open(false);
-    }
-    
     return () => {
       window.removeEventListener('resize', checkIsMobile);
     };
@@ -106,13 +99,6 @@ const AdminLayout = () => {
     }
     
     return [];
-  };
-
-  // Получаем основные элементы меню для мобильного нижнего меню
-  const getMobileMenuItems = () => {
-    const allItems = get_menu_items();
-    // Для мобильного меню выберем только первые 5 важных пунктов
-    return allItems.slice(0, 5);
   };
 
   return (
@@ -187,41 +173,10 @@ const AdminLayout = () => {
           </div>
         </aside>
 
-        {/* Основное содержимое с отступами для мобильных устройств */}
-        <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen ${isMobileView ? "pb-24" : ""}`}>
+        {/* Основное содержимое с отступами */}
+        <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen`}>
           <Outlet />
         </div>
-        
-        {/* Нижнее навигационное меню для мобильных устройств */}
-        {isMobileView && (
-          <nav className="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 z-30 px-2 py-1">
-            <div className="flex justify-around items-center">
-              {getMobileMenuItems().map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex flex-col items-center py-2 px-3 ${
-                    is_active(item.path) 
-                      ? "text-primary" 
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <span className="flex items-center justify-center mb-1">
-                    {item.icon}
-                  </span>
-                  <span className="text-xs">{item.label.split(' ')[0]}</span>
-                </Link>
-              ))}
-              <button
-                onClick={() => set_sidebar_open(true)}
-                className="flex flex-col items-center py-2 px-3 text-gray-400 hover:text-white"
-              >
-                <Menu size={18} className="mb-1" />
-                <span className="text-xs">Меню</span>
-              </button>
-            </div>
-          </nav>
-        )}
       </div>
     </ProtectedRoute>
   );
