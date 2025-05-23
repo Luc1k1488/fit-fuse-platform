@@ -21,7 +21,7 @@ export const GymFilters = ({
 }: GymFiltersProps) => {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mb-2 overflow-auto no-scrollbar">
         <CitySelector 
           cities={cities} 
           selectedCity={selectedCity} 
@@ -29,7 +29,7 @@ export const GymFilters = ({
         />
       </div>
       
-      <div className="mb-2 overflow-auto w-full">
+      <div className="mb-2 overflow-auto w-full no-scrollbar">
         <CategoryTabs
           categories={categories}
           selectedCategory={selectedCategory}

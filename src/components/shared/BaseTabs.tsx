@@ -21,7 +21,7 @@ export const BaseTabs = <T extends string>({
   return (
     <div className={cn("flex w-full overflow-x-auto pb-1 no-scrollbar", className)}>
       <div className="flex gap-2 min-w-max">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <button
             key={item}
             onClick={() => setSelectedItem(item)}
@@ -31,7 +31,8 @@ export const BaseTabs = <T extends string>({
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted hover:bg-muted/80 text-muted-foreground",
               itemClassName,
-              animationDelay && `animate-fade-in animation-delay-${animationDelay}`
+              animationDelay ? `animate-fade-in animation-delay-${animationDelay}` : 
+                               `animate-fade-in animation-delay-${index * 100}ms`
             )}
           >
             {item}
