@@ -33,6 +33,14 @@ type AuthContextType = {
 // Create the auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to validate role
+const validateRole = (role: string | null | undefined): "user" | "admin" | "partner" | "support" => {
+  if (role === "admin" || role === "partner" || role === "support") {
+    return role;
+  }
+  return "user"; // Default fallback
+};
+
 // Auth provider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -64,8 +72,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return { success: false, error: "Ошибка загрузки профиля пользователя" };
         }
 
-        setUser(userProfile);
-        setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
+        // Create user object with validated role
+        const userWithValidatedRole: User = {
+          ...userProfile,
+          role: validateRole(userProfile.role)
+        };
+
+        setUser(userWithValidatedRole);
+        setUserRole(validateRole(userProfile.role));
         return { success: true };
       }
 
@@ -119,8 +133,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return { success: false, error: "Ошибка загрузки профиля пользователя" };
         }
 
-        setUser(userProfile);
-        setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
+        // Create user object with validated role
+        const userWithValidatedRole: User = {
+          ...userProfile,
+          role: validateRole(userProfile.role)
+        };
+
+        setUser(userWithValidatedRole);
+        setUserRole(validateRole(userProfile.role));
         return { success: true };
       }
 
@@ -189,8 +209,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
             setUserRole(null);
           } else {
-            setUser(userProfile);
-            setUserRole(userProfile.role as "user" | "admin" | "partner" | "support");
+            // Create user object with validated role
+            const userWithValidatedRole: User = {
+              ...userProfile,
+              role: validateRole(userProfile.role)
+            };
+
+            setUser(userWithValidatedRole);
+            setUserRole(validateRole(userProfile.role));
           }
         } else {
           setUser(null);
