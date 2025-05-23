@@ -12,12 +12,12 @@ import { cities, categories } from "@/components/client/gyms/gymConstants";
 const ClientGyms = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState("Москва");
+  const [selectedCity, setSelectedCity] = useState("Махачкала");
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [minRating, setMinRating] = useState([4.0]);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
-  // Enhanced function for getting gyms from Supabase with better error handling
+  // Enhanced function for getting gyms from Supabase with better error handling and logging
   const fetchGyms = async () => {
     try {
       console.log("Fetching gyms with filters:", {
@@ -29,10 +29,8 @@ const ClientGyms = () => {
       
       let query = supabase.from("gyms").select("*");
       
-      // Apply filters only if they're not set to "Все" (All)
-      if (selectedCity && selectedCity !== "Все") {
-        query = query.eq("city", selectedCity);
-      }
+      // Always filter by city since we only have one city now
+      query = query.eq("city", selectedCity);
       
       if (selectedCategory && selectedCategory !== "Все") {
         query = query.eq("category", selectedCategory);
@@ -43,8 +41,11 @@ const ClientGyms = () => {
       }
       
       if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
+        query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
       }
+      
+      // Log the SQL query being executed
+      console.log("Executing query for gyms");
       
       const { data, error } = await query.order("name");
       
@@ -58,15 +59,8 @@ const ClientGyms = () => {
         throw error;
       }
       
-      console.log("Gyms loaded successfully:", data?.length || 0, data);
-      
-      // If no data is returned but there's no error, return an empty array
-      if (!data || data.length === 0) {
-        console.log("No gyms found matching the criteria");
-        return [];
-      }
-      
-      return data as Gym[];
+      console.log("Gyms loaded successfully:", data?.length, data);
+      return data as Gym[] || [];
     } catch (error) {
       console.error("Error in fetchGyms:", error);
       toast({
@@ -74,11 +68,11 @@ const ClientGyms = () => {
         title: "Ошибка загрузки",
         description: "Произошла ошибка при получении данных о залах",
       });
-      return [];
+      throw error; // Rethrow to let React Query handle it
     }
   };
 
-  // Add refetchOnMount and refetchOnWindowFocus for better data loading
+  // Use React Query for data fetching with more aggressive options
   const { 
     data: gyms, 
     isLoading, 
@@ -88,18 +82,21 @@ const ClientGyms = () => {
   } = useQuery({
     queryKey: ["client-gyms", searchQuery, selectedCity, selectedCategory, minRating],
     queryFn: fetchGyms,
-    refetchOnMount: true,
+    refetchOnMount: "always",
     refetchOnWindowFocus: true,
-    staleTime: 1000 * 60 * 5, // Consider data stale after 5 minutes
+    retry: 2,
+    staleTime: 1000 * 60, // Consider data stale after 1 minute
   });
 
-  // Ensure we have data when component mounts
+  // Force fetch on component mount
   useEffect(() => {
+    console.log("Component mounted, triggering refetch");
     refetch();
   }, []);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("Search submitted, triggering refetch");
     refetch();
   };
 
@@ -113,12 +110,15 @@ const ClientGyms = () => {
 
   const resetFilters = () => {
     setSearchQuery("");
-    setSelectedCity("Москва");
+    setSelectedCity("Махачкала"); // Keep only Махачкала
     setSelectedCategory("Все");
     setMinRating([4.0]);
-    // Force refetch after resetting filters
-    setTimeout(() => refetch(), 0);
+    console.log("Filters reset, triggering refetch");
+    setTimeout(() => refetch(), 100); // Slight delay to ensure state updates
   };
+
+  // Log current state
+  console.log("Current state:", { gyms, isLoading, isError });
 
   return (
     <div className="pb-16">

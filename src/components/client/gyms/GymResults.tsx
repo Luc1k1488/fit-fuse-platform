@@ -25,6 +25,8 @@ export const GymResults = ({
   refetch,
   resetFilters
 }: GymResultsProps) => {
+  console.log("GymResults rendering with:", { gyms, isLoading, isError });
+  
   if (isLoading) {
     return (
       <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
@@ -50,6 +52,7 @@ export const GymResults = ({
     return (
       <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
         <p className="text-gray-400 mb-4">Не найдено залов по вашим критериям.</p>
+        <p className="text-sm text-gray-500 mb-6">В данный момент в базе нет залов для Махачкалы.</p>
         <Button onClick={resetFilters} className="transition-all hover:scale-105">
           Сбросить фильтры
         </Button>
