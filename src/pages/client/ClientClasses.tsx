@@ -13,6 +13,7 @@ import { ru } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock, MapPin, User, Star } from "lucide-react";
+import { createTestUser } from "@/utils/testUser";
 
 const class_types = ["Все", "Фитнес", "Йога", "КроссФит", "Пилатес", "Бокс"];
 
