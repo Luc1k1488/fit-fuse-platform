@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 // Public routes
 import LandingPage from "./pages/public/LandingPage";
@@ -62,11 +63,35 @@ import SupportChats from "./pages/support/SupportChats";
 
 // Context providers
 import { AuthProvider } from "./contexts/auth_context";
-import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [isMobileView, setIsMobileView] = useState(false);
+  
+  // Check if we're on a mobile device
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    // Первичная проверка
+    checkIsMobile();
+    
+    // Слушаем изменения размера экрана
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Проверяем, запускается ли приложение через Capacitor
+    const isCapacitor = window.location.href.includes('capacitor://');
+    if (isCapacitor) {
+      setIsMobileView(true);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+
   // Принудительно установить темную тему
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -81,7 +106,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={isMobileView ? <Navigate to="/login/mobile" replace /> : <LandingPage />} />
               <Route path="/gyms" element={<GymsPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/faq" element={<FaqPage />} />
