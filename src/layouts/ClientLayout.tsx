@@ -7,9 +7,10 @@ import {
   Dumbbell,
   ListChecks,
   Activity,
+  Menu,
 } from "lucide-react";
-import { useState } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
 
 import { MainNav } from "@/components/main-nav";
 import { 
@@ -80,9 +81,44 @@ const navigationItems = [
 const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    // Первичная проверка
+    checkIsMobile();
+    
+    // Слушаем изменения размера экрана
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Проверяем, запускается ли приложение через Capacitor
+    const isCapacitor = window.location.href.includes('capacitor://');
+    if (isCapacitor) {
+      setIsMobileView(true);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Получаем основные элементы меню для мобильного нижнего меню
+  const getMobileMenuItems = () => {
+    // Для мобильного меню выберем только первые 5 важных пунктов
+    return navigationItems.slice(0, 5);
+  };
+
+  // Проверка активного маршрута
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -114,9 +150,40 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
             </SidebarContent>
           </MainNav>
         </Sidebar>
-        <div className="flex-1 p-4">
+        <div className={`flex-1 p-4 ${isMobileView ? "pb-24" : ""}`}>
           <Outlet />
         </div>
+
+        {/* Нижнее навигационное меню для мобильных устройств */}
+        {isMobileView && (
+          <nav className="fixed bottom-0 left-0 w-full bg-background border-t border-border z-30 px-2 py-1">
+            <div className="flex justify-around items-center">
+              {getMobileMenuItems().map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className={`flex flex-col items-center py-2 px-3 ${
+                    isActive(item.href) 
+                      ? "text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span className="flex items-center justify-center mb-1">
+                    <item.icon className="h-5 w-5" />
+                  </span>
+                  <span className="text-xs">{item.title}</span>
+                </Link>
+              ))}
+              <button
+                onClick={toggleSidebar}
+                className="flex flex-col items-center py-2 px-3 text-muted-foreground hover:text-foreground"
+              >
+                <Menu className="h-5 w-5 mb-1" />
+                <span className="text-xs">Меню</span>
+              </button>
+            </div>
+          </nav>
+        )}
       </div>
     </SidebarProvider>
   );
