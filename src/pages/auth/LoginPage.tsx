@@ -12,38 +12,44 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
-  const { login, user, user_role, is_loading } = useAuth();
+  const { login, user, is_loading } = useAuth();
   const navigate = useNavigate();
 
   // Handle redirection after auth state changes
   useEffect(() => {
-    if (!is_loading && user && !redirecting) {
+    // Only redirect if user is authenticated and we're not currently loading
+    if (!is_loading && user) {
       console.log("User authenticated, redirecting based on role:", user.role);
-      setRedirecting(true);
       
-      // Use setTimeout to avoid blocking the UI
-      setTimeout(() => {
-        if (user.role === "admin") {
-          console.log("Redirecting to admin dashboard");
-          navigate("/admin/dashboard", { replace: true });
-        } else {
-          console.log("Redirecting to user app");
-          navigate("/app", { replace: true });
-        }
-      }, 100);
+      if (user.role === "admin") {
+        console.log("Redirecting to admin dashboard");
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        console.log("Redirecting to user app");
+        navigate("/app", { replace: true });
+      }
     }
-  }, [user, user_role, is_loading, navigate, redirecting]);
+  }, [user, is_loading, navigate]);
 
-  // Show loading while auth state is being determined or redirecting
-  if (is_loading || redirecting) {
+  // Show loading only while auth state is being determined
+  if (is_loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-600">
-            {redirecting ? "Перенаправление..." : "Загрузка..."}
-          </p>
+          <p className="text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already authenticated, don't show the form
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-gray-600">Перенаправление...</p>
         </div>
       </div>
     );
