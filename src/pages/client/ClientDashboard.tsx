@@ -1,249 +1,167 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GradientButton } from "@/components/ui/gradient-button";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth_context";
-import { Calendar, ArrowRight, Bell, Star, Map, Dumbbell } from "lucide-react";
-import OnlineStatusBadge from "@/components/common/OnlineStatusBadge";
-import { DarkCard, DarkCardContent } from "@/components/ui/dark-card";
-import { toast } from "sonner";
+import { DarkCard } from "@/components/ui/dark-card";
+import { Star, MapPin, Calendar, Dumbbell, TrendingUp, Users } from "lucide-react";
+import { Gym } from "@/types";
 
 const ClientDashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  // Получаем залы для отображения на главной
+  const fetchRecentGyms = async () => {
+    console.log("Fetching recent gyms for dashboard");
+    const { data, error } = await supabase
+      .from("gyms")
+      .select("*")
+      .eq("city", "Махачкала")
+      .order("rating", { ascending: false })
+      .limit(3);
 
-  // Пример данных для демонстрации
-  const upcoming_classes = [
-    {
-      id: "class-1",
-      title: "Утренняя йога",
-      gym_name: "Йога Студия Зен",
-      date: "Сегодня, 8:00",
-      image: "https://images.unsplash.com/photo-1599447292180-45fd84092ef4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8eW9nYSUyMGNsYXNzfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-      id: "class-2",
-      title: "HIIT Тренировка",
-      gym_name: "Фитнес Элит",
-      date: "Завтра, 18:30",
-      image: "https://images.unsplash.com/photo-1549060279-7e168fcee0c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGhpaXQlMjBmaXRuZXNzfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
+    if (error) {
+      console.error("Error fetching recent gyms:", error);
+      throw error;
     }
-  ];
 
-  const recommended_gyms = [
-    {
-      id: "gym-1",
-      name: "Фитнес Элит",
-      location: "Центр",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-      id: "gym-2",
-      name: "Пауэр Хаус",
-      location: "Садовое кольцо",
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGd5bXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-      id: "gym-3",
-      name: "ФитЗона",
-      location: "Юг",
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Z3ltfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
-    }
-  ];
-
-  // Обработчики для кнопок быстрых действий
-  const handleFindGym = () => {
-    navigate("/app/gyms");
+    console.log("Recent gyms loaded:", data);
+    return data as Gym[];
   };
 
-  const handleBookClass = () => {
-    navigate("/app/classes");
-  };
-
-  const handleShowReviews = () => {
-    toast.info("Открываем ваши отзывы");
-    // В будущем здесь будет переход на страницу с отзывами
-  };
-
-  const handleShowReminders = () => {
-    toast.info("Открываем ваши напоминания");
-    // В будущем здесь будет переход на страницу с напоминаниями
-  };
+  const { 
+    data: recentGyms, 
+    isLoading: gymsLoading, 
+    isError: gymsError 
+  } = useQuery({
+    queryKey: ["recent-gyms"],
+    queryFn: fetchRecentGyms,
+    refetchOnMount: true,
+  });
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Индикатор статуса онлайн/оффлайн */}
-      <OnlineStatusBadge />
+    <div className="pb-16 space-y-6">
+      {/* Заголовок и приветствие */}
+      <div className="animate-fade-in">
+        <h1 className="text-2xl font-bold text-white mb-2">Добро пожаловать!</h1>
+        <p className="text-gray-400">Готовы к новым тренировкам?</p>
+      </div>
 
-      {/* Приветствие и статистика */}
-      <div className="bg-gradient-to-r from-violet-600 to-blue-500 text-white p-6 rounded-xl shadow-lg shadow-primary/20">
-        <h1 className="text-xl font-bold mb-2">Добро пожаловать, {user?.name || "Фитнес-энтузиаст"}!</h1>
-        <p>Ваш фитнес-прогресс отлично выглядит! Вот что происходит сегодня.</p>
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-            <p className="text-white/80 text-sm">Активная подписка</p>
-            <p className="font-bold mt-1">Премиум</p>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
-            <p className="text-white/80 text-sm">Занятий в этом месяце</p>
-            <p className="font-bold mt-1">12 / Безлимит</p>
-          </div>
+      {/* Статистические карточки */}
+      <div className="grid grid-cols-2 gap-4 animate-fade-in animation-delay-200">
+        <DarkCard className="p-4 text-center" hoverEffect="raise">
+          <Calendar className="h-6 w-6 mx-auto mb-2 text-primary" />
+          <p className="text-sm text-gray-400">Занятий в месяц</p>
+          <p className="text-xl font-bold text-white">12</p>
+        </DarkCard>
+        
+        <DarkCard className="p-4 text-center" hoverEffect="raise">
+          <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-500" />
+          <p className="text-sm text-gray-400">Прогресс</p>
+          <p className="text-xl font-bold text-white">+15%</p>
+        </DarkCard>
+      </div>
+
+      {/* Быстрые действия */}
+      <div className="animate-fade-in animation-delay-400">
+        <h2 className="text-lg font-semibold text-white mb-3">Быстрые действия</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <Button asChild className="h-12 transition-all hover:scale-105">
+            <Link to="/app/gyms" className="flex items-center justify-center gap-2">
+              <Dumbbell className="h-4 w-4" />
+              Найти зал
+            </Link>
+          </Button>
+          
+          <Button asChild variant="outline" className="h-12 bg-gray-800 border-gray-700 hover:bg-gray-700 transition-all hover:scale-105">
+            <Link to="/app/classes" className="flex items-center justify-center gap-2">
+              <Users className="h-4 w-4" />
+              Занятия
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Предстоящие занятия */}
-      <div>
+      {/* Популярные залы */}
+      <div className="animate-fade-in animation-delay-600">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Предстоящие занятия</h2>
-          <Link to="/app/bookings" className="text-primary flex items-center text-sm">
-            Все занятия
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Link>
+          <h2 className="text-lg font-semibold text-white">Популярные залы</h2>
+          <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+            <Link to="/app/gyms">Смотреть все</Link>
+          </Button>
         </div>
-        
-        {upcoming_classes.length > 0 ? (
-          <div className="space-y-4">
-            {upcoming_classes.map((class_item) => (
-              <DarkCard key={class_item.id} className="overflow-hidden">
-                <div className="flex flex-row">
-                  <div className="w-1/3 h-24">
-                    <img 
-                      src={class_item.image} 
-                      alt={class_item.title} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-3 w-2/3 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium text-sm text-white">{class_item.title}</h3>
-                      <p className="text-gray-400 text-xs">{class_item.gym_name}</p>
-                      <div className="flex items-center mt-1 text-xs text-gray-400">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {class_item.date}
+
+        {gymsLoading && (
+          <div className="text-center py-8">
+            <p className="text-gray-400">Загрузка залов...</p>
+          </div>
+        )}
+
+        {gymsError && (
+          <div className="text-center py-8">
+            <p className="text-red-400">Ошибка загрузки залов</p>
+          </div>
+        )}
+
+        {recentGyms && recentGyms.length > 0 && (
+          <div className="space-y-3">
+            {recentGyms.map((gym, index) => (
+              <DarkCard 
+                key={gym.id} 
+                className="p-4 animate-fade-in hover:bg-gray-800/50 transition-all"
+                style={{ animationDelay: `${700 + index * 100}ms` }}
+                hoverEffect="raise"
+              >
+                <Link to={`/app/gyms/${gym.id}`} className="block">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      {gym.main_image ? (
+                        <img 
+                          src={gym.main_image} 
+                          alt={gym.name || ""} 
+                          className="w-12 h-12 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-700 flex items-center justify-center">
+                          <Dumbbell className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-white truncate">{gym.name}</h3>
+                      <div className="flex items-center text-sm text-gray-400 mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span className="truncate">{gym.location}</span>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <Button variant="outline" size="sm" className="text-xs py-0 h-7 border-gray-700 text-gray-300">Отменить</Button>
-                      <Button variant="ghost" size="sm" className="p-0 h-7 w-7 text-gray-300">
-                        <Bell className="h-4 w-4" />
-                        <span className="sr-only">Напоминание</span>
-                      </Button>
+                    
+                    <div className="flex items-center text-sm">
+                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
+                      <span className="text-white font-medium">{gym.rating || 0}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               </DarkCard>
             ))}
           </div>
-        ) : (
-          <DarkCard gradient>
-            <DarkCardContent className="p-6 text-center">
-              <Calendar className="h-12 w-12 mx-auto text-gray-500" />
-              <p className="mt-2 text-gray-400">Нет предстоящих занятий</p>
-              <Link to="/app/classes">
-                <GradientButton className="mt-4">Найти занятия</GradientButton>
-              </Link>
-            </DarkCardContent>
+        )}
+
+        {recentGyms && recentGyms.length === 0 && (
+          <DarkCard className="p-6 text-center">
+            <p className="text-gray-400">Залы не найдены</p>
           </DarkCard>
         )}
       </div>
 
-      {/* Рекомендуемые залы */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Рекомендуемые залы</h2>
-          <Link to="/app/gyms" className="text-primary flex items-center text-sm">
-            Все залы
-            <ArrowRight className="h-4 w-4 ml-1" />
-          </Link>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {recommended_gyms.map((gym) => (
-            <DarkCard key={gym.id} className="overflow-hidden" gradient>
-              <div className="relative h-32">
-                <img 
-                  src={gym.image} 
-                  alt={gym.name} 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
-                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
-                  <span className="text-xs font-medium text-white">{gym.rating}</span>
-                </div>
-              </div>
-              <DarkCardContent className="p-4">
-                <h3 className="font-medium text-white">{gym.name}</h3>
-                <div className="flex items-center mt-1 text-xs text-gray-400">
-                  <Map className="h-3 w-3 mr-1" />
-                  {gym.location}
-                </div>
-                <Link to={`/app/gyms/${gym.id}`} className="mt-3 block">
-                  <GradientButton variant="outline" className="w-full text-sm">
-                    Подробнее
-                  </GradientButton>
-                </Link>
-              </DarkCardContent>
-            </DarkCard>
-          ))}
-        </div>
-      </div>
-
-      {/* Быстрые действия */}
-      <div>
-        <h2 className="text-lg font-bold mb-3">Быстрые действия</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <DarkCard 
-            onClick={handleFindGym} 
-            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <DarkCardContent className="p-4 text-center flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
-                <Dumbbell className="h-5 w-5 text-white" />
-              </div>
-              <p className="font-medium text-sm text-white">Найти зал</p>
-            </DarkCardContent>
-          </DarkCard>
-          
-          <DarkCard 
-            onClick={handleBookClass} 
-            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <DarkCardContent className="p-4 text-center flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <p className="font-medium text-sm text-white">Забронировать</p>
-            </DarkCardContent>
-          </DarkCard>
-          
-          <DarkCard 
-            onClick={handleShowReviews} 
-            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <DarkCardContent className="p-4 text-center flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
-                <Star className="h-5 w-5 text-white" />
-              </div>
-              <p className="font-medium text-sm text-white">Мои отзывы</p>
-            </DarkCardContent>
-          </DarkCard>
-          
-          <DarkCard 
-            onClick={handleShowReminders} 
-            className="shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:scale-105 cursor-pointer"
-          >
-            <DarkCardContent className="p-4 text-center flex flex-col items-center">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 flex items-center justify-center mb-2">
-                <Bell className="h-5 w-5 text-white" />
-              </div>
-              <p className="font-medium text-sm text-white">Напоминания</p>
-            </DarkCardContent>
-          </DarkCard>
-        </div>
+      {/* Последние бронирования */}
+      <div className="animate-fade-in animation-delay-800">
+        <h2 className="text-lg font-semibold text-white mb-3">Мои бронирования</h2>
+        <DarkCard className="p-4 text-center">
+          <p className="text-gray-400 mb-3">У вас пока нет бронирований</p>
+          <Button asChild size="sm" className="transition-all hover:scale-105">
+            <Link to="/app/classes">Забронировать занятие</Link>
+          </Button>
+        </DarkCard>
       </div>
     </div>
   );

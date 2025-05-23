@@ -14,10 +14,10 @@ const ClientGyms = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Махачкала");
   const [selectedCategory, setSelectedCategory] = useState("Все");
-  const [minRating, setMinRating] = useState([4.0]);
+  const [minRating, setMinRating] = useState([0]); // Изменил минимальный рейтинг
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
-  // Enhanced function for getting gyms from Supabase with better error handling and logging
+  // Упрощенная функция получения залов
   const fetchGyms = async () => {
     try {
       console.log("Fetching gyms with filters:", {
@@ -27,16 +27,16 @@ const ClientGyms = () => {
         searchQuery
       });
       
-      let query = supabase.from("gyms").select("*");
-      
-      // Always filter by city since we only have one city now
-      query = query.eq("city", selectedCity);
+      let query = supabase
+        .from("gyms")
+        .select("*")
+        .eq("city", "Махачкала"); // Фиксированно фильтруем по Махачкале
       
       if (selectedCategory && selectedCategory !== "Все") {
         query = query.eq("category", selectedCategory);
       }
       
-      if (minRating && minRating[0] > 0) {
+      if (minRating[0] > 0) {
         query = query.gte("rating", minRating[0]);
       }
       
@@ -44,10 +44,7 @@ const ClientGyms = () => {
         query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
       }
       
-      // Log the SQL query being executed
-      console.log("Executing query for gyms");
-      
-      const { data, error } = await query.order("name");
+      const { data, error } = await query.order("rating", { ascending: false });
       
       if (error) {
         console.error("Error fetching gyms:", error);
@@ -63,16 +60,11 @@ const ClientGyms = () => {
       return data as Gym[] || [];
     } catch (error) {
       console.error("Error in fetchGyms:", error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка загрузки",
-        description: "Произошла ошибка при получении данных о залах",
-      });
-      throw error; // Rethrow to let React Query handle it
+      throw error;
     }
   };
 
-  // Use React Query for data fetching with more aggressive options
+  // React Query для получения данных
   const { 
     data: gyms, 
     isLoading, 
@@ -80,19 +72,11 @@ const ClientGyms = () => {
     error, 
     refetch 
   } = useQuery({
-    queryKey: ["client-gyms", searchQuery, selectedCity, selectedCategory, minRating],
+    queryKey: ["client-gyms", searchQuery, selectedCategory, minRating[0]],
     queryFn: fetchGyms,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
     retry: 2,
-    staleTime: 1000 * 60, // Consider data stale after 1 minute
+    refetchOnMount: true,
   });
-
-  // Force fetch on component mount
-  useEffect(() => {
-    console.log("Component mounted, triggering refetch");
-    refetch();
-  }, []);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -110,15 +94,13 @@ const ClientGyms = () => {
 
   const resetFilters = () => {
     setSearchQuery("");
-    setSelectedCity("Махачкала"); // Keep only Махачкала
     setSelectedCategory("Все");
-    setMinRating([4.0]);
+    setMinRating([0]);
     console.log("Filters reset, triggering refetch");
-    setTimeout(() => refetch(), 100); // Slight delay to ensure state updates
+    setTimeout(() => refetch(), 100);
   };
 
-  // Log current state
-  console.log("Current state:", { gyms, isLoading, isError });
+  console.log("Current state:", { gyms, isLoading, isError, gymsCount: gyms?.length });
 
   return (
     <div className="pb-16">

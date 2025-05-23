@@ -25,7 +25,7 @@ export const GymResults = ({
   refetch,
   resetFilters
 }: GymResultsProps) => {
-  console.log("GymResults rendering with:", { gyms, isLoading, isError });
+  console.log("GymResults rendering with:", { gyms, isLoading, isError, gymsCount: gyms?.length });
   
   if (isLoading) {
     return (
@@ -51,8 +51,8 @@ export const GymResults = ({
   if (!gyms || gyms.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 animate-fade-in">
-        <p className="text-gray-400 mb-4">Не найдено залов по вашим критериям.</p>
-        <p className="text-sm text-gray-500 mb-6">В данный момент в базе нет залов для Махачкалы.</p>
+        <p className="text-gray-400 mb-4">Залы не найдены по вашим критериям.</p>
+        <p className="text-sm text-gray-500 mb-6">Попробуйте изменить фильтры поиска.</p>
         <Button onClick={resetFilters} className="transition-all hover:scale-105">
           Сбросить фильтры
         </Button>
@@ -61,16 +61,21 @@ export const GymResults = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {gyms.map((gym, idx) => (
-        <GymCard 
-          key={gym.id}
-          gym={gym}
-          index={idx}
-          favoriteGyms={favoriteGyms}
-          toggleFavorite={toggleFavorite}
-        />
-      ))}
+    <div className="space-y-4">
+      <div className="text-sm text-gray-400 mb-4">
+        Найдено залов: {gyms.length}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {gyms.map((gym, idx) => (
+          <GymCard 
+            key={gym.id}
+            gym={gym}
+            index={idx}
+            favoriteGyms={favoriteGyms}
+            toggleFavorite={toggleFavorite}
+          />
+        ))}
+      </div>
     </div>
   );
 };
