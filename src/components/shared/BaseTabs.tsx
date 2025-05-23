@@ -1,37 +1,40 @@
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
-interface BaseTabsProps {
-  items: string[];
-  selectedItem: string;
-  setSelectedItem: (item: string) => void;
+interface BaseTabsProps<T extends string> {
+  items: T[];
+  selectedItem: T;
+  setSelectedItem: (item: T) => void;
   className?: string;
-  animationDelay?: string;
+  itemClassName?: string;
 }
 
-export const BaseTabs = ({ 
-  items, 
-  selectedItem, 
-  setSelectedItem, 
-  className = "w-full",
-  animationDelay
-}: BaseTabsProps) => {
-  const animationClass = animationDelay ? `animate-fade-in animation-delay-${animationDelay}` : "";
-
+export const BaseTabs = <T extends string>({
+  items,
+  selectedItem,
+  setSelectedItem,
+  className,
+  itemClassName
+}: BaseTabsProps<T>) => {
   return (
-    <Tabs defaultValue={selectedItem} value={selectedItem} className={`${className} ${animationClass}`}>
-      <TabsList className="w-full overflow-x-auto flex pb-1 bg-gray-800">
+    <div className={cn("flex w-full overflow-x-auto pb-1 no-scrollbar", className)}>
+      <div className="flex gap-2 min-w-max">
         {items.map((item) => (
-          <TabsTrigger
+          <button
             key={item}
-            value={item}
             onClick={() => setSelectedItem(item)}
-            className="whitespace-nowrap transition-all hover:scale-105"
+            className={cn(
+              "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors",
+              selectedItem === item
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted hover:bg-muted/80 text-muted-foreground",
+              itemClassName
+            )}
           >
             {item}
-          </TabsTrigger>
+          </button>
         ))}
-      </TabsList>
-    </Tabs>
+      </div>
+    </div>
   );
 };

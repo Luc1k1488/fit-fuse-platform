@@ -8,6 +8,7 @@ import {
   ListChecks,
   Activity,
   Menu,
+  User,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
@@ -71,10 +72,16 @@ const navigationItems = [
     description: "Ваша статистика"
   },
   {
+    title: "Профиль",
+    href: "/app/profile",
+    icon: User,
+    description: "Настройки профиля"
+  },
+  {
     title: "Настройки",
     href: "/app/settings",
     icon: Settings,
-    description: "Настройки профиля"
+    description: "Настройки приложения"
   }
 ];
 
@@ -112,8 +119,13 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
 
   // Получаем основные элементы меню для мобильного нижнего меню
   const getMobileMenuItems = () => {
-    // Для мобильного меню выберем только первые 5 важных пунктов
-    return navigationItems.slice(0, 5);
+    // Для мобильного меню включаем первые 4 пункта и добавляем профиль явно
+    const mainItems = navigationItems.slice(0, 4);
+    const profileItem = navigationItems.find(item => item.href === "/app/profile");
+    if (profileItem) {
+      return [...mainItems, profileItem];
+    }
+    return mainItems;
   };
 
   // Проверка активного маршрута
@@ -174,13 +186,6 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
                   <span className="text-xs">{item.title}</span>
                 </Link>
               ))}
-              <button
-                onClick={toggleSidebar}
-                className="flex flex-col items-center py-2 px-3 text-muted-foreground hover:text-foreground"
-              >
-                <Menu className="h-5 w-5 mb-1" />
-                <span className="text-xs">Меню</span>
-              </button>
             </div>
           </nav>
         )}

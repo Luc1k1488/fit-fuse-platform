@@ -29,7 +29,7 @@ export const GymFilters = ({
         />
       </div>
       
-      <div className="mb-2">
+      <div className="mb-2 overflow-auto w-full">
         <CategoryTabs
           categories={categories}
           selectedCategory={selectedCategory}
