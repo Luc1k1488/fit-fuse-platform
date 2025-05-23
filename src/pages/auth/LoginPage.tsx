@@ -12,26 +12,39 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const { login, user, user_role, is_loading } = useAuth();
   const navigate = useNavigate();
 
   // Handle redirection after auth state changes
   useEffect(() => {
-    if (!is_loading && user) {
+    if (!is_loading && user && !redirecting) {
       console.log("User authenticated, redirecting based on role:", user.role);
-      if (user.role === "admin") {
-        navigate("/admin/dashboard", { replace: true });
-      } else {
-        navigate("/app", { replace: true });
-      }
+      setRedirecting(true);
+      
+      // Use setTimeout to avoid blocking the UI
+      setTimeout(() => {
+        if (user.role === "admin") {
+          console.log("Redirecting to admin dashboard");
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          console.log("Redirecting to user app");
+          navigate("/app", { replace: true });
+        }
+      }, 100);
     }
-  }, [user, user_role, is_loading, navigate]);
+  }, [user, user_role, is_loading, navigate, redirecting]);
 
-  // Show loading while auth state is being determined
-  if (is_loading) {
+  // Show loading while auth state is being determined or redirecting
+  if (is_loading || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-gray-600">
+            {redirecting ? "Перенаправление..." : "Загрузка..."}
+          </p>
+        </div>
       </div>
     );
   }
