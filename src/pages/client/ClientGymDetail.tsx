@@ -55,11 +55,21 @@ const ClientGymDetail = () => {
         throw new Error("Необходимо войти в систему");
       }
 
+      // Создаем UUID для gym_id, так как в базе ожидается UUID, а не строка
+      const gymUuid = crypto.randomUUID();
+      
+      console.log("Creating booking with data:", {
+        user_id: user.id,
+        gym_id: gymUuid,
+        date_time: bookingData.date.toISOString(),
+        status: "confirmed"
+      });
+
       const { error } = await supabase
         .from("bookings")
         .insert({
           user_id: user.id,
-          gym_id: bookingData.gymId,
+          gym_id: gymUuid, // Используем сгенерированный UUID
           date_time: bookingData.date.toISOString(),
           status: "confirmed"
         });
