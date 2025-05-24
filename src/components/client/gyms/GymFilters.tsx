@@ -4,7 +4,6 @@ import { CategoryTabs } from "./CategoryTabs";
 
 interface GymFiltersProps {
   cities: string[];
-  categories: string[];
   selectedCity: string;
   selectedCategory: string;
   setSelectedCity: (city: string) => void;
