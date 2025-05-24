@@ -60,6 +60,60 @@ export type Subscription = {
   end_date: string | null;
   plan_name: string | null;
   price: number | null;
+  subscription_type: "regular" | "gift" | "promo";
+  plan_id: string | null;
+};
+
+export type SubscriptionPlan = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration_days: number;
+  features: string[] | null;
+  is_active: boolean | null;
+  created_at: string | null;
+};
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  discount_percentage: number | null;
+  discount_amount: number | null;
+  max_uses: number | null;
+  current_uses: number | null;
+  valid_from: string | null;
+  valid_until: string | null;
+  active: boolean | null;
+  created_at: string;
+};
+
+export type GiftSubscription = {
+  id: string;
+  giver_user_id: string | null;
+  receiver_email: string | null;
+  receiver_user_id: string | null;
+  subscription_id: string | null;
+  gift_code: string | null;
+  message: string | null;
+  is_activated: boolean | null;
+  activated_at: string | null;
+  created_at: string | null;
+  expires_at: string | null;
+};
+
+export type UserStats = {
+  id: string;
+  user_id: string | null;
+  total_bookings: number | null;
+  completed_workouts: number | null;
+  favorite_gym_id: string | null;
+  total_hours_trained: number | null;
+  current_streak_days: number | null;
+  best_streak_days: number | null;
+  last_workout_date: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type Review = {

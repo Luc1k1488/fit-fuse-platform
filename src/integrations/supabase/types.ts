@@ -150,6 +150,70 @@ export type Database = {
           },
         ]
       }
+      gift_subscriptions: {
+        Row: {
+          activated_at: string | null
+          created_at: string | null
+          expires_at: string | null
+          gift_code: string | null
+          giver_user_id: string | null
+          id: string
+          is_activated: boolean | null
+          message: string | null
+          receiver_email: string | null
+          receiver_user_id: string | null
+          subscription_id: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          gift_code?: string | null
+          giver_user_id?: string | null
+          id?: string
+          is_activated?: boolean | null
+          message?: string | null
+          receiver_email?: string | null
+          receiver_user_id?: string | null
+          subscription_id?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          gift_code?: string | null
+          giver_user_id?: string | null
+          id?: string
+          is_activated?: boolean | null
+          message?: string | null
+          receiver_email?: string | null
+          receiver_user_id?: string | null
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_subscriptions_giver_user_id_fkey"
+            columns: ["giver_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_subscriptions_receiver_user_id_fkey"
+            columns: ["receiver_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_subscriptions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gyms: {
         Row: {
           address: string | null
@@ -209,6 +273,91 @@ export type Database = {
           },
         ]
       }
+      promo_code_usage: {
+        Row: {
+          id: string
+          promo_code_id: string | null
+          subscription_id: string | null
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          promo_code_id?: string | null
+          subscription_id?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          promo_code_id?: string | null
+          subscription_id?: string | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_code_usage_promo_code_id_fkey"
+            columns: ["promo_code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_code_usage_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_code_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_codes: {
+        Row: {
+          active: boolean | null
+          code: string
+          created_at: string
+          current_uses: number | null
+          discount_amount: number | null
+          discount_percentage: number | null
+          id: string
+          max_uses: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          code: string
+          created_at?: string
+          current_uses?: number | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          code?: string
+          created_at?: string
+          current_uses?: number | null
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          id?: string
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -251,38 +400,84 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_days: number
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_days: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_days?: number
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string | null
           end_date: string | null
           id: string
+          plan_id: string | null
           plan_name: string | null
           price: number | null
           start_date: string | null
           status: string | null
+          subscription_type: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          plan_id?: string | null
           plan_name?: string | null
           price?: number | null
           start_date?: string | null
           status?: string | null
+          subscription_type?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          plan_id?: string | null
           plan_name?: string | null
           price?: number | null
           start_date?: string | null
           status?: string | null
+          subscription_type?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
@@ -335,6 +530,63 @@ export type Database = {
             foreignKeyName: "support_tickets_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          best_streak_days: number | null
+          completed_workouts: number | null
+          created_at: string | null
+          current_streak_days: number | null
+          favorite_gym_id: string | null
+          id: string
+          last_workout_date: string | null
+          total_bookings: number | null
+          total_hours_trained: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          best_streak_days?: number | null
+          completed_workouts?: number | null
+          created_at?: string | null
+          current_streak_days?: number | null
+          favorite_gym_id?: string | null
+          id?: string
+          last_workout_date?: string | null
+          total_bookings?: number | null
+          total_hours_trained?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          best_streak_days?: number | null
+          completed_workouts?: number | null
+          created_at?: string | null
+          current_streak_days?: number | null
+          favorite_gym_id?: string | null
+          id?: string
+          last_workout_date?: string | null
+          total_bookings?: number | null
+          total_hours_trained?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_stats_favorite_gym_id_fkey"
+            columns: ["favorite_gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
