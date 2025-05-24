@@ -7,17 +7,19 @@ import { Gym } from "@/types";
 import { GymSearchForm } from "@/components/client/gyms/GymSearchForm";
 import { GymFilters } from "@/components/client/gyms/GymFilters";
 import { GymResults } from "@/components/client/gyms/GymResults";
-import { cities, categories } from "@/components/client/gyms/gymConstants";
 
 const ClientGyms = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState("Махачкала");
   const [selectedCategory, setSelectedCategory] = useState("Все");
-  const [minRating, setMinRating] = useState([0]); // Изменил минимальный рейтинг
+  const [minRating, setMinRating] = useState([0]);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
-  // Упрощенная функция получения залов
+  const cities = ["Махачкала"];
+  const categories = ["Все", "crossfit", "gym", "pool", "yoga", "boxing", "dance"];
+
+  // Функция получения залов
   const fetchGyms = async () => {
     try {
       console.log("Fetching gyms with filters:", {
@@ -30,7 +32,7 @@ const ClientGyms = () => {
       let query = supabase
         .from("gyms")
         .select("*")
-        .eq("city", "Махачкала"); // Фиксированно фильтруем по Махачкале
+        .eq("city", "Махачкала");
       
       if (selectedCategory && selectedCategory !== "Все") {
         query = query.eq("category", selectedCategory);
@@ -106,7 +108,7 @@ const ClientGyms = () => {
     <div className="pb-16">
       {/* Page header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold animate-fade-in">Найти залы и студии</h1>
+        <h1 className="text-2xl font-bold animate-fade-in">Найти залы в Махачкале</h1>
         <p className="text-gray-600 dark:text-gray-400 animate-fade-in animation-delay-200">
           Выберите спортзал или студию для тренировки
         </p>
@@ -122,7 +124,6 @@ const ClientGyms = () => {
         
         <GymFilters 
           cities={cities}
-          categories={categories}
           selectedCity={selectedCity}
           selectedCategory={selectedCategory}
           setSelectedCity={setSelectedCity}

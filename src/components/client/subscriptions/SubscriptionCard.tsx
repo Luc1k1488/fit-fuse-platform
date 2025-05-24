@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Gift } from "lucide-react";
 
 interface SubscriptionPlan {
   id: string;
@@ -14,6 +14,8 @@ interface SubscriptionPlan {
   features: string[];
   popular?: boolean;
   current?: boolean;
+  bonus?: string;
+  dailyCost?: string;
 }
 
 interface SubscriptionCardProps {
@@ -34,23 +36,32 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
           </Badge>
         </div>
       )}
+
+      {plan.bonus && (
+        <div className="absolute top-4 left-4">
+          <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+            <Gift className="h-3 w-3 mr-1" />
+            {plan.bonus}
+          </Badge>
+        </div>
+      )}
       
-      <div className="h-40 overflow-hidden">
-        <img 
-          src={plan.image} 
-          alt={plan.name}
-          className="w-full h-full object-cover"
-        />
+      <div className="h-40 overflow-hidden bg-gradient-to-br from-purple-500 to-blue-600">
+        <div className="w-full h-full flex items-center justify-center text-white">
+          <div className="text-center">
+            <div className="text-4xl font-bold mb-2">{plan.price}</div>
+            <div className="text-lg opacity-90">{plan.period}</div>
+            {plan.dailyCost && (
+              <div className="text-sm opacity-75 mt-1">{plan.dailyCost}</div>
+            )}
+          </div>
+        </div>
       </div>
       
       <CardContent className="p-6">
         <div className="mb-4">
           <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
           <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
-          <div className="flex items-baseline">
-            <span className="text-3xl font-bold text-gray-900">{plan.price}</span>
-            <span className="text-gray-500 ml-1">/{plan.period}</span>
-          </div>
         </div>
 
         <ul className="space-y-2 mb-6">

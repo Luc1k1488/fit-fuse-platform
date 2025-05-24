@@ -23,15 +23,15 @@ const ClientHome = () => {
     remainingVisits: undefined
   };
 
-  // Тестовые данные залов по категориям с полными свойствами
+  // Обновленные тестовые данные с реальными адресами Махачкалы
   const testGyms: Gym[] = [
     // Кроссфит
     {
       id: "crossfit-1",
       name: "CrossFit Arena",
-      city: "Москва",
-      location: "ул. Спортивная, 15",
-      address: "ул. Спортивная, 15, Москва",
+      city: "Махачкала",
+      location: "пр. Имама Шамиля, 48",
+      address: "пр. Имама Шамиля, 48, Махачкала",
       rating: 4.8,
       review_count: 124,
       main_image: "/placeholder.svg",
@@ -44,10 +44,10 @@ const ClientHome = () => {
     // Тренажерный зал
     {
       id: "gym-1", 
-      name: "Сергей",
-      city: "Москва",
-      location: "ул. Фитнес, 10",
-      address: "ул. Фитнес, 10, Москва",
+      name: "FitPro",
+      city: "Махачкала",
+      location: "ул. Ярагского, 65",
+      address: "ул. Ярагского, 65, Махачкала",
       rating: 4.9,
       review_count: 200,
       main_image: "/placeholder.svg",
@@ -60,10 +60,10 @@ const ClientHome = () => {
     // Бассейн
     {
       id: "pool-1",
-      name: "Aqua Center",
-      city: "Москва", 
-      location: "ул. Водная, 5",
-      address: "ул. Водная, 5, Москва",
+      name: "Aqua Sport",
+      city: "Махачкала", 
+      location: "пр. Петра I, 25",
+      address: "пр. Петра I, 25, Махачкала",
       rating: 4.7,
       review_count: 89,
       main_image: "/placeholder.svg",
@@ -76,10 +76,10 @@ const ClientHome = () => {
     // Йога
     {
       id: "yoga-1",
-      name: "Zen Yoga Studio",
-      city: "Москва",
-      location: "ул. Гармония, 7",
-      address: "ул. Гармония, 7, Москва",
+      name: "Yoga Space",
+      city: "Махачкала",
+      location: "ул. Гагарина, 17",
+      address: "ул. Гагарина, 17, Махачкала",
       rating: 4.9,
       review_count: 156,
       main_image: "/placeholder.svg",
@@ -92,10 +92,10 @@ const ClientHome = () => {
     // Бокс
     {
       id: "box-1",
-      name: "Fight Club",
-      city: "Москва",
-      location: "ул. Бойцовская, 12",
-      address: "ул. Бойцовская, 12, Москва",
+      name: "Boxing Club",
+      city: "Махачкала",
+      location: "ул. Коркмасова, 35",
+      address: "ул. Коркмасова, 35, Махачкала",
       rating: 4.6,
       review_count: 78,
       main_image: "/placeholder.svg",
@@ -108,10 +108,10 @@ const ClientHome = () => {
     // Танцы
     {
       id: "dance-1", 
-      name: "Dance Studio Pro",
-      city: "Москва",
-      location: "ул. Ритма, 3",
-      address: "ул. Ритма, 3, Москва",
+      name: "Dance Academy",
+      city: "Махачкала",
+      location: "ул. Дахадаева, 88",
+      address: "ул. Дахадаева, 88, Махачкала",
       rating: 4.8,
       review_count: 145,
       main_image: "/placeholder.svg",
@@ -140,7 +140,7 @@ const ClientHome = () => {
       {/* Заголовок */}
       <div className="bg-white border-b px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-900">GoodFit</h1>
-        <p className="text-gray-600 mt-1">Найдите идеальный зал для тренировок</p>
+        <p className="text-gray-600 mt-1">Найдите идеальный зал для тренировок в Махачкале</p>
       </div>
 
       <div className="px-4 space-y-6">
@@ -154,7 +154,7 @@ const ClientHome = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input 
-            placeholder="Поиск залов..." 
+            placeholder="Поиск залов в Махачкале..." 
             className="pl-10 bg-white border-gray-200"
           />
         </div>

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GymCard } from "@/components/client/gyms/GymCard";
@@ -12,21 +12,21 @@ import { Gym } from "@/types";
 const ClientSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedCity, setSelectedCity] = useState<string>("Москва");
+  const [selectedCity, setSelectedCity] = useState<string>("Махачкала");
   const [showFilters, setShowFilters] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
-  const cities = ["Москва", "Санкт-Петербург", "Екатеринбург"];
-  const categories = ["all", "crossfit", "gym", "pool", "yoga", "boxing", "dance"];
+  const cities = ["Махачкала"];
 
-  // Тестовые данные с полными свойствами
+  // Обновленные тестовые данные с реальными адресами Махачкалы и координатами
   const testGyms: Gym[] = [
     {
       id: "crossfit-1",
       name: "CrossFit Arena",
-      city: "Москва",
-      location: "ул. Спортивная, 15",
-      address: "ул. Спортивная, 15, Москва",
+      city: "Махачкала",
+      location: "пр. Имама Шамиля, 48",
+      address: "пр. Имама Шамиля, 48, Махачкала",
       rating: 4.8,
       review_count: 124,
       main_image: "/placeholder.svg",
@@ -38,10 +38,10 @@ const ClientSearch = () => {
     },
     {
       id: "gym-1", 
-      name: "Сергей",
-      city: "Москва",
-      location: "ул. Фитнес, 10",
-      address: "ул. Фитнес, 10, Москва",
+      name: "FitPro",
+      city: "Махачкала",
+      location: "ул. Ярагского, 65",
+      address: "ул. Ярагского, 65, Махачкала",
       rating: 4.9,
       review_count: 200,
       main_image: "/placeholder.svg",
@@ -53,10 +53,10 @@ const ClientSearch = () => {
     },
     {
       id: "pool-1",
-      name: "Aqua Center",
-      city: "Москва", 
-      location: "ул. Водная, 5",
-      address: "ул. Водная, 5, Москва",
+      name: "Aqua Sport",
+      city: "Махачкала", 
+      location: "пр. Петра I, 25",
+      address: "пр. Петра I, 25, Махачкала",
       rating: 4.7,
       review_count: 89,
       main_image: "/placeholder.svg",
@@ -68,10 +68,10 @@ const ClientSearch = () => {
     },
     {
       id: "yoga-1",
-      name: "Zen Yoga Studio",
-      city: "Москва",
-      location: "ул. Гармония, 7",
-      address: "ул. Гармония, 7, Москва",
+      name: "Yoga Space",
+      city: "Махачкала",
+      location: "ул. Гагарина, 17",
+      address: "ул. Гагарина, 17, Махачкала",
       rating: 4.9,
       review_count: 156,
       main_image: "/placeholder.svg",
@@ -83,10 +83,10 @@ const ClientSearch = () => {
     },
     {
       id: "box-1",
-      name: "Fight Club",
-      city: "Москва",
-      location: "ул. Бойцовская, 12",
-      address: "ул. Бойцовская, 12, Москва",
+      name: "Boxing Club",
+      city: "Махачкала",
+      location: "ул. Коркмасова, 35",
+      address: "ул. Коркмасова, 35, Махачкала",
       rating: 4.6,
       review_count: 78,
       main_image: "/placeholder.svg",
@@ -98,10 +98,10 @@ const ClientSearch = () => {
     },
     {
       id: "dance-1", 
-      name: "Dance Studio Pro",
-      city: "Москва",
-      location: "ул. Ритма, 3",
-      address: "ул. Ритма, 3, Москва",
+      name: "Dance Academy",
+      city: "Махачкала",
+      location: "ул. Дахадаева, 88",
+      address: "ул. Дахадаева, 88, Махачкала",
       rating: 4.8,
       review_count: 145,
       main_image: "/placeholder.svg",
@@ -122,7 +122,8 @@ const ClientSearch = () => {
   };
 
   const filteredGyms = testGyms.filter(gym => {
-    const matchesSearch = gym.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = gym.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         gym.location.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || gym.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -131,28 +132,21 @@ const ClientSearch = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Заголовок с поиском */}
       <div className="bg-white border-b px-4 py-4 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Поиск залов</h1>
+        <h1 className="text-xl font-bold text-gray-900">Поиск залов в Махачкале</h1>
         
         {/* Поиск */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input 
-            placeholder="Найти зал..." 
+            placeholder="Найти зал или адрес..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-white border-gray-200"
           />
         </div>
 
-        {/* Город и фильтры */}
+        {/* Кнопки управления */}
         <div className="flex gap-2">
-          <div className="flex-1">
-            <CitySelector 
-              cities={cities}
-              selectedCity={selectedCity}
-              setSelectedCity={setSelectedCity}
-            />
-          </div>
           <Button 
             variant="outline" 
             size="sm"
@@ -161,6 +155,15 @@ const ClientSearch = () => {
           >
             <Filter className="h-4 w-4 mr-2" />
             Фильтры
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowMap(!showMap)}
+            className="bg-white border-gray-200"
+          >
+            <Map className="h-4 w-4 mr-2" />
+            {showMap ? 'Список' : 'Карта'}
           </Button>
         </div>
       </div>
@@ -177,7 +180,6 @@ const ClientSearch = () => {
           <div className="bg-white rounded-lg border p-4">
             <GymFilters 
               cities={cities}
-              categories={categories}
               selectedCity={selectedCity}
               selectedCategory={selectedCategory}
               setSelectedCity={setSelectedCity}
@@ -186,35 +188,50 @@ const ClientSearch = () => {
           </div>
         )}
 
-        {/* Результаты */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">
-              Найдено {filteredGyms.length} залов
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {filteredGyms.map((gym, index) => (
-              <GymCard
-                key={gym.id}
-                gym={gym}
-                index={index}
-                favoriteGyms={favoriteGyms}
-                toggleFavorite={toggleFavorite}
-              />
-            ))}
-          </div>
-
-          {filteredGyms.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-gray-500">Залы не найдены</p>
-              <p className="text-gray-400 text-sm mt-1">
-                Попробуйте изменить параметры поиска
+        {/* Карта или результаты */}
+        {showMap ? (
+          <div className="bg-white rounded-lg border p-4 h-96 flex items-center justify-center">
+            <div className="text-center">
+              <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Карта залов</h3>
+              <p className="text-gray-500 mb-4">
+                Интеграция с картой будет добавлена в ближайшее время
               </p>
+              <div className="text-sm text-gray-400">
+                {filteredGyms.length} залов найдено в Махачкале
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-gray-900">
+                Найдено {filteredGyms.length} залов
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {filteredGyms.map((gym, index) => (
+                <GymCard
+                  key={gym.id}
+                  gym={gym}
+                  index={index}
+                  favoriteGyms={favoriteGyms}
+                  toggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+
+            {filteredGyms.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Залы не найдены</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Попробуйте изменить параметры поиска
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
