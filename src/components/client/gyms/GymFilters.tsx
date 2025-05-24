@@ -13,7 +13,6 @@ interface GymFiltersProps {
 
 export const GymFilters = ({
   cities,
-  categories,
   selectedCity,
   selectedCategory,
   setSelectedCity,
@@ -31,9 +30,8 @@ export const GymFilters = ({
       
       <div className="mb-2 overflow-auto w-full no-scrollbar">
         <CategoryTabs
-          categories={categories}
           selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+          onCategoryChange={setSelectedCategory}
         />
       </div>
     </div>
