@@ -1,6 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DarkCard } from "@/components/ui/dark-card";
@@ -10,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 
 const ClientGymDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user, is_authenticated } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("info");
   const [isFavorite, setIsFavorite] = useState(false);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
@@ -41,6 +45,49 @@ const ClientGymDetail = () => {
     ],
   };
 
+  // Мутация для создания бронирования
+  const createBookingMutation = useMutation({
+    mutationFn: async (bookingData: {
+      date: Date;
+      gymId: string;
+    }) => {
+      if (!user?.id) {
+        throw new Error("Необходимо войти в систему");
+      }
+
+      const { error } = await supabase
+        .from("bookings")
+        .insert({
+          user_id: user.id,
+          gym_id: bookingData.gymId,
+          date_time: bookingData.date.toISOString(),
+          status: "confirmed"
+        });
+
+      if (error) {
+        console.error("Booking creation error:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Бронирование создано!",
+        description: "Ваше посещение успешно забронировано. Проверьте раздел 'Расписание'.",
+      });
+      setShowBookingDialog(false);
+      // Обновляем кэш расписания
+      queryClient.invalidateQueries({ queryKey: ["user-bookings"] });
+    },
+    onError: (error) => {
+      console.error("Error creating booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: "Не удалось создать бронирование. Попробуйте снова.",
+      });
+    },
+  });
+
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
@@ -52,15 +99,30 @@ const ClientGymDetail = () => {
   };
 
   const handleBookingSubmit = (bookingData: any) => {
-    console.log("Booking submitted:", bookingData);
-    setShowBookingDialog(false);
-    toast({
-      title: "Бронирование успешно!",
-      description: "Ваше посещение забронировано. Проверьте раздел 'Расписание'.",
+    if (!is_authenticated) {
+      toast({
+        variant: "destructive",
+        title: "Необходимо войти в систему",
+        description: "Для бронирования необходимо войти в систему",
+      });
+      return;
+    }
+
+    createBookingMutation.mutate({
+      date: bookingData.date,
+      gymId: id!,
     });
   };
 
   const handleBookVisit = () => {
+    if (!is_authenticated) {
+      toast({
+        variant: "destructive",
+        title: "Необходимо войти в систему",
+        description: "Для бронирования необходимо войти в систему",
+      });
+      return;
+    }
     setShowBookingDialog(true);
   };
 
@@ -177,10 +239,11 @@ const ClientGymDetail = () => {
             
             <Button 
               onClick={handleBookVisit}
+              disabled={createBookingMutation.isPending}
               className="w-full transition-all hover:scale-105 animate-on-load opacity-0 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700" 
               style={{ transform: 'translateY(10px)', transitionDelay: '700ms' }}
             >
-              Забронировать посещение
+              {createBookingMutation.isPending ? "Бронирование..." : "Забронировать посещение"}
             </Button>
           </div>
         </TabsContent>
