@@ -58,7 +58,7 @@ const ClientGymDetail = () => {
   };
 
   const onBookingSubmit = (bookingData: any) => {
-    handleBookingSubmit(bookingData, id!);
+    handleBookingSubmit(bookingData, id!, gymData.name);
     setShowBookingDialog(false);
   };
 
