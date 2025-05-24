@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Gym } from "@/types";
 import { GymCard } from "./GymCard";
+import { YandexMap } from "../maps/YandexMap";
 import { Loader2 } from "lucide-react";
 
 interface GymResultsProps {
@@ -13,6 +14,9 @@ interface GymResultsProps {
   toggleFavorite: (gymId: string) => void;
   refetch: () => void;
   resetFilters: () => void;
+  showMap?: boolean;
+  selectedGym?: Gym | null;
+  onGymSelect?: (gym: Gym) => void;
 }
 
 export const GymResults = ({
@@ -23,9 +27,12 @@ export const GymResults = ({
   favoriteGyms,
   toggleFavorite,
   refetch,
-  resetFilters
+  resetFilters,
+  showMap = false,
+  selectedGym,
+  onGymSelect
 }: GymResultsProps) => {
-  console.log("GymResults rendering with:", { gyms, isLoading, isError, gymsCount: gyms?.length });
+  console.log("GymResults rendering with:", { gyms, isLoading, isError, gymsCount: gyms?.length, showMap });
   
   if (isLoading) {
     return (
@@ -56,6 +63,24 @@ export const GymResults = ({
         <Button onClick={resetFilters} className="transition-all hover:scale-105 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
           Сбросить фильтры
         </Button>
+      </div>
+    );
+  }
+
+  if (showMap) {
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-slate-400 mb-4">
+          Найдено залов: {gyms.length}
+        </div>
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
+          <YandexMap 
+            gyms={gyms} 
+            selectedGym={selectedGym}
+            onGymSelect={onGymSelect}
+            height="500px"
+          />
+        </div>
       </div>
     );
   }

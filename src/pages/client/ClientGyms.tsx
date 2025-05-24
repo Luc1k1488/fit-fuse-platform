@@ -7,6 +7,7 @@ import { Gym } from "@/types";
 import { GymSearchForm } from "@/components/client/gyms/GymSearchForm";
 import { GymFilters } from "@/components/client/gyms/GymFilters";
 import { GymResults } from "@/components/client/gyms/GymResults";
+import { MapToggleButton } from "@/components/client/maps/MapToggleButton";
 
 const ClientGyms = () => {
   const { toast } = useToast();
@@ -15,6 +16,8 @@ const ClientGyms = () => {
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [minRating, setMinRating] = useState([0]);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
+  const [showMap, setShowMap] = useState(false);
+  const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
 
   const cities = ["Махачкала"];
 
@@ -65,7 +68,6 @@ const ClientGyms = () => {
     }
   };
 
-  // React Query для получения данных
   const { 
     data: gyms, 
     isLoading, 
@@ -101,7 +103,11 @@ const ClientGyms = () => {
     setTimeout(() => refetch(), 100);
   };
 
-  console.log("Current state:", { gyms, isLoading, isError, gymsCount: gyms?.length });
+  const handleGymSelect = (gym: Gym) => {
+    setSelectedGym(gym);
+  };
+
+  console.log("Current state:", { gyms, isLoading, isError, gymsCount: gyms?.length, showMap });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
@@ -129,6 +135,13 @@ const ClientGyms = () => {
             setSelectedCity={setSelectedCity}
             setSelectedCategory={setSelectedCategory}
           />
+
+          <div className="mt-4 flex justify-end">
+            <MapToggleButton 
+              showMap={showMap} 
+              onToggle={() => setShowMap(!showMap)} 
+            />
+          </div>
         </div>
 
         {/* Results */}
@@ -141,6 +154,9 @@ const ClientGyms = () => {
           toggleFavorite={toggleFavorite}
           refetch={refetch}
           resetFilters={resetFilters}
+          showMap={showMap}
+          selectedGym={selectedGym}
+          onGymSelect={handleGymSelect}
         />
       </div>
     </div>

@@ -1,12 +1,13 @@
-
 import { useState } from "react";
-import { Search, Filter, Map } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GymCard } from "@/components/client/gyms/GymCard";
 import { CategoryTabs } from "@/components/client/gyms/CategoryTabs";
 import { CitySelector } from "@/components/client/gyms/CitySelector";
 import { GymFilters } from "@/components/client/gyms/GymFilters";
+import { YandexMap } from "@/components/client/maps/YandexMap";
+import { MapToggleButton } from "@/components/client/maps/MapToggleButton";
 import { Gym } from "@/types";
 
 const ClientSearch = () => {
@@ -16,6 +17,7 @@ const ClientSearch = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
+  const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
 
   const cities = ["Махачкала"];
 
@@ -121,6 +123,10 @@ const ClientSearch = () => {
     );
   };
 
+  const handleGymSelect = (gym: Gym) => {
+    setSelectedGym(gym);
+  };
+
   const filteredGyms = testGyms.filter(gym => {
     const matchesSearch = gym.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          gym.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -156,15 +162,10 @@ const ClientSearch = () => {
             <Filter className="h-4 w-4 mr-2" />
             Фильтры
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowMap(!showMap)}
-            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-slate-300 hover:bg-slate-700/50"
-          >
-            <Map className="h-4 w-4 mr-2" />
-            {showMap ? 'Список' : 'Карта'}
-          </Button>
+          <MapToggleButton 
+            showMap={showMap} 
+            onToggle={() => setShowMap(!showMap)} 
+          />
         </div>
       </div>
 
@@ -190,17 +191,13 @@ const ClientSearch = () => {
 
         {/* Карта или результаты */}
         {showMap ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-4 h-96 flex items-center justify-center">
-            <div className="text-center">
-              <Map className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">Карта залов</h3>
-              <p className="text-slate-400 mb-4">
-                Интеграция с картой будет добавлена в ближайшее время
-              </p>
-              <div className="text-sm text-slate-500">
-                {filteredGyms.length} залов найдено в Махачкале
-              </div>
-            </div>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+            <YandexMap 
+              gyms={filteredGyms} 
+              selectedGym={selectedGym}
+              onGymSelect={handleGymSelect}
+              height="500px"
+            />
           </div>
         ) : (
           <div>
