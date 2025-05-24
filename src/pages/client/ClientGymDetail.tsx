@@ -62,7 +62,7 @@ const ClientGymDetail = () => {
         user_id: user.id,
         gym_id: gymUuid,
         date_time: bookingData.date.toISOString(),
-        status: "confirmed"
+        status: "booked"
       });
 
       const { error } = await supabase
@@ -71,7 +71,7 @@ const ClientGymDetail = () => {
           user_id: user.id,
           gym_id: gymUuid, // Используем сгенерированный UUID
           date_time: bookingData.date.toISOString(),
-          status: "confirmed"
+          status: "booked"
         });
 
       if (error) {

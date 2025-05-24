@@ -108,15 +108,16 @@ const ClientSchedule = () => {
 
   const now = new Date();
   const upcomingBookings = bookings?.filter(booking => 
-    booking.status === "confirmed" && new Date(booking.date_time) > now
+    (booking.status === "booked" || booking.status === "confirmed") && new Date(booking.date_time) > now
   ) || [];
   
   const completedBookings = bookings?.filter(booking => 
-    booking.status === "confirmed" && new Date(booking.date_time) <= now
+    (booking.status === "booked" || booking.status === "confirmed") && new Date(booking.date_time) <= now
   ) || [];
 
   const getTypeColor = (status: string) => {
     switch(status) {
+      case "booked":
       case "confirmed": return "bg-green-500/20 text-green-300 border-green-500/30";
       case "cancelled": return "bg-red-500/20 text-red-300 border-red-500/30";
       case "pending": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
@@ -133,7 +134,7 @@ const ClientSchedule = () => {
             <p className="text-sm text-slate-300 font-medium">{booking.gym?.name || "Зал"}</p>
           </div>
           <Badge className={getTypeColor(booking.status)}>
-            {booking.status === "confirmed" && "Подтверждено"}
+            {(booking.status === "booked" || booking.status === "confirmed") && "Подтверждено"}
             {booking.status === "cancelled" && "Отменено"}
             {booking.status === "pending" && "Ожидание"}
           </Badge>
@@ -154,7 +155,7 @@ const ClientSchedule = () => {
           <p className="text-sm text-slate-400">
             ID: {booking.id.slice(0, 8)}...
           </p>
-          {showCancelButton && booking.status === "confirmed" && (
+          {showCancelButton && (booking.status === "booked" || booking.status === "confirmed") && (
             <Button 
               size="sm" 
               variant="outline" 
