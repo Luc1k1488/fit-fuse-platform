@@ -29,7 +29,7 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
       plan.current ? 'border-primary' : 'border-gray-200 hover:border-gray-300'
     }`}>
       {plan.popular && (
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-10">
           <Badge className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
             <Star className="h-3 w-3 mr-1" />
             Популярный
@@ -38,7 +38,7 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
       )}
 
       {plan.bonus && (
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 z-10">
           <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
             <Gift className="h-3 w-3 mr-1" />
             {plan.bonus}
@@ -46,15 +46,19 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
         </div>
       )}
       
-      <div className="h-40 overflow-hidden bg-gradient-to-br from-purple-500 to-blue-600">
-        <div className="w-full h-full flex items-center justify-center text-white">
-          <div className="text-center">
-            <div className="text-4xl font-bold mb-2">{plan.price}</div>
-            <div className="text-lg opacity-90">{plan.period}</div>
-            {plan.dailyCost && (
-              <div className="text-sm opacity-75 mt-1">{plan.dailyCost}</div>
-            )}
-          </div>
+      <div className="h-40 overflow-hidden relative">
+        <img 
+          src={plan.image} 
+          alt={plan.name}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div className="absolute bottom-4 left-4 text-white">
+          <div className="text-2xl font-bold">{plan.price}</div>
+          <div className="text-sm opacity-90">{plan.period}</div>
+          {plan.dailyCost && (
+            <div className="text-xs opacity-75">{plan.dailyCost}</div>
+          )}
         </div>
       </div>
       
@@ -78,7 +82,7 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
           className={`w-full ${
             plan.current 
               ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
-              : 'bg-primary hover:bg-primary/90'
+              : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white'
           }`}
           disabled={plan.current}
         >

@@ -32,7 +32,7 @@ const ClientSubscription = () => {
       price: "12 600 ₽",
       period: "90 дней",
       dailyCost: "~140 ₽/день",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop",
       description: "Идеально для начинающих",
       features: [
         "Доступ к 20+ фитнес-центрам Махачкалы",
@@ -49,7 +49,7 @@ const ClientSubscription = () => {
       period: "180 дней",
       dailyCost: "~130 ₽/день",
       bonus: "+2 месяца",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop",
       description: "Лучший выбор для активных",
       features: [
         "Доступ ко всем фитнес-центрам",
@@ -69,7 +69,7 @@ const ClientSubscription = () => {
       period: "365 дней", 
       dailyCost: "~115 ₽/день",
       bonus: "+3 месяца",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
       description: "Максимальная выгода на весь год",
       features: [
         "Доступ ко всем залам города",
@@ -93,7 +93,7 @@ const ClientSubscription = () => {
   const currentPlan = subscriptionPlans.find(plan => plan.current);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Заголовок */}
       <div className="bg-white border-b px-4 py-6">
         <h1 className="text-2xl font-bold text-gray-900">Абонементы</h1>
@@ -149,24 +149,24 @@ const ClientSubscription = () => {
         {/* Преимущества */}
         <Card className="bg-white border-gray-200">
           <CardHeader>
-            <CardTitle className="text-lg">Преимущества GoodFit</CardTitle>
+            <CardTitle className="text-lg text-gray-900">Преимущества GoodFit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">20+</div>
+                <div className="text-2xl font-bold text-purple-600">20+</div>
                 <div className="text-sm text-gray-600">Фитнес-центров</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">24/7</div>
+                <div className="text-2xl font-bold text-purple-600">24/7</div>
                 <div className="text-sm text-gray-600">Поддержка</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">∞</div>
+                <div className="text-2xl font-bold text-purple-600">∞</div>
                 <div className="text-sm text-gray-600">Посещения</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">4.9</div>
+                <div className="text-2xl font-bold text-purple-600">4.9</div>
                 <div className="text-sm text-gray-600">Рейтинг</div>
               </div>
             </div>
@@ -180,8 +180,8 @@ const ClientSubscription = () => {
           {selectedPlan && (
             <>
               <DialogHeader>
-                <DialogTitle>{selectedPlan.name}</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-gray-900">{selectedPlan.name}</DialogTitle>
+                <DialogDescription className="text-gray-600">
                   {selectedPlan.description}
                 </DialogDescription>
               </DialogHeader>
@@ -219,7 +219,7 @@ const ClientSubscription = () => {
 
                 <div className="flex gap-2 pt-4">
                   <Button 
-                    className="flex-1"
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
                     disabled={selectedPlan.current}
                   >
                     {selectedPlan.current ? 'Текущий план' : 'Выбрать план'}
@@ -227,6 +227,7 @@ const ClientSubscription = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => setShowDetails(false)}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Закрыть
                   </Button>
