@@ -25,8 +25,8 @@ interface SubscriptionCardProps {
 
 export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
   return (
-    <Card className={`relative overflow-hidden bg-white border-2 transition-all ${
-      plan.current ? 'border-primary' : 'border-gray-200 hover:border-gray-300'
+    <Card className={`relative overflow-hidden bg-slate-800/50 backdrop-blur-sm border-2 transition-all ${
+      plan.current ? 'border-purple-500' : 'border-slate-700 hover:border-slate-600'
     }`}>
       {plan.popular && (
         <div className="absolute top-4 right-4 z-10">
@@ -52,7 +52,7 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
           alt={plan.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
         <div className="absolute bottom-4 left-4 text-white">
           <div className="text-2xl font-bold">{plan.price}</div>
           <div className="text-sm opacity-90">{plan.period}</div>
@@ -64,15 +64,15 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
       
       <CardContent className="p-6">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-          <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
+          <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+          <p className="text-slate-300 text-sm mb-3">{plan.description}</p>
         </div>
 
         <ul className="space-y-2 mb-6">
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-center text-sm">
-              <Check className="h-4 w-4 text-green-600 mr-2 shrink-0" />
-              <span className="text-gray-700">{feature}</span>
+              <Check className="h-4 w-4 text-green-400 mr-2 shrink-0" />
+              <span className="text-slate-300">{feature}</span>
             </li>
           ))}
         </ul>
@@ -81,7 +81,7 @@ export const SubscriptionCard = ({ plan, onClick }: SubscriptionCardProps) => {
           onClick={() => onClick(plan)}
           className={`w-full ${
             plan.current 
-              ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
+              ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
               : 'bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white'
           }`}
           disabled={plan.current}

@@ -32,7 +32,7 @@ const ClientSubscription = () => {
       price: "12 600 ₽",
       period: "90 дней",
       dailyCost: "~140 ₽/день",
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop",
+      image: "/lovable-uploads/bb0c2851-6eff-40a2-a54f-c9a65ead1bd5.png",
       description: "Идеально для начинающих",
       features: [
         "Доступ к 20+ фитнес-центрам Махачкалы",
@@ -49,7 +49,7 @@ const ClientSubscription = () => {
       period: "180 дней",
       dailyCost: "~130 ₽/день",
       bonus: "+2 месяца",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop",
+      image: "/lovable-uploads/8db128cf-3b0f-4c54-be92-4bf321043432.png",
       description: "Лучший выбор для активных",
       features: [
         "Доступ ко всем фитнес-центрам",
@@ -69,7 +69,7 @@ const ClientSubscription = () => {
       period: "365 дней", 
       dailyCost: "~115 ₽/день",
       bonus: "+3 месяца",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
+      image: "/lovable-uploads/bd36db69-79f0-48aa-9708-6af2092d6fb6.png",
       description: "Максимальная выгода на весь год",
       features: [
         "Доступ ко всем залам города",
@@ -93,17 +93,17 @@ const ClientSubscription = () => {
   const currentPlan = subscriptionPlans.find(plan => plan.current);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Заголовок */}
-      <div className="bg-white border-b px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900">Абонементы</h1>
-        <p className="text-gray-600 mt-1">Выберите подходящий тариф</p>
+      <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
+        <h1 className="text-2xl font-bold text-white">Абонементы</h1>
+        <p className="text-slate-300 mt-1">Выберите подходящий тариф</p>
       </div>
 
       <div className="px-4 py-6 space-y-6">
         {/* Текущий абонемент */}
         {currentPlan && (
-          <Card className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+          <Card className="bg-gradient-to-r from-purple-500 to-blue-600 text-white border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
@@ -131,7 +131,7 @@ const ClientSubscription = () => {
 
         {/* Доступные планы */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-white mb-4">
             Доступные тарифы
           </h2>
           
@@ -147,27 +147,27 @@ const ClientSubscription = () => {
         </div>
 
         {/* Преимущества */}
-        <Card className="bg-white border-gray-200">
+        <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
           <CardHeader>
-            <CardTitle className="text-lg text-gray-900">Преимущества GoodFit</CardTitle>
+            <CardTitle className="text-lg text-white">Преимущества GoodFit</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">20+</div>
-                <div className="text-sm text-gray-600">Фитнес-центров</div>
+                <div className="text-2xl font-bold text-purple-400">20+</div>
+                <div className="text-sm text-slate-300">Фитнес-центров</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">24/7</div>
-                <div className="text-sm text-gray-600">Поддержка</div>
+                <div className="text-2xl font-bold text-purple-400">24/7</div>
+                <div className="text-sm text-slate-300">Поддержка</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">∞</div>
-                <div className="text-sm text-gray-600">Посещения</div>
+                <div className="text-2xl font-bold text-purple-400">∞</div>
+                <div className="text-sm text-slate-300">Посещения</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">4.9</div>
-                <div className="text-sm text-gray-600">Рейтинг</div>
+                <div className="text-2xl font-bold text-purple-400">4.9</div>
+                <div className="text-sm text-slate-300">Рейтинг</div>
               </div>
             </div>
           </CardContent>
@@ -176,41 +176,41 @@ const ClientSubscription = () => {
 
       {/* Диалог с деталями плана */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-slate-800 border-slate-700">
           {selectedPlan && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-gray-900">{selectedPlan.name}</DialogTitle>
-                <DialogDescription className="text-gray-600">
+                <DialogTitle className="text-white">{selectedPlan.name}</DialogTitle>
+                <DialogDescription className="text-slate-300">
                   {selectedPlan.description}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div className="flex items-baseline">
-                  <span className="text-3xl font-bold text-gray-900">
+                  <span className="text-3xl font-bold text-white">
                     {selectedPlan.price}
                   </span>
-                  <span className="text-gray-500 ml-1">
+                  <span className="text-slate-400 ml-1">
                     /{selectedPlan.period}
                   </span>
                 </div>
 
                 {selectedPlan.bonus && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <div className="text-green-800 font-medium">
+                  <div className="bg-green-900/30 border border-green-700/50 rounded-lg p-3">
+                    <div className="text-green-300 font-medium">
                       🎁 Бонус: {selectedPlan.bonus}
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">
+                  <h4 className="font-medium text-white mb-2">
                     Что входит в тариф:
                   </h4>
                   <ul className="space-y-1">
                     {selectedPlan.features.map((feature, index) => (
-                      <li key={index} className="text-sm text-gray-600">
+                      <li key={index} className="text-sm text-slate-300">
                         • {feature}
                       </li>
                     ))}
@@ -227,7 +227,7 @@ const ClientSubscription = () => {
                   <Button 
                     variant="outline" 
                     onClick={() => setShowDetails(false)}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
                   >
                     Закрыть
                   </Button>
