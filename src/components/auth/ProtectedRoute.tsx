@@ -12,29 +12,32 @@ const ProtectedRoute = ({ children, roles = [] }: ProtectedRouteProps) => {
   const { user, is_authenticated, is_loading } = useAuth();
   const location = useLocation();
 
-  // Show loading state
+  // Показываем загрузку только если идет проверка аутентификации
   if (is_loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-gray-600">Проверка доступа...</p>
+        </div>
       </div>
     );
   }
 
-  // If not authenticated, redirect to login
+  // Если не аутентифицирован, редиректим на логин
   if (!is_authenticated) {
-    // Redirect to admin login if trying to access admin routes
+    // Для админских роутов - на админский логин
     if (location.pathname.startsWith("/admin")) {
       return <Navigate to="/admin/login" state={{ from: location }} replace />;
     }
     
-    // Redirect to regular login for client app routes
+    // Для клиентских роутов - на обычный логин
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If roles are specified, check if the user has the required role
+  // Если указаны роли и пользователь не имеет нужной роли
   if (roles.length > 0 && user && !roles.includes(user.role)) {
-    // Redirect based on user role
+    // Редиректим на соответствующую роли страницу
     if (user.role === "admin") {
       return <Navigate to="/admin/dashboard" replace />;
     } else if (user.role === "partner") {

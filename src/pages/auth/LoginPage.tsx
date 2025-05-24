@@ -15,31 +15,13 @@ const LoginPage = () => {
   const { login, user, is_loading } = useAuth();
   const navigate = useNavigate();
 
-  // Show loading only while initial auth state is being determined
+  // Простая проверка загрузки без редиректов
   if (is_loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-600">Проверка авторизации...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If user is already authenticated, redirect immediately
-  if (user) {
-    console.log("User already authenticated, redirecting...", user.role);
-    if (user.role === "admin") {
-      navigate("/admin/dashboard", { replace: true });
-    } else {
-      navigate("/app", { replace: true });
-    }
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-600">Перенаправление...</p>
+          <p className="text-gray-600">Загрузка...</p>
         </div>
       </div>
     );
@@ -58,8 +40,16 @@ const LoginPage = () => {
       console.log("Login result:", result);
       
       if (result.success) {
-        console.log("Login successful, waiting for auth state update");
-        // Auth context will handle the redirect via onAuthStateChange
+        console.log("Login successful, redirecting based on user role");
+        // Ждем немного для обновления состояния пользователя
+        setTimeout(() => {
+          const currentUser = JSON.parse(localStorage.getItem('sb-ymxqdmojesynwqbiiscd-auth-token') || '{}')?.user;
+          if (currentUser?.user_metadata?.role === "admin" || currentUser?.role === "admin") {
+            navigate("/admin/dashboard", { replace: true });
+          } else {
+            navigate("/app", { replace: true });
+          }
+        }, 500);
       } else {
         console.error("Login failed:", result.error);
         setError(result.error || "Неверный email или пароль");
