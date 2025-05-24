@@ -151,19 +151,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data.user) {
-        const userProfile = await fetchOrCreateUserProfile(data.user);
-        
-        if (!userProfile) {
-          return { success: false, error: "Ошибка загрузки профиля пользователя" };
-        }
-
-        const userWithValidatedRole: User = {
-          ...userProfile,
-          role: validateRole(userProfile.role)
-        };
-
-        setUser(userWithValidatedRole);
-        setUserRole(validateRole(userProfile.role));
         return { success: true };
       }
 
@@ -208,6 +195,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Logout function
   const logout = async () => {
     try {
+      console.log("Logging out user");
       await supabase.auth.signOut();
       setUser(null);
       setUserRole(null);
@@ -226,28 +214,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Auth state changed:", event, session?.user?.id);
         
         if (session?.user) {
-          const userProfile = await fetchOrCreateUserProfile(session.user);
-          
-          if (userProfile) {
-            const userWithValidatedRole: User = {
-              ...userProfile,
-              role: validateRole(userProfile.role)
-            };
+          // Use setTimeout to avoid blocking the auth state change callback
+          setTimeout(async () => {
+            const userProfile = await fetchOrCreateUserProfile(session.user);
+            
+            if (userProfile) {
+              const userWithValidatedRole: User = {
+                ...userProfile,
+                role: validateRole(userProfile.role)
+              };
 
-            setUser(userWithValidatedRole);
-            setUserRole(validateRole(userProfile.role));
-            console.log("User authenticated with role:", userProfile.role);
-          } else {
-            setUser(null);
-            setUserRole(null);
-          }
+              setUser(userWithValidatedRole);
+              setUserRole(validateRole(userProfile.role));
+              console.log("User authenticated with role:", userProfile.role);
+            } else {
+              setUser(null);
+              setUserRole(null);
+            }
+            
+            setLoading(false);
+          }, 0);
         } else {
           console.log("No user session");
           setUser(null);
           setUserRole(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 

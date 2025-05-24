@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
@@ -15,36 +15,26 @@ const LoginPage = () => {
   const { login, user, is_loading } = useAuth();
   const navigate = useNavigate();
 
-  // Handle redirection after auth state changes
-  useEffect(() => {
-    // Only redirect if user is authenticated and we're not currently loading
-    if (!is_loading && user) {
-      console.log("User authenticated, redirecting based on role:", user.role);
-      
-      if (user.role === "admin") {
-        console.log("Redirecting to admin dashboard");
-        navigate("/admin/dashboard", { replace: true });
-      } else {
-        console.log("Redirecting to user app");
-        navigate("/app", { replace: true });
-      }
-    }
-  }, [user, is_loading, navigate]);
-
-  // Show loading only while auth state is being determined
+  // Show loading only while initial auth state is being determined
   if (is_loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-600">Загрузка...</p>
+          <p className="text-gray-600">Проверка авторизации...</p>
         </div>
       </div>
     );
   }
 
-  // If user is already authenticated, don't show the form
+  // If user is already authenticated, redirect immediately
   if (user) {
+    console.log("User already authenticated, redirecting...", user.role);
+    if (user.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+    } else {
+      navigate("/app", { replace: true });
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center space-y-4">
@@ -68,8 +58,8 @@ const LoginPage = () => {
       console.log("Login result:", result);
       
       if (result.success) {
-        console.log("Login successful, auth context will handle redirect");
-        // Don't navigate here - let useEffect handle it
+        console.log("Login successful, waiting for auth state update");
+        // Auth context will handle the redirect via onAuthStateChange
       } else {
         console.error("Login failed:", result.error);
         setError(result.error || "Неверный email или пароль");
