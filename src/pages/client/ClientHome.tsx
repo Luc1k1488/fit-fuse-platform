@@ -14,6 +14,7 @@ const ClientHome = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Запрос популярных залов (топ-6 по рейтингу)
@@ -83,6 +84,18 @@ const ClientHome = () => {
     "Пилатес",
     "Кроссфит"
   ];
+
+  const toggleFavorite = (gymId: string) => {
+    setFavoriteGyms(prev => 
+      prev.includes(gymId) 
+        ? prev.filter(id => id !== gymId)
+        : [...prev, gymId]
+    );
+    toast({
+      title: favoriteGyms.includes(gymId) ? "Удалено из избранного" : "Добавлено в избранное",
+      description: "Изменения сохранены",
+    });
+  };
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -162,8 +175,14 @@ const ClientHome = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {popularGyms?.map((gym) => (
-                <GymCard key={gym.id} gym={gym} />
+              {popularGyms?.map((gym, index) => (
+                <GymCard 
+                  key={gym.id} 
+                  gym={gym} 
+                  index={index}
+                  favoriteGyms={favoriteGyms}
+                  toggleFavorite={toggleFavorite}
+                />
               ))}
             </div>
           )}
@@ -198,8 +217,14 @@ const ClientHome = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {allGyms?.map((gym) => (
-                <GymCard key={gym.id} gym={gym} />
+              {allGyms?.map((gym, index) => (
+                <GymCard 
+                  key={gym.id} 
+                  gym={gym} 
+                  index={index}
+                  favoriteGyms={favoriteGyms}
+                  toggleFavorite={toggleFavorite}
+                />
               ))}
             </div>
           )}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Search, MapPin, Star, Filter, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const ClientSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,6 +18,8 @@ const ClientSearch = () => {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [ratingRange, setRatingRange] = useState([0]);
   const [showFilters, setShowFilters] = useState(false);
+  const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const { data: gyms, isLoading } = useQuery({
     queryKey: ["search-gyms", searchQuery, selectedCity, selectedCategory, selectedFeatures, ratingRange],
@@ -83,6 +85,18 @@ const ClientSearch = () => {
         ? prev.filter(f => f !== feature)
         : [...prev, feature]
     );
+  };
+
+  const toggleFavorite = (gymId: string) => {
+    setFavoriteGyms(prev => 
+      prev.includes(gymId) 
+        ? prev.filter(id => id !== gymId)
+        : [...prev, gymId]
+    );
+    toast({
+      title: favoriteGyms.includes(gymId) ? "Удалено из избранного" : "Добавлено в избранное",
+      description: "Изменения сохранены",
+    });
   };
 
   const clearAllFilters = () => {
@@ -238,8 +252,14 @@ const ClientSearch = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {gyms?.map((gym) => (
-                  <GymCard key={gym.id} gym={gym} />
+                {gyms?.map((gym, index) => (
+                  <GymCard 
+                    key={gym.id} 
+                    gym={gym} 
+                    index={index}
+                    favoriteGyms={favoriteGyms}
+                    toggleFavorite={toggleFavorite}
+                  />
                 ))}
               </div>
             )}

@@ -107,6 +107,13 @@ const ClientSchedule = () => {
     }
   };
 
+  const switchToAvailableTab = () => {
+    const availableTab = document.querySelector('[data-value="available"]') as HTMLElement;
+    if (availableTab) {
+      availableTab.click();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6">
@@ -155,7 +162,7 @@ const ClientSchedule = () => {
             <Tabs defaultValue="bookings" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="bookings">Мои бронирования</TabsTrigger>
-                <TabsTrigger value="available">Доступные занятия</TabsTrigger>
+                <TabsTrigger value="available" data-value="available">Доступные занятия</TabsTrigger>
               </TabsList>
 
               {/* Мои бронирования */}
@@ -185,7 +192,7 @@ const ClientSchedule = () => {
                     <CardContent className="p-6 text-center">
                       <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500 mb-4">На эту дату нет бронирований</p>
-                      <Button variant="outline" onClick={() => document.querySelector('[data-value="available"]')?.click()}>
+                      <Button variant="outline" onClick={switchToAvailableTab}>
                         Посмотреть доступные занятия
                       </Button>
                     </CardContent>

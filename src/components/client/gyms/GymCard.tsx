@@ -7,12 +7,18 @@ import { Gym } from "@/types";
 
 interface GymCardProps {
   gym: Gym;
-  index: number;
-  favoriteGyms: string[];
-  toggleFavorite: (gymId: string) => void;
+  index?: number;
+  favoriteGyms?: string[];
+  toggleFavorite?: (gymId: string) => void;
 }
 
-export const GymCard = ({ gym, index, favoriteGyms, toggleFavorite }: GymCardProps) => {
+export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: GymCardProps) => {
+  const handleFavoriteClick = () => {
+    if (toggleFavorite) {
+      toggleFavorite(gym.id);
+    }
+  };
+
   return (
     <DarkCard 
       key={gym.id} 
@@ -36,14 +42,16 @@ export const GymCard = ({ gym, index, favoriteGyms, toggleFavorite }: GymCardPro
           <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
           <span className="text-xs font-medium">{gym.rating || 0}</span>
         </div>
-        <button 
-          onClick={() => toggleFavorite(gym.id)} 
-          className="absolute top-2 left-2 bg-black/30 backdrop-blur-sm p-2 rounded-full transition-all hover:bg-black/50"
-        >
-          <Heart 
-            className={`h-4 w-4 ${favoriteGyms.includes(gym.id) ? 'text-red-500 fill-red-500' : 'text-white'} transition-colors`} 
-          />
-        </button>
+        {toggleFavorite && (
+          <button 
+            onClick={handleFavoriteClick} 
+            className="absolute top-2 left-2 bg-black/30 backdrop-blur-sm p-2 rounded-full transition-all hover:bg-black/50"
+          >
+            <Heart 
+              className={`h-4 w-4 ${favoriteGyms.includes(gym.id) ? 'text-red-500 fill-red-500' : 'text-white'} transition-colors`} 
+            />
+          </button>
+        )}
       </div>
       <div className="p-4">
         <h3 className="font-medium text-lg text-white">{gym.name}</h3>
