@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,7 +22,9 @@ import MobileLoginPage from "./pages/auth/MobileLoginPage";
 
 // Client app routes
 import ClientLayout from "./layouts/ClientLayout";
-import ClientDashboard from "./pages/client/ClientDashboard";
+import ClientHome from "./pages/client/ClientHome";
+import ClientSearch from "./pages/client/ClientSearch";
+import ClientSchedule from "./pages/client/ClientSchedule";
 import ClientGyms from "./pages/client/ClientGyms";
 import ClientGymDetail from "./pages/client/ClientGymDetail";
 import ClientClasses from "./pages/client/ClientClasses";
@@ -69,16 +70,16 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isMobileView, setIsMobileView] = useState(false);
   
-  // Check if we're on a mobile device
+  // Check if we're on a mobile device or force mobile layout
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobileView(window.innerWidth < 768);
+      // Всегда используем мобильный интерфейс для /app маршрутов
+      const isAppRoute = window.location.pathname.startsWith('/app');
+      const isActuallyMobile = window.innerWidth < 768;
+      setIsMobileView(isAppRoute || isActuallyMobile);
     };
     
-    // Первичная проверка
     checkIsMobile();
-    
-    // Слушаем изменения размера экрана
     window.addEventListener('resize', checkIsMobile);
     
     // Проверяем, запускается ли приложение через Capacitor
@@ -121,16 +122,12 @@ const App = () => {
               
               {/* Client app routes - protected */}
               <Route path="/app" element={<ClientLayout />}>
-                <Route index element={<ClientDashboard />} />
-                <Route path="gyms" element={<ClientGyms />} />
-                <Route path="gyms/:id" element={<ClientGymDetail />} />
-                <Route path="classes" element={<ClientClasses />} />
-                <Route path="bookings" element={<ClientBookings />} />
-                <Route path="profile" element={<ClientProfile />} />
+                <Route index element={<ClientHome />} />
+                <Route path="search" element={<ClientSearch />} />
+                <Route path="schedule" element={<ClientSchedule />} />
                 <Route path="subscription" element={<ClientSubscription />} />
-                <Route path="support" element={<ClientSupport />} />
-                <Route path="calendar" element={<ClientCalendar />} />
-                <Route path="progress" element={<ClientProgress />} />
+                <Route path="profile" element={<ClientProfile />} />
+                <Route path="gyms/:id" element={<ClientGymDetail />} />
               </Route>
               
               {/* Admin routes - protected */}

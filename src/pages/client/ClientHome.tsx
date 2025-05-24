@@ -104,26 +104,26 @@ const ClientHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="w-full max-w-full px-3 py-4 space-y-6">
         
         {/* Поиск и быстрые фильтры */}
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1 relative">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="w-full relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Поиск по названию, району или адресу..."
+                placeholder="Поиск по названию, району..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="px-3 py-2 border rounded-md bg-white"
+                className="flex-1 px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-sm"
               >
                 <option value="">Все города</option>
                 {filterOptions?.cities.map((city) => (
@@ -134,7 +134,8 @@ const ClientHome = () => {
               <Button
                 variant={selectedCity || selectedCategory || searchQuery ? "default" : "outline"}
                 onClick={clearFilters}
-                size="icon"
+                size="sm"
+                className="shrink-0"
               >
                 <Filter className="h-4 w-4" />
               </Button>
@@ -147,7 +148,7 @@ const ClientHome = () => {
               <Badge
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
-                className="cursor-pointer"
+                className="cursor-pointer text-xs px-2 py-1"
                 onClick={() => setSelectedCategory(selectedCategory === category ? "" : category)}
               >
                 {category}
@@ -158,24 +159,24 @@ const ClientHome = () => {
 
         {/* Популярные залы */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 px-1">
             <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-            <h2 className="text-2xl font-bold">Популярные залы</h2>
+            <h2 className="text-xl font-bold dark:text-white">Популярные залы</h2>
           </div>
           
           {popularLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4 animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            <div className="grid grid-cols-1 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
+                  <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {popularGyms?.map((gym, index) => (
+            <div className="grid grid-cols-1 gap-4">
+              {popularGyms?.slice(0, 6).map((gym, index) => (
                 <GymCard 
                   key={gym.id} 
                   gym={gym} 
@@ -190,25 +191,25 @@ const ClientHome = () => {
 
         {/* Все залы */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Все фитнес-залы</h2>
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-xl font-bold dark:text-white">Все фитнес-залы</h2>
             <div className="text-sm text-gray-500">
-              {allGyms?.length || 0} {allGyms?.length === 1 ? 'зал' : 'залов'} найдено
+              {allGyms?.length || 0} {allGyms?.length === 1 ? 'зал' : 'залов'}
             </div>
           </div>
           
           {allLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4 animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            <div className="grid grid-cols-1 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
+                  <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                 </div>
               ))}
             </div>
           ) : allGyms?.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg">
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
               <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">Залы не найдены</p>
               <Button onClick={clearFilters} variant="outline">
@@ -216,7 +217,7 @@ const ClientHome = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {allGyms?.map((gym, index) => (
                 <GymCard 
                   key={gym.id} 
