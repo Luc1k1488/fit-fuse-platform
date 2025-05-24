@@ -29,8 +29,8 @@ const ClientSearch = () => {
       address: "пр. Имама Шамиля, 48, Махачкала",
       rating: 4.8,
       review_count: 124,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"],
+      main_image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"],
       features: ["Кроссфит", "Функциональные тренировки", "Групповые занятия"],
       category: "crossfit",
       owner_id: null,
@@ -44,8 +44,8 @@ const ClientSearch = () => {
       address: "ул. Ярагского, 65, Махачкала",
       rating: 4.9,
       review_count: 200,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"],
+      main_image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"],
       features: ["Тренажеры", "Свободные веса", "Кардиозона"],
       category: "gym",
       owner_id: null,
@@ -59,8 +59,8 @@ const ClientSearch = () => {
       address: "пр. Петра I, 25, Махачкала",
       rating: 4.7,
       review_count: 89,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"],
+      main_image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"],
       features: ["25-метровый бассейн", "Аквааэробика", "Сауна"],
       category: "pool",
       owner_id: null,
@@ -74,8 +74,8 @@ const ClientSearch = () => {
       address: "ул. Гагарина, 17, Махачкала",
       rating: 4.9,
       review_count: 156,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"], 
+      main_image: "https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1588286840104-8957b019727f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"], 
       features: ["Хатха-йога", "Виньяса", "Медитация"],
       category: "yoga",
       owner_id: null,
@@ -89,8 +89,8 @@ const ClientSearch = () => {
       address: "ул. Коркмасова, 35, Махачкала",
       rating: 4.6,
       review_count: 78,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"],
+      main_image: "https://images.unsplash.com/photo-1517637382994-f02da38c6728?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1517637382994-f02da38c6728?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"],
       features: ["Бокс", "Кикбоксинг", "Персональные тренировки"],
       category: "boxing",
       owner_id: null,
@@ -104,8 +104,8 @@ const ClientSearch = () => {
       address: "ул. Дахадаева, 88, Махачкала",
       rating: 4.8,
       review_count: 145,
-      main_image: "/placeholder.svg",
-      images: ["/placeholder.svg"],
+      main_image: "https://images.unsplash.com/photo-1562771379-eafdca7a02f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
+      images: ["https://images.unsplash.com/photo-1562771379-eafdca7a02f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"],
       features: ["Современные танцы", "Хип-хоп", "Латина"],
       category: "dance",
       owner_id: null,
@@ -129,10 +129,10 @@ const ClientSearch = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Заголовок с поиском */}
-      <div className="bg-white border-b px-4 py-4 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">Поиск залов в Махачкале</h1>
+      <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-4 space-y-4">
+        <h1 className="text-xl font-bold text-white">Поиск залов в Махачкале</h1>
         
         {/* Поиск */}
         <div className="relative">
@@ -141,7 +141,7 @@ const ClientSearch = () => {
             placeholder="Найти зал или адрес..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white border-gray-200"
+            className="pl-10 bg-slate-800/50 backdrop-blur-sm border-slate-700 text-white placeholder:text-slate-400"
           />
         </div>
 
@@ -151,7 +151,7 @@ const ClientSearch = () => {
             variant="outline" 
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="bg-white border-gray-200"
+            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-slate-300 hover:bg-slate-700/50"
           >
             <Filter className="h-4 w-4 mr-2" />
             Фильтры
@@ -160,7 +160,7 @@ const ClientSearch = () => {
             variant="outline" 
             size="sm"
             onClick={() => setShowMap(!showMap)}
-            className="bg-white border-gray-200"
+            className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-slate-300 hover:bg-slate-700/50"
           >
             <Map className="h-4 w-4 mr-2" />
             {showMap ? 'Список' : 'Карта'}
@@ -177,7 +177,7 @@ const ClientSearch = () => {
 
         {/* Фильтры */}
         {showFilters && (
-          <div className="bg-white rounded-lg border p-4">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-4">
             <GymFilters 
               cities={cities}
               selectedCity={selectedCity}
@@ -190,14 +190,14 @@ const ClientSearch = () => {
 
         {/* Карта или результаты */}
         {showMap ? (
-          <div className="bg-white rounded-lg border p-4 h-96 flex items-center justify-center">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-4 h-96 flex items-center justify-center">
             <div className="text-center">
-              <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Карта залов</h3>
-              <p className="text-gray-500 mb-4">
+              <Map className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">Карта залов</h3>
+              <p className="text-slate-400 mb-4">
                 Интеграция с картой будет добавлена в ближайшее время
               </p>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-slate-500">
                 {filteredGyms.length} залов найдено в Махачкале
               </div>
             </div>
@@ -205,7 +205,7 @@ const ClientSearch = () => {
         ) : (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-gray-900">
+              <h2 className="text-lg font-medium text-white">
                 Найдено {filteredGyms.length} залов
               </h2>
             </div>
@@ -224,8 +224,8 @@ const ClientSearch = () => {
 
             {filteredGyms.length === 0 && (
               <div className="text-center py-8">
-                <p className="text-gray-500">Залы не найдены</p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-slate-400">Залы не найдены</p>
+                <p className="text-slate-500 text-sm mt-1">
                   Попробуйте изменить параметры поиска
                 </p>
               </div>

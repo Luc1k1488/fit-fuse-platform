@@ -17,7 +17,6 @@ const ClientGyms = () => {
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
 
   const cities = ["Махачкала"];
-  const categories = ["Все", "crossfit", "gym", "pool", "yoga", "boxing", "dance"];
 
   // Функция получения залов
   const fetchGyms = async () => {
@@ -105,43 +104,45 @@ const ClientGyms = () => {
   console.log("Current state:", { gyms, isLoading, isError, gymsCount: gyms?.length });
 
   return (
-    <div className="pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
       {/* Page header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold animate-fade-in">Найти залы в Махачкале</h1>
-        <p className="text-gray-600 dark:text-gray-400 animate-fade-in animation-delay-200">
+      <div className="mb-4 bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
+        <h1 className="text-2xl font-bold text-white animate-fade-in">Найти залы в Махачкале</h1>
+        <p className="text-slate-300 animate-fade-in animation-delay-200">
           Выберите спортзал или студию для тренировки
         </p>
       </div>
 
-      {/* Search and filters */}
-      <div className="bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-800 mb-6 animate-fade-in animation-delay-400">
-        <GymSearchForm 
-          searchQuery={searchQuery} 
-          setSearchQuery={setSearchQuery} 
-          onSearch={handleSearch} 
-        />
-        
-        <GymFilters 
-          cities={cities}
-          selectedCity={selectedCity}
-          selectedCategory={selectedCategory}
-          setSelectedCity={setSelectedCity}
-          setSelectedCategory={setSelectedCategory}
+      <div className="px-4">
+        {/* Search and filters */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-4 rounded-xl shadow-lg mb-6 animate-fade-in animation-delay-400">
+          <GymSearchForm 
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            onSearch={handleSearch} 
+          />
+          
+          <GymFilters 
+            cities={cities}
+            selectedCity={selectedCity}
+            selectedCategory={selectedCategory}
+            setSelectedCity={setSelectedCity}
+            setSelectedCategory={setSelectedCategory}
+          />
+        </div>
+
+        {/* Results */}
+        <GymResults
+          gyms={gyms}
+          isLoading={isLoading}
+          isError={isError}
+          error={error as Error}
+          favoriteGyms={favoriteGyms}
+          toggleFavorite={toggleFavorite}
+          refetch={refetch}
+          resetFilters={resetFilters}
         />
       </div>
-
-      {/* Results */}
-      <GymResults
-        gyms={gyms}
-        isLoading={isLoading}
-        isError={isError}
-        error={error as Error}
-        favoriteGyms={favoriteGyms}
-        toggleFavorite={toggleFavorite}
-        refetch={refetch}
-        resetFilters={resetFilters}
-      />
     </div>
   );
 };

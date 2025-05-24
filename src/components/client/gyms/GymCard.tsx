@@ -22,7 +22,7 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
 
   return (
     <Card 
-      className="overflow-hidden animate-fade-in bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full" 
+      className="overflow-hidden animate-fade-in bg-slate-800/50 backdrop-blur-sm border-slate-700 w-full" 
       style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="relative h-40 overflow-hidden group w-full">
@@ -33,13 +33,13 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-            <p className="text-gray-400 text-sm">Нет изображения</p>
+          <div className="w-full h-full bg-slate-700 flex items-center justify-center">
+            <p className="text-slate-400 text-sm">Нет изображения</p>
           </div>
         )}
-        <div className="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 rounded-full px-2 py-1 flex items-center">
+        <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center">
           <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 mr-1" />
-          <span className="text-xs font-medium dark:text-white">{gym.rating || 0}</span>
+          <span className="text-xs font-medium text-white">{gym.rating || 0}</span>
         </div>
         {toggleFavorite && (
           <button 
@@ -53,14 +53,14 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
         )}
       </div>
       <CardContent className="p-4 w-full">
-        <h3 className="font-medium text-lg text-gray-900 dark:text-white mb-1 truncate">{gym.name}</h3>
-        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+        <h3 className="font-medium text-lg text-white mb-1 truncate">{gym.name}</h3>
+        <div className="flex items-center text-sm text-slate-300 mb-2">
           <MapPin className="h-3 w-3 mr-1 shrink-0" />
           <span className="truncate">
             {gym.location ? `${gym.location}, ${gym.city}` : gym.city}
           </span>
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+        <div className="text-sm text-slate-400 mb-3">
           <p>{gym.review_count} отзывов</p>
         </div>
         {gym.features && gym.features.length > 0 && (
@@ -68,23 +68,23 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
             {gym.features.slice(0, 3).map((feature, index) => (
               <span 
                 key={index} 
-                className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs"
+                className="px-2 py-1 bg-slate-700 text-slate-300 rounded-full text-xs"
               >
                 {feature}
               </span>
             ))}
             {gym.features.length > 3 && (
-              <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs">
+              <span className="px-2 py-1 bg-slate-700 text-slate-300 rounded-full text-xs">
                 +{gym.features.length - 3}
               </span>
             )}
           </div>
         )}
         <div className="flex gap-2 w-full">
-          <Button asChild className="flex-1 text-sm">
+          <Button asChild className="flex-1 text-sm bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
             <Link to={`/app/gyms/${gym.id}`}>Подробнее</Link>
           </Button>
-          <Button variant="outline" size="sm" className="shrink-0 text-sm">
+          <Button variant="outline" size="sm" className="shrink-0 text-sm border-slate-600 text-slate-300 hover:bg-slate-700">
             Расписание
           </Button>
         </div>
