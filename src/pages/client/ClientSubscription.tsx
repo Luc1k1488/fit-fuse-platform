@@ -1,195 +1,228 @@
+
 import { useState } from "react";
+import { CreditCard, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, CreditCard, AlertTriangle, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { SubscriptionCard } from "@/components/client/subscriptions/SubscriptionCard";
+
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  image: string;
+  description: string;
+  features: string[];
+  popular?: boolean;
+  current?: boolean;
+}
 
 const ClientSubscription = () => {
-  const [activeTab, setActiveTab] = useState("current");
-  
-  // Тестовые данные для подписки
-  const subscriptionData = {
-    currentPlan: {
-      name: "Премиум",
-      status: "active",
-      startDate: "2023-05-01",
-      endDate: "2023-08-01",
-      price: "2990₽",
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Тестовые данные абонементов с изображениями
+  const subscriptionPlans: SubscriptionPlan[] = [
+    {
+      id: "basic",
+      name: "Базовый",
+      price: "1 990 ₽",
       period: "месяц",
+      image: "/placeholder.svg",
+      description: "Идеально для начинающих",
       features: [
-        "Доступ ко всем залам-партнерам",
-        "До 30 посещений в месяц",
-        "Групповые тренировки",
-        "Бесплатная заморозка до 14 дней",
-        "Специальные цены на персональные тренировки"
-      ],
-      daysLeft: 47,
-      totalDays: 92,
-      visitsUsed: 18,
-      visitsTotal: 30
+        "Доступ к 20 фитнес-центрам",
+        "3 посещения в неделю",
+        "Стандартные часы посещения",
+        "Онлайн-бронирование",
+        "Базовая поддержка"
+      ]
     },
-    history: [
-      {
-        id: "sub-1",
-        name: "Стандарт",
-        startDate: "2023-02-01",
-        endDate: "2023-05-01",
-        price: "1790₽",
-        period: "месяц",
-        status: "completed"
-      },
-      {
-        id: "sub-2",
-        name: "Пробный",
-        startDate: "2023-01-15",
-        endDate: "2023-02-01",
-        price: "990₽",
-        period: "2 недели",
-        status: "completed"
-      }
-    ]
+    {
+      id: "standard",
+      name: "Стандарт",
+      price: "3 990 ₽", 
+      period: "месяц",
+      image: "/placeholder.svg",
+      description: "Оптимальный выбор для регулярных тренировок",
+      features: [
+        "Доступ к 50 фитнес-центрам",
+        "5 посещений в неделю",
+        "Расширенные часы посещения",
+        "Приоритетное бронирование",
+        "Персональный тренер (1 раз в месяц)",
+        "Доступ к групповым занятиям",
+        "Приоритетная поддержка"
+      ],
+      popular: true
+    },
+    {
+      id: "premium",
+      name: "Премиум",
+      price: "7 990 ₽",
+      period: "месяц", 
+      image: "/placeholder.svg",
+      description: "Максимальные возможности для энтузиастов",
+      features: [
+        "Безлимитный доступ ко всем фитнес-центрам",
+        "Неограниченное количество посещений",
+        "Круглосуточный доступ",
+        "VIP-бронирование",
+        "Персональный тренер (4 раза в месяц)",
+        "Доступ ко всем групповым занятиям",
+        "Премиум-поддержка 24/7",
+        "Эксклюзивные мастер-классы",
+        "Специальные скидки"
+      ],
+      current: true
+    }
+  ];
+
+  const handlePlanClick = (plan: SubscriptionPlan) => {
+    setSelectedPlan(plan);
+    setShowDetails(true);
   };
-  
-  // Форматирование даты
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('ru-RU', options);
-  };
-  
+
+  const currentPlan = subscriptionPlans.find(plan => plan.current);
+
   return (
-    <div className="pb-16">
-      <h1 className="text-2xl font-bold mb-4">Моя подписка</h1>
-      
-      <Tabs defaultValue="current" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-2 mb-6">
-          <TabsTrigger value="current">Текущая</TabsTrigger>
-          <TabsTrigger value="history">История</TabsTrigger>
-        </TabsList>
-        
-        {/* Текущая подписка */}
-        <TabsContent value="current">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Заголовок */}
+      <div className="bg-white border-b px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900">Абонементы</h1>
+        <p className="text-gray-600 mt-1">Выберите подходящий тариф</p>
+      </div>
+
+      <div className="px-4 py-6 space-y-6">
+        {/* Текущий абонемент */}
+        {currentPlan && (
+          <Card className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Текущий абонемент
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-bold">{subscriptionData.currentPlan.name}</h2>
-                  <p className="text-gray-500">{subscriptionData.currentPlan.price} / {subscriptionData.currentPlan.period}</p>
+                  <h3 className="text-xl font-bold">{currentPlan.name}</h3>
+                  <p className="text-white/90">{currentPlan.description}</p>
+                  <p className="text-white/80 mt-2">
+                    <Clock className="h-4 w-4 inline mr-1" />
+                    Действует до: 15.03.2025
+                  </p>
                 </div>
-                <Badge>{subscriptionData.currentPlan.status === "active" ? "Активна" : "Неактивна"}</Badge>
-              </div>
-              
-              <div className="space-y-4 mb-6">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Срок действия:</span>
-                    <span className="font-medium">
-                      {formatDate(subscriptionData.currentPlan.startDate)} - {formatDate(subscriptionData.currentPlan.endDate)}
-                    </span>
-                  </div>
-                  <Progress value={(subscriptionData.currentPlan.daysLeft / subscriptionData.currentPlan.totalDays) * 100} />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Осталось {subscriptionData.currentPlan.daysLeft} дней</span>
-                    <span>{Math.round((subscriptionData.currentPlan.daysLeft / subscriptionData.currentPlan.totalDays) * 100)}%</span>
-                  </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">{currentPlan.price}</p>
+                  <p className="text-white/80">/{currentPlan.period}</p>
                 </div>
-                
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Посещения в этом месяце:</span>
-                    <span className="font-medium">
-                      {subscriptionData.currentPlan.visitsUsed} / {subscriptionData.currentPlan.visitsTotal}
-                    </span>
-                  </div>
-                  <Progress value={(subscriptionData.currentPlan.visitsUsed / subscriptionData.currentPlan.visitsTotal) * 100} />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Использовано {subscriptionData.currentPlan.visitsUsed} из {subscriptionData.currentPlan.visitsTotal}</span>
-                    <span>{Math.round((subscriptionData.currentPlan.visitsUsed / subscriptionData.currentPlan.visitsTotal) * 100)}%</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="font-medium mb-2">Включено в подписку:</h3>
-                <ul className="space-y-2">
-                  {subscriptionData.currentPlan.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="space-y-3">
-                <Button className="w-full">Продлить подписку</Button>
-                <Button variant="outline" className="w-full">Приостановить подписку</Button>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        {/* История подписок */}
-        <TabsContent value="history">
+        )}
+
+        {/* Доступные планы */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Доступные тарифы
+          </h2>
+          
           <div className="space-y-4">
-            {subscriptionData.history.map((subscription) => (
-              <Card key={subscription.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{subscription.name}</h3>
-                      <p className="text-gray-600 text-sm">{subscription.price} / {subscription.period}</p>
-                    </div>
-                    <Badge variant="outline">
-                      {subscription.status === "completed" ? "Завершена" : "Отменена"}
-                    </Badge>
-                  </div>
-                  
-                  <div className="mt-3 flex items-center text-sm text-gray-600">
-                    <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                    <span>
-                      {formatDate(subscription.startDate)} - {formatDate(subscription.endDate)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+            {subscriptionPlans.map((plan) => (
+              <SubscriptionCard
+                key={plan.id}
+                plan={plan}
+                onClick={handlePlanClick}
+              />
             ))}
           </div>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex">
-        <AlertTriangle className="text-amber-500 h-5 w-5 mr-3 flex-shrink-0" />
-        <div>
-          <p className="text-sm text-amber-800 font-medium">Автопродление активно</p>
-          <p className="text-xs text-amber-600 mt-1">
-            Ваша подписка будет автоматически продлена 1 августа 2023. Вы можете отключить автопродление в настройках оплаты.
-          </p>
         </div>
-      </div>
-      
-      <div className="mt-6">
-        <h2 className="text-lg font-medium mb-3">Способы оплаты</h2>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="mr-3 bg-gray-100 p-2 rounded-md">
-                  <CreditCard className="h-5 w-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="font-medium">•••• 4832</p>
-                  <p className="text-xs text-gray-500">Истекает 06/25</p>
-                </div>
+
+        {/* Преимущества */}
+        <Card className="bg-white border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-lg">Преимущества GoodFit</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">100+</div>
+                <div className="text-sm text-gray-600">Фитнес-центров</div>
               </div>
-              <Button variant="ghost" size="sm">
-                Изменить
-              </Button>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">24/7</div>
+                <div className="text-sm text-gray-600">Поддержка</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">∞</div>
+                <div className="text-sm text-gray-600">Гибкость</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">4.9</div>
+                <div className="text-sm text-gray-600">Рейтинг</div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Диалог с деталями плана */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="bg-white">
+          {selectedPlan && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedPlan.name}</DialogTitle>
+                <DialogDescription>
+                  {selectedPlan.description}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold text-gray-900">
+                    {selectedPlan.price}
+                  </span>
+                  <span className="text-gray-500 ml-1">
+                    /{selectedPlan.period}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Что входит в тариф:
+                  </h4>
+                  <ul className="space-y-1">
+                    {selectedPlan.features.map((feature, index) => (
+                      <li key={index} className="text-sm text-gray-600">
+                        • {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    className="flex-1"
+                    disabled={selectedPlan.current}
+                  >
+                    {selectedPlan.current ? 'Текущий план' : 'Выбрать план'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowDetails(false)}
+                  >
+                    Закрыть
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

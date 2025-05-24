@@ -1,328 +1,199 @@
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/auth_context";
 import { 
   User, 
-  Mail, 
-  Phone, 
-  Camera, 
+  Settings, 
+  CreditCard, 
   Bell, 
-  Lock, 
+  Shield, 
+  HelpCircle, 
   LogOut,
+  Edit,
+  Camera,
+  Phone,
+  Mail,
+  MapPin,
   Calendar
 } from "lucide-react";
-import { FitnessTrackerConnect } from "@/components/integrations/FitnessTrackerConnect";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 const ClientProfile = () => {
-  const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState("personal");
-  
-  // Состояния для формы с личными данными
-  const [formData, setFormData] = useState({
-    name: user?.name || "Иван Петров",
-    email: user?.email || "ivan@example.com",
-    phone: user?.phone || "+7 (999) 123-45-67",
-    birthdate: "1990-01-15",
-    gender: "Мужской"
+  const [user] = useState({
+    name: "Анна Петрова",
+    email: "anna.petrova@email.com",
+    phone: "+7 (999) 123-45-67",
+    location: "Москва",
+    joinDate: "Январь 2024",
+    avatar: "/placeholder.svg"
   });
-  
-  // Состояния для настроек уведомлений
-  const [notificationSettings, setNotificationSettings] = useState({
-    email: true,
-    push: true,
-    sms: false,
-    marketing: false
+
+  const [stats] = useState({
+    totalWorkouts: 45,
+    currentStreak: 7,
+    favoriteGyms: 12,
+    monthlyGoal: 20
   });
-  
-  // Обработчик изменения полей формы
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  // Обработчик изменения переключателей уведомлений
-  const handleToggleChange = (setting: keyof typeof notificationSettings) => {
-    setNotificationSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }));
-  };
-  
-  // Обработчик сохранения профиля
-  const handleSaveProfile = () => {
-    // В реальном приложении здесь был бы запрос к API
-    toast.success("Профиль успешно обновлен");
-  };
-  
-  // Обработчик сохранения настроек уведомлений
-  const handleSaveNotifications = () => {
-    toast.success("Настройки уведомлений обновлены");
-  };
-  
-  // Обработчик выхода из аккаунта
-  const handleLogout = () => {
-    logout();
-  };
+
+  const menuItems = [
+    {
+      icon: User,
+      title: "Персональные данные",
+      description: "Имя, телефон, email",
+      action: () => console.log("Edit profile")
+    },
+    {
+      icon: CreditCard,
+      title: "Способы оплаты",
+      description: "Карты и платежные методы",
+      action: () => console.log("Payment methods")
+    },
+    {
+      icon: Bell,
+      title: "Уведомления",
+      description: "Настройки push-уведомлений",
+      action: () => console.log("Notifications")
+    },
+    {
+      icon: Shield,
+      title: "Приватность и безопасность",
+      description: "Пароль, двухфакторная аутентификация",
+      action: () => console.log("Security")
+    },
+    {
+      icon: HelpCircle,
+      title: "Помощь и поддержка",
+      description: "FAQ, связаться с поддержкой",
+      action: () => console.log("Help")
+    }
+  ];
 
   return (
-    <div className="pb-16">
-      <h1 className="text-2xl font-bold mb-4">Мой профиль</h1>
-      
-      {/* Аватар и основная информация */}
-      <div className="flex items-center mb-6">
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden">
-            {user?.profile_image ? (
-              <img 
-                src={user.profile_image} 
-                alt="Аватар" 
-                className="w-full h-full object-cover" 
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-400" />
-              </div>
-            )}
-          </div>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="absolute -bottom-2 -right-2 rounded-full p-1 bg-white"
-          >
-            <Camera className="h-4 w-4" />
-            <span className="sr-only">Изменить фото</span>
-          </Button>
-        </div>
-        <div className="ml-4">
-          <p className="font-medium text-lg">{formData.name}</p>
-          <p className="text-gray-500 text-sm">Активная подписка: Премиум</p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Заголовок */}
+      <div className="bg-white border-b px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900">Профиль</h1>
       </div>
-      
-      {/* Вкладки для настроек профиля */}
-      <Tabs defaultValue="personal" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 mb-6">
-          <TabsTrigger value="personal">Профиль</TabsTrigger>
-          <TabsTrigger value="notifications">Уведомления</TabsTrigger>
-          <TabsTrigger value="security">Безопасность</TabsTrigger>
-        </TabsList>
-        
-        {/* Вкладка с личными данными */}
-        <TabsContent value="personal" className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">ФИО</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Телефон</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="birthdate">Дата рождения</Label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="birthdate"
-                name="birthdate"
-                type="date"
-                value={formData.birthdate}
-                onChange={handleInputChange}
-                className="pl-10"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Пол</Label>
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                type="button"
-                variant={formData.gender === "Мужской" ? "default" : "outline"}
-                onClick={() => setFormData(prev => ({ ...prev, gender: "Мужской" }))}
-                className="justify-center"
-              >
-                Мужской
-              </Button>
-              <Button 
-                type="button"
-                variant={formData.gender === "Женский" ? "default" : "outline"}
-                onClick={() => setFormData(prev => ({ ...prev, gender: "Женский" }))}
-                className="justify-center"
-              >
-                Женский
+
+      <div className="px-4 py-6 space-y-6">
+        {/* Профиль пользователя */}
+        <Card className="bg-white border-gray-200">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback className="text-lg">
+                    {user.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  size="sm"
+                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
+                  <Badge className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                    Премиум
+                  </Badge>
+                </div>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <Mail className="h-3 w-3" />
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" />
+                    <span>{user.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{user.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    <span>С нами с {user.joinDate}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <Button variant="outline" size="sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Редактировать
               </Button>
             </div>
-          </div>
-          
-          <Button onClick={handleSaveProfile} className="w-full mt-4">
-            Сохранить изменения
-          </Button>
-        </TabsContent>
-        
-        {/* Вкладка с уведомлениями */}
-        <TabsContent value="notifications" className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Email уведомления</p>
-                <p className="text-gray-500 text-sm">Получать уведомления на почту</p>
+          </CardContent>
+        </Card>
+
+        {/* Статистика */}
+        <Card className="bg-white border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-lg">Ваша статистика</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-primary">{stats.totalWorkouts}</div>
+                <div className="text-sm text-gray-600">Всего тренировок</div>
               </div>
-              <Switch 
-                checked={notificationSettings.email} 
-                onCheckedChange={() => handleToggleChange('email')} 
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Push-уведомления</p>
-                <p className="text-gray-500 text-sm">Получать уведомления в приложении</p>
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{stats.currentStreak}</div>
+                <div className="text-sm text-gray-600">Дней подряд</div>
               </div>
-              <Switch 
-                checked={notificationSettings.push} 
-                onCheckedChange={() => handleToggleChange('push')} 
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">SMS уведомления</p>
-                <p className="text-gray-500 text-sm">Получать уведомления по SMS</p>
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{stats.favoriteGyms}</div>
+                <div className="text-sm text-gray-600">Избранные залы</div>
               </div>
-              <Switch 
-                checked={notificationSettings.sms} 
-                onCheckedChange={() => handleToggleChange('sms')} 
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Маркетинговые рассылки</p>
-                <p className="text-gray-500 text-sm">Получать новости и специальные предложения</p>
-              </div>
-              <Switch 
-                checked={notificationSettings.marketing} 
-                onCheckedChange={() => handleToggleChange('marketing')} 
-              />
-            </div>
-          </div>
-          
-          <Button onClick={handleSaveNotifications} className="w-full mt-4">
-            Сохранить настройки
-          </Button>
-        </TabsContent>
-        
-        {/* Вкладка с безопасностью */}
-        <TabsContent value="security" className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Текущий пароль</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                <Input
-                  id="current-password"
-                  type="password"
-                  className="pl-10"
-                  placeholder="••••••••"
-                />
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">{stats.monthlyGoal}</div>
+                <div className="text-sm text-gray-600">Цель на месяц</div>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Новый пароль</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                <Input
-                  id="new-password"
-                  type="password"
-                  className="pl-10"
-                  placeholder="••••••••"
-                />
+          </CardContent>
+        </Card>
+
+        {/* Настройки */}
+        <Card className="bg-white border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-lg">Настройки</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {menuItems.map((item, index) => (
+              <div key={index}>
+                <button
+                  onClick={item.action}
+                  className="w-full p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors"
+                >
+                  <item.icon className="h-5 w-5 text-gray-400" />
+                  <div className="flex-1 text-left">
+                    <div className="font-medium text-gray-900">{item.title}</div>
+                    <div className="text-sm text-gray-500">{item.description}</div>
+                  </div>
+                  <div className="text-gray-400">→</div>
+                </button>
+                {index < menuItems.length - 1 && <Separator />}
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Подтвердите пароль</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  className="pl-10"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-            
-            <Button className="w-full">
-              Обновить пароль
-            </Button>
-            
-            <div className="pt-4 border-t mt-4">
-              <Button 
-                variant="destructive" 
-                className="w-full" 
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Выйти из аккаунта
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      <div>
-        <h2 className="text-lg font-bold mb-3">Интеграции с устройствами</h2>
-        <FitnessTrackerConnect 
-          onConnect={(data) => {
-            console.log("Устройство подключено:", data);
-            // Здесь можно обработать данные с подключенного устройства
-          }} 
-        />
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Выход */}
+        <Card className="bg-white border-gray-200">
+          <CardContent className="p-0">
+            <button className="w-full p-4 flex items-center space-x-3 text-red-600 hover:bg-red-50 transition-colors">
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Выйти из аккаунта</span>
+            </button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

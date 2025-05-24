@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -93,12 +94,14 @@ const App = () => {
     };
   }, []);
 
-  // Принудительно установить светлую тему для мобильного интерфейса
+  // Устанавливаем тему в зависимости от маршрута
   useEffect(() => {
     const isAppRoute = window.location.pathname.startsWith('/app');
     if (isAppRoute) {
+      // Светлая тема для мобильного приложения
       document.documentElement.classList.remove('dark');
     } else {
+      // Темная тема для публичных страниц
       document.documentElement.classList.add('dark');
     }
   }, [window.location.pathname]);

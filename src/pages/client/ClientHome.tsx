@@ -1,89 +1,102 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Gym } from "@/types";
-import { GymCard } from "@/components/client/gyms/GymCard";
-import { Input } from "@/components/ui/input";
+import { Search, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Search, Star, MapPin, Filter, CreditCard } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { GymCard } from "@/components/client/gyms/GymCard";
+import { CategoryTabs } from "@/components/client/gyms/CategoryTabs";
+import { ActiveSubscriptionCard } from "@/components/client/subscriptions/ActiveSubscriptionCard";
+import { Gym } from "@/types";
 
 const ClientHome = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [favoriteGyms, setFavoriteGyms] = useState<string[]>([]);
-  const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  // Запрос популярных залов (топ-6 по рейтингу)
-  const { data: popularGyms, isLoading: popularLoading } = useQuery({
-    queryKey: ["popular-gyms"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gyms")
-        .select("*")
-        .order("rating", { ascending: false })
-        .order("review_count", { ascending: false })
-        .limit(6);
-      
-      if (error) throw error;
-      return data as Gym[];
+  // Тестовый активный абонемент
+  const activeSubscription = {
+    id: "1",
+    name: "Премиум",
+    type: "Безлимитный доступ",
+    image: "/placeholder.svg",
+    status: "Активен",
+    expiryDate: "15.03.2025",
+    remainingVisits: undefined
+  };
+
+  // Тестовые данные залов по категориям
+  const testGyms: Gym[] = [
+    // Кроссфит
+    {
+      id: "crossfit-1",
+      name: "CrossFit Arena",
+      city: "Москва",
+      location: "ул. Спортивная, 15",
+      rating: 4.8,
+      review_count: 124,
+      main_image: "/placeholder.svg",
+      features: ["Кроссфит", "Функциональные тренировки", "Групповые занятия"],
+      category: "crossfit"
     },
-  });
-
-  // Запрос всех залов с фильтрами
-  const { data: allGyms, isLoading: allLoading } = useQuery({
-    queryKey: ["all-gyms", searchQuery, selectedCity, selectedCategory],
-    queryFn: async () => {
-      let query = supabase.from("gyms").select("*");
-      
-      if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,address.ilike.%${searchQuery}%`);
-      }
-      
-      if (selectedCity) {
-        query = query.eq("city", selectedCity);
-      }
-      
-      if (selectedCategory) {
-        query = query.eq("category", selectedCategory);
-      }
-      
-      const { data, error } = await query.order("rating", { ascending: false });
-      
-      if (error) throw error;
-      return data as Gym[];
+    // Тренажерный зал
+    {
+      id: "gym-1", 
+      name: "Сергей",
+      city: "Москва",
+      location: "ул. Фитнес, 10",
+      rating: 4.9,
+      review_count: 200,
+      main_image: "/placeholder.svg",
+      features: ["Тренажеры", "Свободные веса", "Кардиозона"],
+      category: "gym"
     },
-  });
-
-  // Получаем уникальные города и категории для фильтров
-  const { data: filterOptions } = useQuery({
-    queryKey: ["filter-options"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gyms")
-        .select("city, category");
-      
-      if (error) throw error;
-      
-      const cities = [...new Set(data.map(gym => gym.city).filter(Boolean))];
-      const categories = [...new Set(data.map(gym => gym.category).filter(Boolean))];
-      
-      return { cities, categories };
+    // Бассейн
+    {
+      id: "pool-1",
+      name: "Aqua Center",
+      city: "Москва", 
+      location: "ул. Водная, 5",
+      rating: 4.7,
+      review_count: 89,
+      main_image: "/placeholder.svg",
+      features: ["25-метровый бассейн", "Аквааэробика", "Сауна"],
+      category: "pool"
     },
-  });
-
-  const categories = [
-    "Фитнес-клуб",
-    "Тренажерный зал", 
-    "Йога-студия",
-    "Бокс",
-    "Танцы",
-    "Пилатес",
-    "Кроссфит"
+    // Йога
+    {
+      id: "yoga-1",
+      name: "Zen Yoga Studio",
+      city: "Москва",
+      location: "ул. Гармония, 7",
+      rating: 4.9,
+      review_count: 156,
+      main_image: "/placeholder.svg", 
+      features: ["Хатха-йога", "Виньяса", "Медитация"],
+      category: "yoga"
+    },
+    // Бокс
+    {
+      id: "box-1",
+      name: "Fight Club",
+      city: "Москва",
+      location: "ул. Бойцовская, 12",
+      rating: 4.6,
+      review_count: 78,
+      main_image: "/placeholder.svg",
+      features: ["Бокс", "Кикбоксинг", "Персональные тренировки"],
+      category: "boxing"
+    },
+    // Танцы
+    {
+      id: "dance-1", 
+      name: "Dance Studio Pro",
+      city: "Москва",
+      location: "ул. Ритма, 3",
+      rating: 4.8,
+      review_count: 145,
+      main_image: "/placeholder.svg",
+      features: ["Современные танцы", "Хип-хоп", "Латина"],
+      category: "dance"
+    }
   ];
 
   const toggleFavorite = (gymId: string) => {
@@ -92,164 +105,73 @@ const ClientHome = () => {
         ? prev.filter(id => id !== gymId)
         : [...prev, gymId]
     );
-    toast({
-      title: favoriteGyms.includes(gymId) ? "Удалено из избранного" : "Добавлено в избранное",
-      description: "Изменения сохранены",
-    });
   };
 
-  const clearFilters = () => {
-    setSearchQuery("");
-    setSelectedCity("");
-    setSelectedCategory("");
-  };
+  const filteredGyms = selectedCategory === "all" 
+    ? testGyms 
+    : testGyms.filter(gym => gym.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 w-full">
-      <div className="w-full px-4 py-4 space-y-6">
-        
-        {/* Текущий абонемент */}
-        <Card className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-white/20 rounded-full">
-                <CreditCard className="h-6 w-6" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">Премиум абонемент</h3>
-                <p className="text-white/80 text-sm">Активен до 01.08.2023</p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold">18/30</p>
-                <p className="text-white/80 text-xs">посещений</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gray-50 pb-4">
+      {/* Заголовок */}
+      <div className="bg-white border-b px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900">GoodFit</h1>
+        <p className="text-gray-600 mt-1">Найдите идеальный зал для тренировок</p>
+      </div>
 
-        {/* Поиск и быстрые фильтры */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col gap-3 mb-4">
-            <div className="w-full relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Поиск по названию, району..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full"
-              />
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-sm"
-              >
-                <option value="">Все города</option>
-                {filterOptions?.cities.map((city) => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-              
-              <Button
-                variant={selectedCity || selectedCategory || searchQuery ? "default" : "outline"}
-                onClick={clearFilters}
-                size="sm"
-                className="shrink-0"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Быстрые фильтры по категориям */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                className="cursor-pointer text-xs px-2 py-1"
-                onClick={() => setSelectedCategory(selectedCategory === category ? "" : category)}
-              >
-                {category}
-              </Badge>
-            ))}
-          </div>
+      <div className="px-4 space-y-6">
+        {/* Активный абонемент */}
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Ваш абонемент</h2>
+          <ActiveSubscriptionCard subscription={activeSubscription} />
         </div>
 
-        {/* Популярные залы */}
-        <section className="w-full">
-          <div className="flex items-center gap-2 mb-4 px-1">
-            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-            <h2 className="text-xl font-bold dark:text-white">Популярные залы</h2>
-          </div>
-          
-          {popularLoading ? (
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse border border-gray-200 dark:border-gray-700">
-                  <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {popularGyms?.slice(0, 6).map((gym, index) => (
-                <GymCard 
-                  key={gym.id} 
-                  gym={gym} 
-                  index={index}
-                  favoriteGyms={favoriteGyms}
-                  toggleFavorite={toggleFavorite}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+        {/* Поиск */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input 
+            placeholder="Поиск залов..." 
+            className="pl-10 bg-white border-gray-200"
+          />
+        </div>
 
-        {/* Все залы */}
-        <section className="w-full">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-xl font-bold dark:text-white">Все фитнес-залы</h2>
-            <div className="text-sm text-gray-500">
-              {allGyms?.length || 0} {allGyms?.length === 1 ? 'зал' : 'залов'}
-            </div>
+        {/* Категории */}
+        <div>
+          <CategoryTabs 
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+
+        {/* Список залов */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {selectedCategory === "all" ? "Все залы" : "Залы в категории"}
+            </h2>
+            <Button variant="ghost" size="sm" className="text-primary">
+              Все
+            </Button>
           </div>
-          
-          {allLoading ? (
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse border border-gray-200 dark:border-gray-700">
-                  <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : allGyms?.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 mb-4">Залы не найдены</p>
-              <Button onClick={clearFilters} variant="outline">
-                Сбросить фильтры
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 w-full">
-              {allGyms?.map((gym, index) => (
-                <GymCard 
-                  key={gym.id} 
-                  gym={gym} 
-                  index={index}
-                  favoriteGyms={favoriteGyms}
-                  toggleFavorite={toggleFavorite}
-                />
-              ))}
+
+          <div className="space-y-4">
+            {filteredGyms.map((gym, index) => (
+              <GymCard
+                key={gym.id}
+                gym={gym}
+                index={index}
+                favoriteGyms={favoriteGyms}
+                toggleFavorite={toggleFavorite}
+              />
+            ))}
+          </div>
+
+          {filteredGyms.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">В этой категории нет залов</p>
             </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );
