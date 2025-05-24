@@ -7,7 +7,8 @@ import { GymCard } from "@/components/client/gyms/GymCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Star, MapPin, Filter } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Star, MapPin, Filter, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ClientHome = () => {
@@ -104,11 +105,30 @@ const ClientHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-full px-3 py-4 space-y-6">
+    <div className="min-h-screen bg-white dark:bg-gray-900 w-full">
+      <div className="w-full px-4 py-4 space-y-6">
         
+        {/* Текущий абонемент */}
+        <Card className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-white/20 rounded-full">
+                <CreditCard className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg">Премиум абонемент</h3>
+                <p className="text-white/80 text-sm">Активен до 01.08.2023</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold">18/30</p>
+                <p className="text-white/80 text-xs">посещений</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Поиск и быстрые фильтры */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex flex-col gap-3 mb-4">
             <div className="w-full relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -158,16 +178,16 @@ const ClientHome = () => {
         </div>
 
         {/* Популярные залы */}
-        <section>
+        <section className="w-full">
           <div className="flex items-center gap-2 mb-4 px-1">
             <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
             <h2 className="text-xl font-bold dark:text-white">Популярные залы</h2>
           </div>
           
           {popularLoading ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse border border-gray-200 dark:border-gray-700">
                   <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
@@ -175,7 +195,7 @@ const ClientHome = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {popularGyms?.slice(0, 6).map((gym, index) => (
                 <GymCard 
                   key={gym.id} 
@@ -190,7 +210,7 @@ const ClientHome = () => {
         </section>
 
         {/* Все залы */}
-        <section>
+        <section className="w-full">
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-xl font-bold dark:text-white">Все фитнес-залы</h2>
             <div className="text-sm text-gray-500">
@@ -199,9 +219,9 @@ const ClientHome = () => {
           </div>
           
           {allLoading ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse">
+                <div key={i} className="bg-white dark:bg-gray-800 rounded-lg p-4 animate-pulse border border-gray-200 dark:border-gray-700">
                   <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
@@ -209,7 +229,7 @@ const ClientHome = () => {
               ))}
             </div>
           ) : allGyms?.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">Залы не найдены</p>
               <Button onClick={clearFilters} variant="outline">
@@ -217,7 +237,7 @@ const ClientHome = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 w-full">
               {allGyms?.map((gym, index) => (
                 <GymCard 
                   key={gym.id} 

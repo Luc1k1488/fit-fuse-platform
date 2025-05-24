@@ -60,20 +60,22 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="h-screen flex flex-col antialiased text-foreground w-full max-w-full overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col w-full max-w-full overflow-hidden">
       {/* Основной контент */}
-      <div className="flex-1 overflow-auto pb-20">
-        <Outlet />
+      <div className="flex-1 overflow-y-auto pb-20 px-0">
+        <div className="w-full max-w-full">
+          <Outlet />
+        </div>
       </div>
 
-      {/* Нижнее навигационное меню */}
-      <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 px-2 py-2 safe-area-pb">
-        <div className="flex justify-around items-center max-w-full">
+      {/* Нижнее навигационное меню - фиксированное */}
+      <nav className="fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 px-0 py-2 safe-area-pb">
+        <div className="flex justify-around items-center w-full max-w-full">
           {navigationItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
-              className={`flex flex-col items-center py-1 px-2 min-w-0 flex-1 ${
+              className={`flex flex-col items-center py-1 px-1 min-w-0 flex-1 ${
                 isActive(item.href) 
                   ? "text-primary" 
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"

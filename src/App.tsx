@@ -70,7 +70,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isMobileView, setIsMobileView] = useState(false);
   
-  // Check if we're on a mobile device or force mobile layout
+  // Принудительно используем мобильный интерфейс для /app маршрутов
   useEffect(() => {
     const checkIsMobile = () => {
       // Всегда используем мобильный интерфейс для /app маршрутов
@@ -93,17 +93,22 @@ const App = () => {
     };
   }, []);
 
-  // Принудительно установить темную тему
+  // Принудительно установить светлую тему для мобильного интерфейса
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    const isAppRoute = window.location.pathname.startsWith('/app');
+    if (isAppRoute) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  }, [window.location.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
-          <Sonner theme="dark" />
+          <Sonner theme={window.location.pathname.startsWith('/app') ? "light" : "dark"} />
           <BrowserRouter>
             <Routes>
               {/* Public routes */}

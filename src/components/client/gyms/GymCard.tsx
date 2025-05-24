@@ -22,10 +22,10 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
 
   return (
     <Card 
-      className="overflow-hidden animate-fade-in bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700" 
+      className="overflow-hidden animate-fade-in bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full" 
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <div className="relative h-40 overflow-hidden group">
+      <div className="relative h-40 overflow-hidden group w-full">
         {gym.main_image ? (
           <img 
             src={gym.main_image} 
@@ -52,8 +52,8 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
           </button>
         )}
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-medium text-lg text-gray-900 dark:text-white mb-1">{gym.name}</h3>
+      <CardContent className="p-4 w-full">
+        <h3 className="font-medium text-lg text-gray-900 dark:text-white mb-1 truncate">{gym.name}</h3>
         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
           <MapPin className="h-3 w-3 mr-1 shrink-0" />
           <span className="truncate">
@@ -80,7 +80,7 @@ export const GymCard = ({ gym, index = 0, favoriteGyms = [], toggleFavorite }: G
             )}
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
           <Button asChild className="flex-1 text-sm">
             <Link to={`/app/gyms/${gym.id}`}>Подробнее</Link>
           </Button>
