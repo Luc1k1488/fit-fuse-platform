@@ -14,7 +14,7 @@ interface CitySelectorProps {
   setSelectedCity: (city: string) => void;
 }
 
-export const CitySelector = ({ cities, selectedCity, setSelectedCity }: CitySelectorProps) => {
+export const CitySelector = ({ cities = [], selectedCity, setSelectedCity }: CitySelectorProps) => {
   return (
     <div>
       <DropdownMenu>

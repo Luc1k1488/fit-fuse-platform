@@ -23,7 +23,7 @@ const ClientHome = () => {
     remainingVisits: undefined
   };
 
-  // Тестовые данные залов по категориям
+  // Тестовые данные залов по категориям с полными свойствами
   const testGyms: Gym[] = [
     // Кроссфит
     {
@@ -31,11 +31,15 @@ const ClientHome = () => {
       name: "CrossFit Arena",
       city: "Москва",
       location: "ул. Спортивная, 15",
+      address: "ул. Спортивная, 15, Москва",
       rating: 4.8,
       review_count: 124,
       main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"],
       features: ["Кроссфит", "Функциональные тренировки", "Групповые занятия"],
-      category: "crossfit"
+      category: "crossfit",
+      owner_id: null,
+      working_hours: "6:00-23:00"
     },
     // Тренажерный зал
     {
@@ -43,11 +47,15 @@ const ClientHome = () => {
       name: "Сергей",
       city: "Москва",
       location: "ул. Фитнес, 10",
+      address: "ул. Фитнес, 10, Москва",
       rating: 4.9,
       review_count: 200,
       main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"],
       features: ["Тренажеры", "Свободные веса", "Кардиозона"],
-      category: "gym"
+      category: "gym",
+      owner_id: null,
+      working_hours: "24/7"
     },
     // Бассейн
     {
@@ -55,11 +63,15 @@ const ClientHome = () => {
       name: "Aqua Center",
       city: "Москва", 
       location: "ул. Водная, 5",
+      address: "ул. Водная, 5, Москва",
       rating: 4.7,
       review_count: 89,
       main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"],
       features: ["25-метровый бассейн", "Аквааэробика", "Сауна"],
-      category: "pool"
+      category: "pool",
+      owner_id: null,
+      working_hours: "6:00-22:00"
     },
     // Йога
     {
@@ -67,11 +79,15 @@ const ClientHome = () => {
       name: "Zen Yoga Studio",
       city: "Москва",
       location: "ул. Гармония, 7",
+      address: "ул. Гармония, 7, Москва",
       rating: 4.9,
       review_count: 156,
-      main_image: "/placeholder.svg", 
+      main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"], 
       features: ["Хатха-йога", "Виньяса", "Медитация"],
-      category: "yoga"
+      category: "yoga",
+      owner_id: null,
+      working_hours: "7:00-21:00"
     },
     // Бокс
     {
@@ -79,11 +95,15 @@ const ClientHome = () => {
       name: "Fight Club",
       city: "Москва",
       location: "ул. Бойцовская, 12",
+      address: "ул. Бойцовская, 12, Москва",
       rating: 4.6,
       review_count: 78,
       main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"],
       features: ["Бокс", "Кикбоксинг", "Персональные тренировки"],
-      category: "boxing"
+      category: "boxing",
+      owner_id: null,
+      working_hours: "8:00-22:00"
     },
     // Танцы
     {
@@ -91,11 +111,15 @@ const ClientHome = () => {
       name: "Dance Studio Pro",
       city: "Москва",
       location: "ул. Ритма, 3",
+      address: "ул. Ритма, 3, Москва",
       rating: 4.8,
       review_count: 145,
       main_image: "/placeholder.svg",
+      images: ["/placeholder.svg"],
       features: ["Современные танцы", "Хип-хоп", "Латина"],
-      category: "dance"
+      category: "dance",
+      owner_id: null,
+      working_hours: "10:00-22:00"
     }
   ];
 
