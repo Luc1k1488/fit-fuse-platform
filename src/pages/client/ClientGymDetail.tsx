@@ -4,18 +4,22 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DarkCard } from "@/components/ui/dark-card";
+import { BookingDialog } from "@/components/bookings/BookingDialog";
 import { MapPin, Star, Clock, Calendar, Check, Heart, Share, ChevronLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const ClientGymDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("info");
   const [isFavorite, setIsFavorite] = useState(false);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const { toast } = useToast();
   
   // Данные по залу (в реальном приложении будут загружаться по ID)
   const gymData = {
     id: id,
-    name: id === "gym-1" ? "Фитнес Элит" : id === "gym-2" ? "Пауэр Хаус" : "Спортзал",
+    name: id === "gym-1" ? "Фитнес Элит" : id === "gym-2" ? "Пауэр Хаус" : id === "crossfit-1" ? "CrossFit Arena" : "Спортзал",
     location: "Центр",
     city: "Москва",
     address: "ул. Тверская, 18, Москва",
@@ -42,8 +46,22 @@ const ClientGymDetail = () => {
   };
 
   const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
     setShowShareTooltip(true);
     setTimeout(() => setShowShareTooltip(false), 2000);
+  };
+
+  const handleBookingSubmit = (bookingData: any) => {
+    console.log("Booking submitted:", bookingData);
+    setShowBookingDialog(false);
+    toast({
+      title: "Бронирование успешно!",
+      description: "Ваше посещение забронировано. Проверьте раздел 'Расписание'.",
+    });
+  };
+
+  const handleBookVisit = () => {
+    setShowBookingDialog(true);
   };
 
   // Эффект для красивого появления контента при загрузке
@@ -58,7 +76,7 @@ const ClientGymDetail = () => {
   }, []);
 
   return (
-    <div className="pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
       {/* Основное изображение */}
       <div className="relative mb-4">
         <div className="h-52 overflow-hidden">
@@ -157,7 +175,13 @@ const ClientGymDetail = () => {
               <p className="text-gray-400">{gymData.phone}</p>
             </div>
             
-            <Button className="w-full transition-all hover:scale-105 animate-on-load opacity-0" style={{ transform: 'translateY(10px)', transitionDelay: '700ms' }}>Забронировать посещение</Button>
+            <Button 
+              onClick={handleBookVisit}
+              className="w-full transition-all hover:scale-105 animate-on-load opacity-0 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700" 
+              style={{ transform: 'translateY(10px)', transitionDelay: '700ms' }}
+            >
+              Забронировать посещение
+            </Button>
           </div>
         </TabsContent>
         
@@ -181,7 +205,7 @@ const ClientGymDetail = () => {
                   </div>
                   <div className="flex justify-between items-center mt-3">
                     <span className="text-sm text-gray-400">Тренер: {classItem.trainer}</span>
-                    <Button size="sm" className="transition-all hover:scale-105">Записаться</Button>
+                    <Button size="sm" className="transition-all hover:scale-105 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">Записаться</Button>
                   </div>
                 </div>
               </DarkCard>
@@ -208,6 +232,13 @@ const ClientGymDetail = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Диалог бронирования */}
+      <BookingDialog
+        open={showBookingDialog}
+        onOpenChange={setShowBookingDialog}
+        onSubmit={handleBookingSubmit}
+      />
     </div>
   );
 };
