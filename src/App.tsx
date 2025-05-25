@@ -134,7 +134,7 @@ const App = () => {
                 <Route path="search" element={<ClientSearch />} />
                 <Route path="schedule" element={<ClientSchedule />} />
                 <Route path="subscription" element={<ClientSubscription />} />
-                <Route path="profile" element={<ClientProfile />} />
+                <Route path="profile" element={<ClientProfileNew />} />
                 <Route path="gyms/:id" element={<ClientGymDetail />} />
               </Route>
               
