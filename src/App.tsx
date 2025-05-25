@@ -31,6 +31,7 @@ import ClientGymDetail from "./pages/client/ClientGymDetail";
 import ClientClasses from "./pages/client/ClientClasses";
 import ClientBookings from "./pages/client/ClientBookings";
 import ClientProfile from "./pages/client/ClientProfile";
+import ClientProfileNew from "./pages/client/ClientProfileNew";
 import ClientSubscription from "./pages/client/ClientSubscription";
 import ClientSupport from "./pages/client/ClientSupport";
 import ClientCalendar from "./pages/client/ClientCalendar";

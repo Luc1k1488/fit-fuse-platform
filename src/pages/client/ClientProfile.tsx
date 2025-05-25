@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import ProfileHeader from "@/components/client/profile/ProfileHeader";
 import StatsCard from "@/components/client/profile/StatsCard";
 import SettingsMenu from "@/components/client/profile/SettingsMenu";
-import LogoutButton from "@/components/client/profile/LogoutButton";
 
 const ClientProfile = () => {
   const [user] = useState({
@@ -33,7 +31,6 @@ const ClientProfile = () => {
         <ProfileHeader user={user} />
         <StatsCard stats={stats} />
         <SettingsMenu />
-        <LogoutButton />
       </div>
     </div>
   );
