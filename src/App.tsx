@@ -67,6 +67,10 @@ import SupportChats from "./pages/support/SupportChats";
 // Context providers
 import { AuthProvider } from "./contexts/auth_context";
 
+// Protected route components
+import AdminProtectedRoute from "./components/auth/AdminProtectedRoute";
+import ClientProtectedRoute from "./components/auth/ClientProtectedRoute";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -130,7 +134,11 @@ const App = () => {
               <Route path="/register" element={<RegisterPage />} />
               
               {/* Client app routes - protected */}
-              <Route path="/app" element={<ClientLayout />}>
+              <Route path="/app" element={
+                <ClientProtectedRoute>
+                  <ClientLayout />
+                </ClientProtectedRoute>
+              }>
                 <Route index element={<ClientHome />} />
                 <Route path="search" element={<ClientSearch />} />
                 <Route path="schedule" element={<ClientSchedule />} />
@@ -140,35 +148,119 @@ const App = () => {
               </Route>
               
               {/* Admin routes - protected */}
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin" element={
+                <AdminProtectedRoute allowedRoles={["admin", "partner", "support"]}>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }>
                 {/* Admin specific routes */}
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="gyms" element={<AdminGyms />} />
-                <Route path="classes" element={<AdminClasses />} />
-                <Route path="bookings" element={<AdminBookings />} />
-                <Route path="subscriptions" element={<AdminSubscriptions />} />
-                <Route path="partners" element={<AdminPartners />} />
-                <Route path="support" element={<AdminSupport />} />
-                <Route path="reviews" element={<AdminReviews />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="dashboard" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="users" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminUsers />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="gyms" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminGyms />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="classes" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminClasses />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="bookings" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminBookings />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="subscriptions" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminSubscriptions />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="partners" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminPartners />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="support" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminSupport />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="reviews" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminReviews />
+                  </AdminProtectedRoute>
+                } />
+                <Route path="analytics" element={
+                  <AdminProtectedRoute allowedRoles={["admin"]}>
+                    <AdminAnalytics />
+                  </AdminProtectedRoute>
+                } />
                 
                 {/* Partner routes (inside admin layout) */}
                 <Route path="partner">
-                  <Route index element={<PartnerDashboard />} />
-                  <Route path="gyms" element={<PartnerGyms />} />
-                  <Route path="classes" element={<PartnerClasses />} />
-                  <Route path="bookings" element={<PartnerBookings />} />
-                  <Route path="reviews" element={<PartnerReviews />} />
-                  <Route path="analytics" element={<PartnerAnalytics />} />
+                  <Route index element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerDashboard />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="gyms" element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerGyms />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="classes" element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerClasses />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="bookings" element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerBookings />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="reviews" element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerReviews />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="analytics" element={
+                    <AdminProtectedRoute allowedRoles={["partner"]}>
+                      <PartnerAnalytics />
+                    </AdminProtectedRoute>
+                  } />
                 </Route>
                 
                 {/* Support routes (inside admin layout) */}
                 <Route path="support-portal">
-                  <Route index element={<SupportDashboard />} />
-                  <Route path="tickets" element={<SupportTickets />} />
-                  <Route path="users" element={<SupportUsers />} />
-                  <Route path="chats" element={<SupportChats />} />
+                  <Route index element={
+                    <AdminProtectedRoute allowedRoles={["support"]}>
+                      <SupportDashboard />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="tickets" element={
+                    <AdminProtectedRoute allowedRoles={["support"]}>
+                      <SupportTickets />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="users" element={
+                    <AdminProtectedRoute allowedRoles={["support"]}>
+                      <SupportUsers />
+                    </AdminProtectedRoute>
+                  } />
+                  <Route path="chats" element={
+                    <AdminProtectedRoute allowedRoles={["support"]}>
+                      <SupportChats />
+                    </AdminProtectedRoute>
+                  } />
                 </Route>
                 
                 {/* Admin index redirect */}
