@@ -1,5 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { 
   Table, 
   TableBody, 
@@ -8,316 +12,332 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Search, Edit, MapPin, Star, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Gym } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { Search, MoreVertical, Plus, MapPin, Filter, Star, StarHalf } from "lucide-react";
-import { GymForm } from "@/components/admin/GymForm";
+import { Gym, Partner } from "@/types";
+import { toast } from "sonner";
 
 const AdminGyms = () => {
-  const { toast } = useToast();
+  const [gyms, setGyms] = useState<Gym[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [isAddGymOpen, setIsAddGymOpen] = useState(false);
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
-  
-  const fetchGyms = async () => {
-    let query = supabase.from("gyms").select("*");
-    
-    if (categoryFilter) {
-      query = query.eq("category", categoryFilter);
-    }
-    
-    if (searchQuery) {
-      query = query.or(`name.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%`);
-    }
-    
-    const { data, error } = await query.order("name");
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    return data as Gym[];
-  };
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const { 
-    data: gyms, 
-    isLoading, 
-    isError, 
-    error, 
-    refetch 
-  } = useQuery({
-    queryKey: ["gyms", searchQuery, categoryFilter],
-    queryFn: fetchGyms,
+  // Form state
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    address: "",
+    city: "",
+    category: "",
+    working_hours: "",
+    features: [] as string[]
   });
 
-  const categories = ["Премиум", "Фитнес", "Йога", "Кроссфит", "Бокс", "Велнес"];
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    refetch();
+  const fetchData = async () => {
+    try {
+      const [gymsResponse, partnersResponse] = await Promise.all([
+        supabase.from('gyms').select('*').order('created_at', { ascending: false }),
+        supabase.from('partners').select('*')
+      ]);
+
+      if (gymsResponse.error) throw gymsResponse.error;
+      if (partnersResponse.error) throw partnersResponse.error;
+
+      setGyms(gymsResponse.data || []);
+      setPartners(partnersResponse.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCategoryFilter = (category: string | null) => {
-    setCategoryFilter(category);
-    refetch();
-  };
-
-  const handleAddGym = () => {
-    setSelectedGym(null);
-    setIsAddGymOpen(true);
+  const getPartnerName = (ownerId: string | null) => {
+    if (!ownerId) return 'Не назначен';
+    const partner = partners.find(p => p.id === ownerId);
+    return partner ? partner.name : 'Неизвестный партнер';
   };
 
   const handleEditGym = (gym: Gym) => {
     setSelectedGym(gym);
-    setIsAddGymOpen(true);
-  };
-
-  const handleGymSuccess = (gym: Gym) => {
-    refetch();
-    toast({
-      title: "Успешно!",
-      description: selectedGym 
-        ? "Фитнес-зал успешно обновлен" 
-        : "Фитнес-зал успешно добавлен",
+    setFormData({
+      name: gym.name || "",
+      location: gym.location || "",
+      address: gym.address || "",
+      city: gym.city || "",
+      category: gym.category || "",
+      working_hours: gym.working_hours || "",
+      features: gym.features || []
     });
+    setEditDialogOpen(true);
   };
 
-  const handleDeleteGym = async (gymId: string) => {
+  const handleSaveGym = async () => {
+    if (!selectedGym) return;
+
     try {
       const { error } = await supabase
-        .from("gyms")
-        .delete()
-        .eq("id", gymId);
+        .from('gyms')
+        .update({
+          name: formData.name,
+          location: formData.location,
+          address: formData.address,
+          city: formData.city,
+          category: formData.category,
+          working_hours: formData.working_hours,
+          features: formData.features
+        })
+        .eq('id', selectedGym.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      toast({
-        title: "Успешно!",
-        description: "Фитнес-зал успешно удален",
-      });
-      
-      refetch();
+      await fetchData();
+      setEditDialogOpen(false);
+      setSelectedGym(null);
+      toast.success('Зал обновлен');
     } catch (error) {
-      console.error("Ошибка при удалении зала:", error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка!",
-        description: "Не удалось удалить фитнес-зал",
+      console.error('Error updating gym:', error);
+      toast.error('Ошибка обновления зала');
+    }
+  };
+
+  const addFeature = (feature: string) => {
+    if (feature && !formData.features.includes(feature)) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, feature]
       });
     }
   };
-  
-  // Функция для отрисовки рейтинга звездами
-  const renderRating = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    return (
-      <div className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} size={14} className="text-yellow-400 fill-yellow-400" />
-        ))}
-        {hasHalfStar && <StarHalf size={14} className="text-yellow-400 fill-yellow-400" />}
-        <span className="ml-1 text-sm">{rating.toFixed(1)}</span>
-      </div>
-    );
+
+  const removeFeature = (feature: string) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter(f => f !== feature)
+    });
   };
 
+  const filteredGyms = gyms.filter(gym =>
+    gym.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    gym.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    gym.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const formatRating = (rating: number | null) => {
+    if (!rating) return '-';
+    return rating.toFixed(1);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Управление фитнес-залами</h1>
-        <Button className="gap-2" onClick={handleAddGym}>
-          <Plus size={16} />
-          Добавить зал
-        </Button>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Управление залами</h1>
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Поиск залов..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
       </div>
 
-      {/* Фильтры и поиск */}
       <Card>
         <CardHeader>
-          <CardTitle>Список фитнес-залов</CardTitle>
-          <CardDescription>Управление фитнес-залами на платформе</CardDescription>
+          <CardTitle>Список залов ({filteredGyms.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-2 top-3 h-4 w-4 text-gray-500" />
-                <Input 
-                  placeholder="Поиск по названию или местоположению..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8"
-                />
-              </form>
-            </div>
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-1">
-                    <Filter size={16} />
-                    {categoryFilter ? `Категория: ${categoryFilter}` : "Все категории"}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleCategoryFilter(null)}>
-                    Все категории
-                  </DropdownMenuItem>
-                  {categories.map((category) => (
-                    <DropdownMenuItem 
-                      key={category} 
-                      onClick={() => handleCategoryFilter(category)}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Название</TableHead>
+                <TableHead>Локация</TableHead>
+                <TableHead>Категория</TableHead>
+                <TableHead>Партнер</TableHead>
+                <TableHead>Рейтинг</TableHead>
+                <TableHead>Отзывы</TableHead>
+                <TableHead>Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredGyms.map((gym) => (
+                <TableRow key={gym.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{gym.name}</div>
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {gym.address}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{gym.city}</TableCell>
+                  <TableCell>
+                    {gym.category && (
+                      <Badge variant="outline">{gym.category}</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{getPartnerName(gym.owner_id)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                      {formatRating(gym.rating)}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 text-gray-500 mr-1" />
+                      {gym.review_count || 0}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditGym(gym)}
                     >
-                      {category}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center py-10">
-              <p>Загрузка фитнес-залов...</p>
-            </div>
-          ) : isError ? (
-            <div className="text-center py-10">
-              <p className="text-red-500">Ошибка загрузки данных</p>
-              <p className="text-sm text-gray-500">{(error as Error).message}</p>
-              <Button onClick={() => refetch()} className="mt-2">
-                Попробовать снова
-              </Button>
-            </div>
-          ) : (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Название</TableHead>
-                    <TableHead>Местоположение</TableHead>
-                    <TableHead>Категория</TableHead>
-                    <TableHead>Рейтинг</TableHead>
-                    <TableHead>Особенности</TableHead>
-                    <TableHead className="text-right">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {gyms && gyms.length > 0 ? (
-                    gyms.map((gym) => (
-                      <TableRow key={gym.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
-                              {gym.main_image && (
-                                <img 
-                                  src={gym.main_image} 
-                                  alt={gym.name || ""} 
-                                  className="h-full w-full object-cover"
-                                />
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium">{gym.name}</p>
-                              <p className="text-xs text-gray-500">ID: {gym.id.substring(0, 8)}...</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-gray-500" />
-                            <span>{gym.city}, {gym.location}</span>
-                          </div>
-                          <p className="text-xs text-gray-500">{gym.address}</p>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{gym.category}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {renderRating(gym.rating || 0)}
-                          <p className="text-xs text-gray-500">{gym.review_count} отзывов</p>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1 max-w-[200px]">
-                            {gym.features && gym.features.slice(0, 3).map((feature, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {feature}
-                              </Badge>
-                            ))}
-                            {gym.features && gym.features.length > 3 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{gym.features.length - 3}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical size={16} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditGym(gym)}>
-                                Редактировать
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>Управление тренировками</DropdownMenuItem>
-                              <DropdownMenuItem 
-                                className="text-red-500"
-                                onClick={() => handleDeleteGym(gym.id)}
-                              >
-                                Удалить зал
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-10">
-                        Фитнес-залов не найдено
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                      <Edit className="h-4 w-4 mr-1" />
+                      Редактировать
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Модальное окно для добавления/редактирования зала */}
-      {isAddGymOpen && (
-        <GymForm 
-          open={isAddGymOpen}
-          onClose={() => setIsAddGymOpen(false)}
-          onSuccess={handleGymSuccess}
-          initialData={selectedGym || undefined}
-        />
-      )}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Редактировать зал</DialogTitle>
+            <DialogDescription>
+              Измените информацию о зале
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Название</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="category">Категория</Label>
+              <Input
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="city">Город</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="location">Район</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label htmlFor="address">Адрес</Label>
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label htmlFor="working_hours">Часы работы</Label>
+              <Input
+                id="working_hours"
+                value={formData.working_hours}
+                onChange={(e) => setFormData({ ...formData, working_hours: e.target.value })}
+                placeholder="Пн-Пт: 06:00-24:00, Сб-Вс: 08:00-22:00"
+              />
+            </div>
+            
+            <div className="col-span-2">
+              <Label>Удобства</Label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {formData.features.map((feature, index) => (
+                  <Badge key={index} variant="secondary" className="cursor-pointer" onClick={() => removeFeature(feature)}>
+                    {feature} ×
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {['Парковка', 'Душевые', 'Сауна', 'Кондиционер', 'WiFi', 'Раздевалки', 'Тренеры'].map(feature => (
+                  <Button
+                    key={feature}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addFeature(feature)}
+                    disabled={formData.features.includes(feature)}
+                  >
+                    {feature}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleSaveGym}>
+              Сохранить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

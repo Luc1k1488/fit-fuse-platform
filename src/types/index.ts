@@ -11,6 +11,22 @@ export type User = {
   created_at: string | null;
   profile_image: string | null;
   subscription_id: string | null;
+  is_blocked?: boolean | null;
+  blocked_at?: string | null;
+  blocked_reason?: string | null;
+};
+
+export type Partner = {
+  id: string;
+  user_id: string | null;
+  name: string;
+  email: string;
+  phone: string | null;
+  company_name: string | null;
+  status: "active" | "inactive" | "pending";
+  gym_count: number | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Gym = {
@@ -62,6 +78,10 @@ export type Subscription = {
   price: number | null;
   subscription_type: "regular" | "gift" | "promo";
   plan_id: string | null;
+  is_frozen?: boolean | null;
+  frozen_at?: string | null;
+  frozen_until?: string | null;
+  freeze_reason?: string | null;
 };
 
 export type SubscriptionPlan = {

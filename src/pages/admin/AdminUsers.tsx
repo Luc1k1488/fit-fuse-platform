@@ -1,5 +1,10 @@
 
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Table, 
   TableBody, 
@@ -9,300 +14,338 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Search, Ban, Unlock, UserX, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
-import { Search, MoreVertical, UserPlus, Filter, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 const AdminUsers = () => {
-  const { toast } = useToast();
+  const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [actionType, setActionType] = useState<"block" | "freeze" | null>(null);
+  const [reason, setReason] = useState("");
+  const [freezeDuration, setFreezeDuration] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
-    let query = supabase.from("users").select("*");
-    
-    if (roleFilter) {
-      query = query.eq("role", roleFilter);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Ошибка загрузки пользователей');
+    } finally {
+      setLoading(false);
     }
-    
-    if (searchQuery) {
-      query = query.or(`name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+  };
+
+  const handleBlockUser = async () => {
+    if (!selectedUser || !reason) return;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          is_blocked: true,
+          blocked_at: new Date().toISOString(),
+          blocked_reason: reason
+        })
+        .eq('id', selectedUser.id);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      setSelectedUser(null);
+      setActionType(null);
+      setReason("");
+      toast.success('Пользователь заблокирован');
+    } catch (error) {
+      console.error('Error blocking user:', error);
+      toast.error('Ошибка блокировки пользователя');
     }
-    
-    const { data, error } = await query.order("created_at", { ascending: false });
-    
-    if (error) {
-      throw new Error(error.message);
+  };
+
+  const handleUnblockUser = async (user: User) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          is_blocked: false,
+          blocked_at: null,
+          blocked_reason: null
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      toast.success('Пользователь разблокирован');
+    } catch (error) {
+      console.error('Error unblocking user:', error);
+      toast.error('Ошибка разблокировки пользователя');
     }
+  };
+
+  const handleFreezeSubscription = async () => {
+    if (!selectedUser || !reason || !freezeDuration) return;
+
+    try {
+      // Находим активную подписку пользователя
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', selectedUser.id)
+        .eq('status', 'active')
+        .single();
+
+      if (subError || !subscription) {
+        toast.error('У пользователя нет активной подписки');
+        return;
+      }
+
+      const freezeUntil = new Date();
+      freezeUntil.setDate(freezeUntil.getDate() + parseInt(freezeDuration));
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({
+          is_frozen: true,
+          frozen_at: new Date().toISOString(),
+          frozen_until: freezeUntil.toISOString(),
+          freeze_reason: reason
+        })
+        .eq('id', subscription.id);
+
+      if (error) throw error;
+
+      setSelectedUser(null);
+      setActionType(null);
+      setReason("");
+      setFreezeDuration("");
+      toast.success('Подписка заморожена');
+    } catch (error) {
+      console.error('Error freezing subscription:', error);
+      toast.error('Ошибка заморозки подписки');
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('ru-RU');
+  };
+
+  const getRoleBadge = (role: string) => {
+    const roleMap = {
+      admin: { label: 'Админ', color: 'bg-red-100 text-red-800' },
+      partner: { label: 'Партнер', color: 'bg-blue-100 text-blue-800' },
+      support: { label: 'Поддержка', color: 'bg-green-100 text-green-800' },
+      user: { label: 'Пользователь', color: 'bg-gray-100 text-gray-800' }
+    };
     
-    return data as User[];
+    const roleInfo = roleMap[role as keyof typeof roleMap] || roleMap.user;
+    return (
+      <Badge className={roleInfo.color}>
+        {roleInfo.label}
+      </Badge>
+    );
   };
 
-  const { 
-    data: users, 
-    isLoading, 
-    isError, 
-    error, 
-    refetch 
-  } = useQuery({
-    queryKey: ["users", searchQuery, roleFilter],
-    queryFn: fetchUsers,
-  });
-
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    refetch();
-  };
-
-  const handleRoleFilter = (role: string | null) => {
-    setRoleFilter(role);
-    refetch();
-  };
-
-  const handleRefresh = () => {
-    refetch();
-    toast({
-      title: "Обновлено",
-      description: "Список пользователей обновлен",
-    });
-  };
-
-  // Расчет статистики пользователей
-  const userStats = {
-    total: users?.length || 0,
-    admin: users?.filter(user => user.role === "admin").length || 0,
-    partner: users?.filter(user => user.role === "partner").length || 0,
-    support: users?.filter(user => user.role === "support").length || 0,
-    regularUsers: users?.filter(user => user.role === "user").length || 0,
-  };
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Управление пользователями</h1>
-        <Button className="gap-2">
-          <UserPlus size={16} />
-          Добавить пользователя
-        </Button>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Управление пользователями</h1>
+        <div className="relative w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Поиск пользователей..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
       </div>
 
-      {/* Статистика пользователей */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Всего пользователей</p>
-              <p className="text-3xl font-bold">{userStats.total}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Администраторы</p>
-              <p className="text-3xl font-bold">{userStats.admin}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Партнеры</p>
-              <p className="text-3xl font-bold">{userStats.partner}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Поддержка</p>
-              <p className="text-3xl font-bold">{userStats.support}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Клиенты</p>
-              <p className="text-3xl font-bold">{userStats.regularUsers}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Фильтры и поиск */}
       <Card>
         <CardHeader>
-          <CardTitle>Список пользователей</CardTitle>
-          <CardDescription>Управление пользователями платформы</CardDescription>
+          <CardTitle>Список пользователей ({filteredUsers.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-2 top-3 h-4 w-4 text-gray-500" />
-                <Input 
-                  placeholder="Поиск по имени или email..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8"
-                />
-              </form>
-            </div>
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-1">
-                    <Filter size={16} />
-                    {roleFilter ? `Роль: ${roleFilter}` : "Все роли"}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleRoleFilter(null)}>
-                    Все роли
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRoleFilter("user")}>
-                    Клиенты
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRoleFilter("admin")}>
-                    Администраторы
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRoleFilter("partner")}>
-                    Партнеры
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleRoleFilter("support")}>
-                    Поддержка
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button onClick={handleRefresh} variant="ghost" size="icon">
-                <RefreshCw size={16} />
-              </Button>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Пользователь</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Роль</TableHead>
+                <TableHead>Статус</TableHead>
+                <TableHead>Дата регистрации</TableHead>
+                <TableHead>Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.profile_image || ""} />
+                        <AvatarFallback>
+                          {user.name ? user.name.substring(0, 2).toUpperCase() : 'ПО'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{user.name || 'Без имени'}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{getRoleBadge(user.role)}</TableCell>
+                  <TableCell>
+                    {user.is_blocked ? (
+                      <Badge className="bg-red-100 text-red-800">Заблокирован</Badge>
+                    ) : (
+                      <Badge className="bg-green-100 text-green-800">Активен</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{formatDate(user.created_at)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      {user.is_blocked ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnblockUser(user)}
+                        >
+                          <Unlock className="h-4 w-4 mr-1" />
+                          Разблокировать
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setActionType("block");
+                            }}
+                          >
+                            <Ban className="h-4 w-4 mr-1" />
+                            Заблокировать
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setActionType("freeze");
+                            }}
+                          >
+                            <Calendar className="h-4 w-4 mr-1" />
+                            Заморозить
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Dialog open={!!actionType} onOpenChange={() => setActionType(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === "block" ? "Заблокировать пользователя" : "Заморозить подписку"}
+            </DialogTitle>
+            <DialogDescription>
+              {actionType === "block" 
+                ? "Пользователь не сможет войти в систему до разблокировки"
+                : "Подписка будет приостановлена на указанный период"
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {actionType === "freeze" && (
+              <div>
+                <label className="text-sm font-medium">Период заморозки (дней)</label>
+                <Select value={freezeDuration} onValueChange={setFreezeDuration}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите период" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">7 дней</SelectItem>
+                    <SelectItem value="14">14 дней</SelectItem>
+                    <SelectItem value="30">30 дней</SelectItem>
+                    <SelectItem value="90">90 дней</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            <div>
+              <label className="text-sm font-medium">Причина</label>
+              <Textarea
+                placeholder="Укажите причину..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
             </div>
           </div>
 
-          {isLoading ? (
-            <div className="flex justify-center py-10">
-              <p>Загрузка пользователей...</p>
-            </div>
-          ) : isError ? (
-            <div className="text-center py-10">
-              <p className="text-red-500">Ошибка загрузки данных</p>
-              <p className="text-sm text-gray-500">{(error as Error).message}</p>
-              <Button onClick={() => refetch()} className="mt-2">
-                Попробовать снова
-              </Button>
-            </div>
-          ) : (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Пользователь</TableHead>
-                    <TableHead>Контакты</TableHead>
-                    <TableHead>Роль</TableHead>
-                    <TableHead>Дата регистрации</TableHead>
-                    <TableHead className="text-right">Действия</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users && users.length > 0 ? (
-                    users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-mono text-xs w-[80px] truncate">
-                          {user.id.substring(0, 8)}...
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                              {user.profile_image ? (
-                                <img 
-                                  src={user.profile_image} 
-                                  alt={user.name} 
-                                  className="h-8 w-8 rounded-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-sm font-medium">
-                                  {user.name ? user.name[0].toUpperCase() : "U"}
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium">{user.name || "Без имени"}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="text-sm">{user.email || "Нет email"}</p>
-                            <p className="text-xs text-gray-500">{user.phone || "Нет телефона"}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={
-                            user.role === "admin" ? "default" : 
-                            user.role === "partner" ? "secondary" :
-                            user.role === "support" ? "outline" : 
-                            "secondary"
-                          }>
-                            {user.role === "admin" ? "Администратор" : 
-                             user.role === "partner" ? "Партнер" :
-                             user.role === "support" ? "Поддержка" : 
-                             "Пользователь"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString("ru-RU")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical size={16} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Просмотр профиля</DropdownMenuItem>
-                              <DropdownMenuItem>Редактировать</DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-500">
-                                Удалить пользователя
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-10">
-                        Пользователей не найдено
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActionType(null)}>
+              Отмена
+            </Button>
+            <Button
+              onClick={actionType === "block" ? handleBlockUser : handleFreezeSubscription}
+              disabled={!reason || (actionType === "freeze" && !freezeDuration)}
+            >
+              {actionType === "block" ? "Заблокировать" : "Заморозить"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
