@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +74,8 @@ const AdminPartners = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPartners(data || []);
+      // Type assertion to ensure the data matches our Partner interface
+      setPartners((data || []) as Partner[]);
     } catch (error) {
       console.error('Error fetching partners:', error);
       toast.error('Ошибка загрузки партнеров');

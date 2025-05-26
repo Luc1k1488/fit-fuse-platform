@@ -58,14 +58,14 @@ const AdminGyms = () => {
       if (gymsError) throw gymsError;
       setGyms(gymsData || []);
       
-      // Теперь получаем реальные данные партнеров из базы данных
       const { data: partnersData, error: partnersError } = await supabase
         .from('partners')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (partnersError) throw partnersError;
-      setPartners(partnersData || []);
+      // Type assertion to ensure the data matches our Partner interface
+      setPartners((partnersData || []) as Partner[]);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Ошибка загрузки данных');
