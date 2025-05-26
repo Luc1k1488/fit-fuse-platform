@@ -58,33 +58,14 @@ const AdminGyms = () => {
       if (gymsError) throw gymsError;
       setGyms(gymsData || []);
       
-      // Временно используем mock данные для партнеров до обновления типов
-      setPartners([
-        {
-          id: '1',
-          user_id: null,
-          name: 'Иванов Иван Иванович',
-          email: 'ivanov@fitnesscenter.ru',
-          phone: '+7 (900) 123-45-67',
-          company_name: 'Фитнес Центр Иванова',
-          status: 'active',
-          gym_count: 2,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          user_id: null,
-          name: 'Петрова Анна Сергеевна',
-          email: 'petrova@sportclub.ru',
-          phone: '+7 (900) 234-56-78',
-          company_name: 'Спорт Клуб Премиум',
-          status: 'active',
-          gym_count: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]);
+      // Теперь получаем реальные данные партнеров из базы данных
+      const { data: partnersData, error: partnersError } = await supabase
+        .from('partners')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (partnersError) throw partnersError;
+      setPartners(partnersData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Ошибка загрузки данных');

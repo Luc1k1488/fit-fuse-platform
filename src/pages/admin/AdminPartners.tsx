@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,119 +43,104 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Plus, MoreHorizontal, Mail, User, Dumbbell } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-// Тестовые данные партнеров
-const mock_partners = [
-  {
-    id: "partner-1",
-    name: "Иванов Иван",
-    email: "ivanov@example.com",
-    created_at: "2023-04-15T14:32:17Z",
-    gym_count: 2,
-    status: "active"
-  },
-  {
-    id: "partner-2",
-    name: "Смирнова Елена",
-    email: "smirnova@example.com",
-    created_at: "2023-05-22T09:15:43Z",
-    gym_count: 1,
-    status: "active"
-  },
-  {
-    id: "partner-3",
-    name: "Соколов Михаил",
-    email: "sokolov@example.com",
-    created_at: "2023-06-10T16:28:05Z",
-    gym_count: 3,
-    status: "active"
-  },
-  {
-    id: "partner-4",
-    name: "Петрова Анна",
-    email: "petrova@example.com",
-    created_at: "2023-07-03T11:42:19Z",
-    gym_count: 1,
-    status: "inactive"
-  },
-  {
-    id: "partner-5",
-    name: "Волков Дмитрий",
-    email: "volkov@example.com",
-    created_at: "2023-08-18T15:09:37Z",
-    gym_count: 2,
-    status: "pending"
-  }
-];
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Partner } from "@/types";
 
 const AdminPartners = () => {
-  const [partners, set_partners] = useState(mock_partners);
-  const [search_query, set_search_query] = useState("");
-  const [filter_status, set_filter_status] = useState("all");
-  const [is_add_dialog_open, set_is_add_dialog_open] = useState(false);
-  const [new_partner, set_new_partner] = useState({
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [filteredPartners, setFilteredPartners] = useState<Partner[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [newPartner, setNewPartner] = useState({
     name: "",
     email: "",
   });
-  const { toast } = useToast();
 
-  const handle_search = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const filtered = mock_partners.filter(
-      (partner) =>
-        partner.name.toLowerCase().includes(search_query.toLowerCase()) ||
-        partner.email.toLowerCase().includes(search_query.toLowerCase())
-    );
-    set_partners(filtered);
-  };
+  useEffect(() => {
+    fetchPartners();
+  }, []);
 
-  const handle_status_filter = (status: string) => {
-    set_filter_status(status);
-    if (status === "all") {
-      set_partners(mock_partners);
-    } else {
-      const filtered = mock_partners.filter((partner) => partner.status === status);
-      set_partners(filtered);
+  useEffect(() => {
+    applyFilters();
+  }, [partners, searchQuery, filterStatus]);
+
+  const fetchPartners = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPartners(data || []);
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      toast.error('Ошибка загрузки партнеров');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handle_add_partner = () => {
-    // В реальном приложении здесь бы подключались к Supabase для создания партнера
-    const new_id = `partner-${Date.now()}`;
-    const new_created = new Date().toISOString();
-    
-    const new_partner_record = {
-      id: new_id,
-      name: new_partner.name,
-      email: new_partner.email,
-      created_at: new_created,
-      gym_count: 0,
-      status: "pending"
-    };
-    
-    set_partners([new_partner_record, ...partners]);
-    set_new_partner({ name: "", email: "" });
-    set_is_add_dialog_open(false);
-    
-    toast({
-      title: "Приглашение отправлено",
-      description: `Приглашение отправлено на почту ${new_partner.email}`,
-    });
+  const applyFilters = () => {
+    let filtered = partners;
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (partner) =>
+          partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          partner.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((partner) => partner.status === filterStatus);
+    }
+
+    setFilteredPartners(filtered);
   };
 
-  const handle_send_invitation = (partner_id: string) => {
-    const partner = partners.find((p) => p.id === partner_id);
+  const handleAddPartner = async () => {
+    if (!newPartner.name || !newPartner.email) {
+      toast.error('Заполните все обязательные поля');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('partners')
+        .insert([{
+          name: newPartner.name,
+          email: newPartner.email,
+          status: 'pending'
+        }]);
+
+      if (error) throw error;
+
+      await fetchPartners();
+      setNewPartner({ name: "", email: "" });
+      setIsAddDialogOpen(false);
+      
+      toast.success(`Приглашение отправлено на почту ${newPartner.email}`);
+    } catch (error) {
+      console.error('Error adding partner:', error);
+      toast.error('Ошибка добавления партнера');
+    }
+  };
+
+  const handleSendInvitation = (partnerId: string) => {
+    const partner = partners.find((p) => p.id === partnerId);
     if (partner) {
-      toast({
-        title: "Приглашение повторно отправлено",
-        description: `Приглашение повторно отправлено на почту ${partner.email}`,
-      });
+      toast.success(`Приглашение повторно отправлено на почту ${partner.email}`);
     }
   };
 
-  const format_date = (date_string: string) => {
-    const date = new Date(date_string);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     return date.toLocaleDateString("ru-RU", {
       year: "numeric",
       month: "long",
@@ -163,7 +148,7 @@ const AdminPartners = () => {
     });
   };
 
-  const get_status_badge = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
         return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Активен</span>;
@@ -176,11 +161,26 @@ const AdminPartners = () => {
     }
   };
 
+  const resetFilters = () => {
+    setSearchQuery("");
+    setFilterStatus("all");
+  };
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Управление партнерами</h1>
-        <Dialog open={is_add_dialog_open} onOpenChange={set_is_add_dialog_open}>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" /> Добавить партнера
@@ -200,8 +200,8 @@ const AdminPartners = () => {
                 </label>
                 <Input
                   id="name"
-                  value={new_partner.name}
-                  onChange={(e) => set_new_partner({ ...new_partner, name: e.target.value })}
+                  value={newPartner.name}
+                  onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })}
                   placeholder="Введите полное имя"
                 />
               </div>
@@ -212,17 +212,17 @@ const AdminPartners = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={new_partner.email}
-                  onChange={(e) => set_new_partner({ ...new_partner, email: e.target.value })}
+                  value={newPartner.email}
+                  onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
                   placeholder="partner@example.com"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => set_is_add_dialog_open(false)}>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                 Отмена
               </Button>
-              <Button onClick={handle_add_partner} disabled={!new_partner.name || !new_partner.email}>
+              <Button onClick={handleAddPartner} disabled={!newPartner.name || !newPartner.email}>
                 Отправить приглашение
               </Button>
             </DialogFooter>
@@ -233,18 +233,18 @@ const AdminPartners = () => {
       <Card className="mb-8">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <form onSubmit={handle_search} className="relative sm:w-96">
+            <div className="relative sm:w-96">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <Input
                 type="text"
                 placeholder="Поиск партнеров..."
-                value={search_query}
-                onChange={(e) => set_search_query(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
-            </form>
+            </div>
             <div className="flex gap-2">
-              <Select value={filter_status} onValueChange={handle_status_filter}>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Фильтр по статусу" />
                 </SelectTrigger>
@@ -255,11 +255,7 @@ const AdminPartners = () => {
                   <SelectItem value="pending">Ожидающие</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" onClick={() => {
-                set_search_query("");
-                set_filter_status("all");
-                set_partners(mock_partners);
-              }}>
+              <Button variant="outline" onClick={resetFilters}>
                 Сбросить
               </Button>
             </div>
@@ -267,7 +263,7 @@ const AdminPartners = () => {
         </CardContent>
       </Card>
 
-      {partners.length > 0 ? (
+      {filteredPartners.length > 0 ? (
         <Card>
           <CardContent className="p-0">
             <Table>
@@ -282,13 +278,13 @@ const AdminPartners = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {partners.map((partner) => (
+                {filteredPartners.map((partner) => (
                   <TableRow key={partner.id}>
                     <TableCell className="font-medium">{partner.name}</TableCell>
                     <TableCell>{partner.email}</TableCell>
-                    <TableCell>{get_status_badge(partner.status)}</TableCell>
-                    <TableCell>{partner.gym_count}</TableCell>
-                    <TableCell>{format_date(partner.created_at)}</TableCell>
+                    <TableCell>{getStatusBadge(partner.status)}</TableCell>
+                    <TableCell>{partner.gym_count || 0}</TableCell>
+                    <TableCell>{formatDate(partner.created_at)}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -299,7 +295,7 @@ const AdminPartners = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Действия</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handle_send_invitation(partner.id)}>
+                          <DropdownMenuItem onClick={() => handleSendInvitation(partner.id)}>
                             <Mail className="h-4 w-4 mr-2" />
                             Отправить приглашение
                           </DropdownMenuItem>
@@ -325,7 +321,7 @@ const AdminPartners = () => {
           </CardContent>
           <CardFooter className="flex items-center justify-between border-t p-4">
             <div className="text-sm text-gray-500">
-              Показано {partners.length} из {mock_partners.length} партнеров
+              Показано {filteredPartners.length} из {partners.length} партнеров
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" disabled>
@@ -345,11 +341,7 @@ const AdminPartners = () => {
             <p className="text-gray-500 text-center mb-4">
               Ни один партнер не соответствует вашим критериям поиска или фильтрации.
             </p>
-            <Button onClick={() => {
-              set_search_query("");
-              set_filter_status("all");
-              set_partners(mock_partners);
-            }}>
+            <Button onClick={resetFilters}>
               Сбросить фильтры
             </Button>
           </CardContent>
