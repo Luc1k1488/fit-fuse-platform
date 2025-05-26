@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, StarHalf, Search, CheckCircle, AlertTriangle } from "lucide-react";
+import { Star, StarHalf, Search, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Review, User, Gym } from "@/types";
 import { toast } from "sonner";
@@ -18,7 +17,6 @@ const AdminReviews = () => {
   const [gyms, setGyms] = useState<Record<string, Gym>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRating, setFilterRating] = useState("all");
-  const [currentTab, setCurrentTab] = useState("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,8 +38,11 @@ const AdminReviews = () => {
       setReviews(reviewsResponse.data || []);
       
       // Create lookup objects
-      const usersMap = (usersResponse.data || []).reduce((acc: Record<string, User>, user: User) => {
-        acc[user.id] = user;
+      const usersMap = (usersResponse.data || []).reduce((acc: Record<string, User>, user: any) => {
+        acc[user.id] = {
+          ...user,
+          role: user.role as "user" | "admin" | "partner" | "support"
+        };
         return acc;
       }, {});
       
