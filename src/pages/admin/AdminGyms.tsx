@@ -57,10 +57,9 @@ const AdminGyms = () => {
       if (gymsResponse.error) throw gymsResponse.error;
       setGyms(gymsResponse.data || []);
       
-      // Fetch partners using a direct query to avoid TypeScript issues
+      // Fetch partners using RPC function without .select()
       const { data: partnersData, error: partnersError } = await supabase
-        .rpc('get_partners_data')
-        .select();
+        .rpc('get_partners_data');
 
       if (partnersError) {
         // If RPC fails, create mock partners
