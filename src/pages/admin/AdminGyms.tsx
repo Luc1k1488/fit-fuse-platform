@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,17 +50,21 @@ const AdminGyms = () => {
 
   const fetchData = async () => {
     try {
-      const [gymsResponse, partnersResponse] = await Promise.all([
-        supabase.from('gyms').select('*').order('created_at', { ascending: false }),
-        // Используем простой SQL запрос для получения партнеров, пока типы не обновились
-        supabase.rpc('get_partners_data')
+      const [gymsResponse] = await Promise.all([
+        supabase.from('gyms').select('*').order('created_at', { ascending: false })
       ]);
 
       if (gymsResponse.error) throw gymsResponse.error;
       setGyms(gymsResponse.data || []);
       
-      // Если RPC не работает, создаем моковых партнеров
-      if (partnersResponse.error) {
+      // Fetch partners using a direct query to avoid TypeScript issues
+      const { data: partnersData, error: partnersError } = await supabase
+        .rpc('get_partners_data')
+        .select();
+
+      if (partnersError) {
+        // If RPC fails, create mock partners
+        console.log('RPC failed, using mock data:', partnersError);
         setPartners([
           {
             id: '1',
@@ -89,11 +92,39 @@ const AdminGyms = () => {
           }
         ]);
       } else {
-        setPartners(partnersResponse.data || []);
+        setPartners(partnersData || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Ошибка загрузки данных');
+      
+      // Set mock data as fallback
+      setPartners([
+        {
+          id: '1',
+          user_id: null,
+          name: 'Иванов Иван Иванович',
+          email: 'ivanov@fitnesscenter.ru',
+          phone: '+7 (900) 123-45-67',
+          company_name: 'Фитнес Центр Иванова',
+          status: 'active',
+          gym_count: 2,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          user_id: null,
+          name: 'Петрова Анна Сергеевна',
+          email: 'petrova@sportclub.ru',
+          phone: '+7 (900) 234-56-78',
+          company_name: 'Спорт Клуб Премиум',
+          status: 'active',
+          gym_count: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ]);
     } finally {
       setLoading(false);
     }
