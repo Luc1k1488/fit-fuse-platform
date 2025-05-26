@@ -50,54 +50,15 @@ const AdminGyms = () => {
 
   const fetchData = async () => {
     try {
-      const [gymsResponse] = await Promise.all([
-        supabase.from('gyms').select('*').order('created_at', { ascending: false })
-      ]);
+      const { data: gymsData, error: gymsError } = await supabase
+        .from('gyms')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (gymsResponse.error) throw gymsResponse.error;
-      setGyms(gymsResponse.data || []);
+      if (gymsError) throw gymsError;
+      setGyms(gymsData || []);
       
-      // Fetch partners using RPC function without .select()
-      const { data: partnersData, error: partnersError } = await supabase
-        .rpc('get_partners_data');
-
-      if (partnersError) {
-        // If RPC fails, create mock partners
-        console.log('RPC failed, using mock data:', partnersError);
-        setPartners([
-          {
-            id: '1',
-            user_id: null,
-            name: 'Иванов Иван Иванович',
-            email: 'ivanov@fitnesscenter.ru',
-            phone: '+7 (900) 123-45-67',
-            company_name: 'Фитнес Центр Иванова',
-            status: 'active',
-            gym_count: 2,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          },
-          {
-            id: '2',
-            user_id: null,
-            name: 'Петрова Анна Сергеевна',
-            email: 'petrova@sportclub.ru',
-            phone: '+7 (900) 234-56-78',
-            company_name: 'Спорт Клуб Премиум',
-            status: 'active',
-            gym_count: 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        ]);
-      } else {
-        setPartners(partnersData || []);
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Ошибка загрузки данных');
-      
-      // Set mock data as fallback
+      // Use mock partners data since we don't have a partners table
       setPartners([
         {
           id: '1',
@@ -124,6 +85,9 @@ const AdminGyms = () => {
           updated_at: new Date().toISOString()
         }
       ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast.error('Ошибка загрузки данных');
     } finally {
       setLoading(false);
     }
