@@ -273,6 +273,45 @@ export type Database = {
           },
         ]
       }
+      partners: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          gym_count: number | null
+          id: string
+          name: string
+          phone: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          gym_count?: number | null
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          gym_count?: number | null
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       promo_code_usage: {
         Row: {
           id: string
