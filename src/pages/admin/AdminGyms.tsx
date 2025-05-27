@@ -82,7 +82,7 @@ const AdminGyms = () => {
   };
 
   const getPartnerName = (partnerId: string | null) => {
-    if (!partnerId) return 'Не назначен';
+    if (!partnerId || partnerId === 'unassigned') return 'Не назначен';
     const partner = partners.find(p => p.id === partnerId);
     return partner ? partner.name : 'Неизвестный партнер';
   };
@@ -97,7 +97,7 @@ const AdminGyms = () => {
       category: gym.category || "",
       working_hours: gym.working_hours || "",
       features: gym.features || [],
-      partner_id: gym.partner_id || ""
+      partner_id: gym.partner_id || "unassigned"
     });
     setEditDialogOpen(true);
   };
@@ -106,6 +106,8 @@ const AdminGyms = () => {
     if (!selectedGym) return;
 
     try {
+      const partnerIdToSave = formData.partner_id === 'unassigned' ? null : formData.partner_id;
+      
       const { error } = await supabase
         .from('gyms')
         .update({
@@ -116,7 +118,7 @@ const AdminGyms = () => {
           category: formData.category,
           working_hours: formData.working_hours,
           features: formData.features,
-          partner_id: formData.partner_id || null
+          partner_id: partnerIdToSave
         })
         .eq('id', selectedGym.id);
 
@@ -321,7 +323,7 @@ const AdminGyms = () => {
                   <SelectValue placeholder="Выберите партнера" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Не назначен</SelectItem>
+                  <SelectItem value="unassigned">Не назначен</SelectItem>
                   {partners.filter(p => p.status === 'active').map((partner) => (
                     <SelectItem key={partner.id} value={partner.id}>
                       {partner.name} ({partner.email})
