@@ -39,6 +39,7 @@ const ClientHome = () => {
       features: ["Кроссфит", "Функциональные тренировки", "Групповые занятия"],
       category: "crossfit",
       owner_id: null,
+      partner_id: null,
       working_hours: "6:00-23:00"
     },
     // Тренажерный зал
@@ -55,6 +56,7 @@ const ClientHome = () => {
       features: ["Тренажеры", "Свободные веса", "Кардиозона"],
       category: "gym",
       owner_id: null,
+      partner_id: null,
       working_hours: "24/7"
     },
     // Бассейн
@@ -71,6 +73,7 @@ const ClientHome = () => {
       features: ["25-метровый бассейн", "Аквааэробика", "Сауна"],
       category: "pool",
       owner_id: null,
+      partner_id: null,
       working_hours: "6:00-22:00"
     },
     // Йога
@@ -87,6 +90,7 @@ const ClientHome = () => {
       features: ["Хатха-йога", "Виньяса", "Медитация"],
       category: "yoga",
       owner_id: null,
+      partner_id: null,
       working_hours: "7:00-21:00"
     },
     // Бокс
@@ -103,6 +107,7 @@ const ClientHome = () => {
       features: ["Бокс", "Кикбоксинг", "Персональные тренировки"],
       category: "boxing",
       owner_id: null,
+      partner_id: null,
       working_hours: "8:00-22:00"
     },
     // Танцы
@@ -119,6 +124,7 @@ const ClientHome = () => {
       features: ["Современные танцы", "Хип-хоп", "Латина"],
       category: "dance",
       owner_id: null,
+      partner_id: null,
       working_hours: "10:00-22:00"
     }
   ];

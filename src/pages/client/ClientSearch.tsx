@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ const ClientSearch = () => {
       features: ["Кроссфит", "Функциональные тренировки", "Групповые занятия"],
       category: "crossfit",
       owner_id: null,
+      partner_id: null,
       working_hours: "6:00-23:00"
     },
     {
@@ -51,6 +53,7 @@ const ClientSearch = () => {
       features: ["Тренажеры", "Свободные веса", "Кардиозона"],
       category: "gym",
       owner_id: null,
+      partner_id: null,
       working_hours: "24/7"
     },
     {
@@ -66,6 +69,7 @@ const ClientSearch = () => {
       features: ["25-метровый бассейн", "Аквааэробика", "Сауна"],
       category: "pool",
       owner_id: null,
+      partner_id: null,
       working_hours: "6:00-22:00"
     },
     {
@@ -81,6 +85,7 @@ const ClientSearch = () => {
       features: ["Хатха-йога", "Виньяса", "Медитация"],
       category: "yoga",
       owner_id: null,
+      partner_id: null,
       working_hours: "7:00-21:00"
     },
     {
@@ -96,6 +101,7 @@ const ClientSearch = () => {
       features: ["Бокс", "Кикбоксинг", "Персональные тренировки"],
       category: "boxing",
       owner_id: null,
+      partner_id: null,
       working_hours: "8:00-22:00"
     },
     {
@@ -111,6 +117,7 @@ const ClientSearch = () => {
       features: ["Современные танцы", "Хип-хоп", "Латина"],
       category: "dance",
       owner_id: null,
+      partner_id: null,
       working_hours: "10:00-22:00"
     }
   ];
