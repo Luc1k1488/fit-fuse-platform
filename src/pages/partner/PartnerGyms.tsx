@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Table, 
@@ -22,7 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth_context";
-import { Search, MoreVertical, Plus, MapPin, Star, StarHalf } from "lucide-react";
+import { Search, Plus, MapPin, Star, StarHalf } from "lucide-react";
 import { GymForm } from "@/components/admin/GymForm";
 
 const PartnerGyms = () => {
@@ -33,11 +34,23 @@ const PartnerGyms = () => {
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
   
   const fetchGyms = async () => {
+    // Получаем ID партнера для текущего пользователя
+    const { data: partnerData, error: partnerError } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('user_id', user?.id)
+      .single();
+
+    if (partnerError) {
+      console.error('Error fetching partner:', partnerError);
+      throw new Error('Партнер не найден');
+    }
+
     let query = supabase.from("gyms").select("*");
     
-    // Партнер видит только свои залы
-    if (user?.id) {
-      query = query.eq("owner_id", user.id);
+    // Партнер видит только свои залы по partner_id
+    if (partnerData?.id) {
+      query = query.eq("partner_id", partnerData.id);
     }
     
     if (searchQuery) {
@@ -67,6 +80,7 @@ const PartnerGyms = () => {
   } = useQuery({
     queryKey: ["partner-gyms", searchQuery, user?.id],
     queryFn: fetchGyms,
+    enabled: !!user?.id
   });
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,7 +88,14 @@ const PartnerGyms = () => {
     refetch();
   };
 
-  const handleAddGym = () => {
+  const handleAddGym = async () => {
+    // Получаем ID партнера для создания нового зала
+    const { data: partnerData } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('user_id', user?.id)
+      .single();
+
     setSelectedGym(null);
     setIsAddGymOpen(true);
   };
@@ -96,11 +117,18 @@ const PartnerGyms = () => {
 
   const handleDeleteGym = async (gymId: string) => {
     try {
+      // Получаем ID партнера для проверки прав
+      const { data: partnerData } = await supabase
+        .from('partners')
+        .select('id')
+        .eq('user_id', user?.id)
+        .single();
+
       const { error } = await supabase
         .from("gyms")
         .delete()
         .eq("id", gymId)
-        .eq("owner_id", user?.id); // Для безопасности добавлена проверка владельца
+        .eq("partner_id", partnerData?.id); // Проверка прав партнера
 
       if (error) {
         toast({
@@ -212,7 +240,6 @@ const PartnerGyms = () => {
                                   alt={gym.name || ""} 
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
-                                    // Если изображение не загружается, показываем запасной вариант
                                     (e.target as HTMLImageElement).src = "https://placehold.co/200x200?text=No+Image";
                                   }}
                                 />
@@ -302,10 +329,7 @@ const PartnerGyms = () => {
           open={isAddGymOpen}
           onClose={() => setIsAddGymOpen(false)}
           onSuccess={handleGymSuccess}
-          initialData={
-            selectedGym || 
-            (user?.id ? { owner_id: user.id } as Partial<Gym> : undefined)
-          }
+          initialData={selectedGym}
         />
       )}
     </div>

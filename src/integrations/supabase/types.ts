@@ -227,6 +227,7 @@ export type Database = {
           main_image: string | null
           name: string | null
           owner_id: string | null
+          partner_id: string | null
           rating: number | null
           review_count: number | null
           working_hours: string | null
@@ -243,6 +244,7 @@ export type Database = {
           main_image?: string | null
           name?: string | null
           owner_id?: string | null
+          partner_id?: string | null
           rating?: number | null
           review_count?: number | null
           working_hours?: string | null
@@ -259,6 +261,7 @@ export type Database = {
           main_image?: string | null
           name?: string | null
           owner_id?: string | null
+          partner_id?: string | null
           rating?: number | null
           review_count?: number | null
           working_hours?: string | null
@@ -269,6 +272,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gyms_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]

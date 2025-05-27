@@ -19,6 +19,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Search, Edit, MapPin, Star, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +48,8 @@ const AdminGyms = () => {
     city: "",
     category: "",
     working_hours: "",
-    features: [] as string[]
+    features: [] as string[],
+    partner_id: ""
   });
 
   useEffect(() => {
@@ -64,7 +72,6 @@ const AdminGyms = () => {
         .order('created_at', { ascending: false });
 
       if (partnersError) throw partnersError;
-      // Type assertion to ensure the data matches our Partner interface
       setPartners((partnersData || []) as Partner[]);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -74,9 +81,9 @@ const AdminGyms = () => {
     }
   };
 
-  const getPartnerName = (ownerId: string | null) => {
-    if (!ownerId) return 'Не назначен';
-    const partner = partners.find(p => p.id === ownerId);
+  const getPartnerName = (partnerId: string | null) => {
+    if (!partnerId) return 'Не назначен';
+    const partner = partners.find(p => p.id === partnerId);
     return partner ? partner.name : 'Неизвестный партнер';
   };
 
@@ -89,7 +96,8 @@ const AdminGyms = () => {
       city: gym.city || "",
       category: gym.category || "",
       working_hours: gym.working_hours || "",
-      features: gym.features || []
+      features: gym.features || [],
+      partner_id: gym.partner_id || ""
     });
     setEditDialogOpen(true);
   };
@@ -107,7 +115,8 @@ const AdminGyms = () => {
           city: formData.city,
           category: formData.category,
           working_hours: formData.working_hours,
-          features: formData.features
+          features: formData.features,
+          partner_id: formData.partner_id || null
         })
         .eq('id', selectedGym.id);
 
@@ -210,7 +219,7 @@ const AdminGyms = () => {
                       <Badge variant="outline">{gym.category}</Badge>
                     )}
                   </TableCell>
-                  <TableCell>{getPartnerName(gym.owner_id)}</TableCell>
+                  <TableCell>{getPartnerName(gym.partner_id)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Star className="h-4 w-4 text-yellow-500 mr-1" />
@@ -303,6 +312,23 @@ const AdminGyms = () => {
                 onChange={(e) => setFormData({ ...formData, working_hours: e.target.value })}
                 placeholder="Пн-Пт: 06:00-24:00, Сб-Вс: 08:00-22:00"
               />
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="partner">Партнер</Label>
+              <Select value={formData.partner_id} onValueChange={(value) => setFormData({ ...formData, partner_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите партнера" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Не назначен</SelectItem>
+                  {partners.filter(p => p.status === 'active').map((partner) => (
+                    <SelectItem key={partner.id} value={partner.id}>
+                      {partner.name} ({partner.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="col-span-2">

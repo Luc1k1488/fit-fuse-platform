@@ -1,4 +1,3 @@
-
 // Common types for the fitness platform
 // All fields use snake_case as required
 
@@ -34,6 +33,7 @@ export type Gym = {
   name: string | null;
   location: string | null;
   owner_id: string | null;
+  partner_id: string | null; // Новое поле для связи с партнером
   main_image: string | null;
   working_hours: string | null;
   review_count: number | null;
