@@ -236,7 +236,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
       {/* Основное содержимое с отступами */}
       <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen`}>
-        {children || <Outlet />}
+        <Outlet />
       </div>
     </div>
   );
