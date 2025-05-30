@@ -1,4 +1,3 @@
-
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth_context";
@@ -22,7 +21,11 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const AdminLayout = () => {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { user, logout, user_role } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -233,7 +236,7 @@ const AdminLayout = () => {
 
       {/* Основное содержимое с отступами */}
       <div className={`${sidebar_open ? "lg:ml-64" : ""} p-4 pt-20 min-h-screen`}>
-        <Outlet />
+        {children || <Outlet />}
       </div>
     </div>
   );
