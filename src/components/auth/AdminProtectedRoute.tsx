@@ -33,6 +33,10 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin"] }: AdminProtec
     // Редиректим на соответствующую роли страницу
     if (user.role === "user") {
       return <Navigate to="/app" replace />;
+    } else if (user.role === "partner") {
+      return <Navigate to="/admin/partner" replace />;
+    } else if (user.role === "support") {
+      return <Navigate to="/admin/support-portal" replace />;
     } else {
       return <Navigate to="/admin/dashboard" replace />;
     }

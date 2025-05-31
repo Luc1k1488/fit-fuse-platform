@@ -10,10 +10,13 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user, logout, user_role } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
+
+  // Получаем роль пользователя из объекта user
+  const user_role = user?.role || 'user';
 
   const handleLogout = () => {
     logout();

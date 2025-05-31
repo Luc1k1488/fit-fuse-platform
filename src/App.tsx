@@ -28,6 +28,20 @@ import AdminSupport from "@/pages/admin/AdminSupport";
 import AdminAnalytics from "@/pages/admin/AdminAnalytics";
 import AdminLoginPage from "@/pages/auth/AdminLoginPage";
 
+// Partner pages
+import PartnerDashboard from "@/pages/partner/PartnerDashboard";
+import PartnerGyms from "@/pages/partner/PartnerGyms";
+import PartnerClasses from "@/pages/partner/PartnerClasses";
+import PartnerBookings from "@/pages/partner/PartnerBookings";
+import PartnerReviews from "@/pages/partner/PartnerReviews";
+import PartnerAnalytics from "@/pages/partner/PartnerAnalytics";
+
+// Support pages
+import SupportDashboard from "@/pages/support/SupportDashboard";
+import SupportTickets from "@/pages/support/SupportTickets";
+import SupportUsers from "@/pages/support/SupportUsers";
+import SupportChats from "@/pages/support/SupportChats";
+
 // Client pages
 import ClientHome from "@/pages/client/ClientHome";
 import ClientGyms from "@/pages/client/ClientGyms";
@@ -71,7 +85,7 @@ const App = () => {
               
               {/* Admin routes */}
               <Route path="/admin" element={
-                <AdminProtectedRoute allowedRoles={["admin", "support"]}>
+                <AdminProtectedRoute allowedRoles={["admin"]}>
                   <AdminLayout />
                 </AdminProtectedRoute>
               }>
@@ -86,6 +100,32 @@ const App = () => {
                 <Route path="reviews" element={<AdminReviews />} />
                 <Route path="support" element={<AdminSupport />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
+              </Route>
+
+              {/* Partner routes */}
+              <Route path="/admin/partner" element={
+                <AdminProtectedRoute allowedRoles={["partner"]}>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }>
+                <Route index element={<PartnerDashboard />} />
+                <Route path="gyms" element={<PartnerGyms />} />
+                <Route path="classes" element={<PartnerClasses />} />
+                <Route path="bookings" element={<PartnerBookings />} />
+                <Route path="reviews" element={<PartnerReviews />} />
+                <Route path="analytics" element={<PartnerAnalytics />} />
+              </Route>
+
+              {/* Support routes */}
+              <Route path="/admin/support-portal" element={
+                <AdminProtectedRoute allowedRoles={["support"]}>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }>
+                <Route index element={<SupportDashboard />} />
+                <Route path="tickets" element={<SupportTickets />} />
+                <Route path="users" element={<SupportUsers />} />
+                <Route path="chats" element={<SupportChats />} />
               </Route>
               
               {/* Client routes */}
