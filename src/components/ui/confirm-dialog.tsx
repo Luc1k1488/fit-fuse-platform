@@ -9,6 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -50,7 +52,11 @@ export const ConfirmDialog = ({
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={loading}
-            variant={variant === "destructive" ? "destructive" : "default"}
+            className={cn(
+              buttonVariants({ 
+                variant: variant === "destructive" ? "destructive" : "default" 
+              })
+            )}
           >
             {loading ? "Загрузка..." : confirmText}
           </AlertDialogAction>
