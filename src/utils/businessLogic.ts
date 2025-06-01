@@ -184,7 +184,8 @@ export const updateUserStats = async (
       completed_workouts: 0,
       current_streak_days: 0,
       best_streak_days: 0,
-      total_hours_trained: 0
+      total_hours_trained: 0,
+      last_workout_date: null
     };
 
     let updatedStats = { ...currentStats };
@@ -197,7 +198,7 @@ export const updateUserStats = async (
         updatedStats.completed_workouts = (currentStats.completed_workouts || 0) + 1;
         updatedStats.total_hours_trained = (currentStats.total_hours_trained || 0) + 1.5; // Предполагаем 1.5 часа за тренировку
         updatedStats.last_workout_date = new Date().toISOString();
-        // Обновляем streak (серию тренировок)
+        // Обновляем streak (серия тренировок)
         // Простая логика - если последняя тренировка была вчера, увеличиваем streak
         if (currentStats.last_workout_date) {
           const lastWorkout = new Date(currentStats.last_workout_date);
