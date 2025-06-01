@@ -47,7 +47,7 @@ import ClientHome from "@/pages/client/ClientHome";
 import ClientGyms from "@/pages/client/ClientGyms";
 import ClientClasses from "@/pages/client/ClientClasses";
 import ClientBookings from "@/pages/client/ClientBookings";
-import ClientProfile from "@/pages/client/ClientProfile";
+import ClientProfileNew from "@/pages/client/ClientProfileNew";
 import ClientSearch from "@/pages/client/ClientSearch";
 import ClientSubscription from "@/pages/client/ClientSubscription";
 import ClientDashboard from "@/pages/client/ClientDashboard";
@@ -138,7 +138,7 @@ const App = () => {
                 <Route path="search" element={<ClientSearch />} />
                 <Route path="schedule" element={<ClientSchedule />} />
                 <Route path="subscription" element={<ClientSubscription />} />
-                <Route path="profile" element={<ClientProfile />} />
+                <Route path="profile" element={<ClientProfileNew />} />
                 <Route path="gyms" element={<ClientGyms />} />
                 <Route path="gyms/:id" element={<ClientGymDetail />} />
                 <Route path="classes" element={<ClientClasses />} />
