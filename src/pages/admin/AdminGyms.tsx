@@ -138,12 +138,14 @@ const AdminGyms = () => {
     }
   };
 
-  const handleMainImageUpload = async (file: File) => {
+  const handleMainImageUpload = async (file: File): Promise<string> => {
     try {
       const url = await handleImageUpload(file);
       setFormData(prev => ({ ...prev, main_image: url }));
+      return url;
     } catch (error) {
       console.error('Error uploading main image:', error);
+      throw error;
     }
   };
 
