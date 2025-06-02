@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -148,17 +147,16 @@ const AdminGyms = () => {
     }
   };
 
-  const handleAdditionalImagesUpload = async (files: File[]) => {
+  const handleAdditionalImageUpload = async (file: File): Promise<string> => {
     try {
-      const uploadPromises = files.map(file => handleImageUpload(file));
-      const urls = await Promise.all(uploadPromises);
+      const url = await handleImageUpload(file);
       setFormData(prev => ({ 
         ...prev, 
-        images: [...prev.images, ...urls] 
+        images: [...prev.images, url] 
       }));
-      return urls;
+      return url;
     } catch (error) {
-      console.error('Error uploading additional images:', error);
+      console.error('Error uploading additional image:', error);
       throw error;
     }
   };
@@ -453,10 +451,7 @@ const AdminGyms = () => {
               </div>
               <ImageUploader
                 label="Добавить изображения"
-                onImageUpload={async (file) => {
-                  const urls = await handleAdditionalImagesUpload([file]);
-                  return urls[0];
-                }}
+                onImageUpload={handleAdditionalImageUpload}
                 accept="image/*"
                 maxSize={5}
                 className="mt-4"
