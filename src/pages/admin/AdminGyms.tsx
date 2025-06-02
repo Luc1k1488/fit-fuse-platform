@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,9 @@ import { Search, Edit, MapPin, Star, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Gym, Partner } from "@/types";
 import { toast } from "sonner";
+import { ImageUploader } from "@/components/ui/image-uploader";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 
 const AdminGyms = () => {
   const [gyms, setGyms] = useState<Gym[]>([]);
@@ -39,6 +43,9 @@ const AdminGyms = () => {
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imageUploading, setImageUploading] = useState(false);
+
+  const confirmDialog = useConfirmDialog();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +56,9 @@ const AdminGyms = () => {
     category: "",
     working_hours: "",
     features: [] as string[],
-    partner_id: ""
+    partner_id: "",
+    main_image: "",
+    images: [] as string[]
   });
 
   useEffect(() => {
@@ -97,13 +106,85 @@ const AdminGyms = () => {
       category: gym.category || "",
       working_hours: gym.working_hours || "",
       features: gym.features || [],
-      partner_id: gym.partner_id || "unassigned"
+      partner_id: gym.partner_id || "unassigned",
+      main_image: gym.main_image || "",
+      images: gym.images || []
     });
     setEditDialogOpen(true);
   };
 
+  const handleImageUpload = async (file: File): Promise<string> => {
+    setImageUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `gym-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('gym-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('gym-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw new Error('Не удалось загрузить изображение');
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const handleMainImageUpload = async (file: File) => {
+    try {
+      const url = await handleImageUpload(file);
+      setFormData(prev => ({ ...prev, main_image: url }));
+    } catch (error) {
+      console.error('Error uploading main image:', error);
+    }
+  };
+
+  const handleAdditionalImagesUpload = async (files: File[]) => {
+    try {
+      const uploadPromises = files.map(file => handleImageUpload(file));
+      const urls = await Promise.all(uploadPromises);
+      setFormData(prev => ({ 
+        ...prev, 
+        images: [...prev.images, ...urls] 
+      }));
+      return urls;
+    } catch (error) {
+      console.error('Error uploading additional images:', error);
+      throw error;
+    }
+  };
+
+  const handleRemoveMainImage = () => {
+    setFormData(prev => ({ ...prev, main_image: "" }));
+  };
+
+  const handleRemoveAdditionalImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSaveGym = async () => {
     if (!selectedGym) return;
+
+    const confirmed = await confirmDialog.confirm({
+      title: "Сохранить изменения?",
+      description: "Вы уверены, что хотите сохранить изменения в зале?",
+      confirmText: "Сохранить",
+      cancelText: "Отмена"
+    });
+
+    if (!confirmed) return;
 
     try {
       const partnerIdToSave = formData.partner_id === 'unassigned' ? null : formData.partner_id;
@@ -118,7 +199,9 @@ const AdminGyms = () => {
           category: formData.category,
           working_hours: formData.working_hours,
           features: formData.features,
-          partner_id: partnerIdToSave
+          partner_id: partnerIdToSave,
+          main_image: formData.main_image || null,
+          images: formData.images
         })
         .eq('id', selectedGym.id);
 
@@ -252,7 +335,7 @@ const AdminGyms = () => {
       </Card>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Редактировать зал</DialogTitle>
             <DialogDescription>
@@ -260,44 +343,46 @@ const AdminGyms = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Название</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Название</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category">Категория</Label>
+                <Input
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="city">Город</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="location">Район</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                />
+              </div>
             </div>
             
             <div>
-              <Label htmlFor="category">Категория</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="city">Город</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="location">Район</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              />
-            </div>
-            
-            <div className="col-span-2">
               <Label htmlFor="address">Адрес</Label>
               <Input
                 id="address"
@@ -306,7 +391,7 @@ const AdminGyms = () => {
               />
             </div>
             
-            <div className="col-span-2">
+            <div>
               <Label htmlFor="working_hours">Часы работы</Label>
               <Input
                 id="working_hours"
@@ -316,7 +401,7 @@ const AdminGyms = () => {
               />
             </div>
 
-            <div className="col-span-2">
+            <div>
               <Label htmlFor="partner">Партнер</Label>
               <Select value={formData.partner_id} onValueChange={(value) => setFormData({ ...formData, partner_id: value })}>
                 <SelectTrigger>
@@ -332,8 +417,53 @@ const AdminGyms = () => {
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <ImageUploader
+                label="Главное изображение"
+                onImageUpload={handleMainImageUpload}
+                currentImage={formData.main_image}
+                onImageRemove={handleRemoveMainImage}
+                accept="image/*"
+                maxSize={5}
+              />
+            </div>
+
+            <div>
+              <Label>Дополнительные изображения</Label>
+              <div className="grid grid-cols-3 gap-4 mt-2">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={image}
+                      alt={`Дополнительное изображение ${index + 1}`}
+                      className="w-full h-24 object-cover rounded border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={() => handleRemoveAdditionalImage(index)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <ImageUploader
+                label="Добавить изображения"
+                onImageUpload={async (file) => {
+                  const urls = await handleAdditionalImagesUpload([file]);
+                  return urls[0];
+                }}
+                accept="image/*"
+                maxSize={5}
+                className="mt-4"
+              />
+            </div>
             
-            <div className="col-span-2">
+            <div>
               <Label>Удобства</Label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {formData.features.map((feature, index) => (
@@ -363,12 +493,27 @@ const AdminGyms = () => {
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
               Отмена
             </Button>
-            <Button onClick={handleSaveGym}>
-              Сохранить
+            <Button 
+              onClick={handleSaveGym}
+              disabled={imageUploading}
+            >
+              {imageUploading ? 'Загрузка...' : 'Сохранить'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmDialog.isOpen}
+        onOpenChange={confirmDialog.setIsOpen}
+        title={confirmDialog.config.title}
+        description={confirmDialog.config.description}
+        confirmText={confirmDialog.config.confirmText}
+        cancelText={confirmDialog.config.cancelText}
+        onConfirm={confirmDialog.handleConfirm}
+        variant={confirmDialog.config.variant}
+        loading={confirmDialog.loading}
+      />
     </div>
   );
 };
