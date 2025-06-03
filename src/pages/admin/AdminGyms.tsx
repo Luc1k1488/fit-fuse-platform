@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { AdminGymsHeader } from "@/components/admin/gyms/AdminGymsHeader";
 import { AdminGymsTable } from "@/components/admin/gyms/AdminGymsTable";
 import { AdminGymEditDialog } from "@/components/admin/gyms/AdminGymEditDialog";
+import { validateGymData } from "@/utils/gymValidation";
 
 interface GymFormData {
   name: string;
@@ -157,6 +157,14 @@ const AdminGyms = () => {
 
   const handleSaveGym = async () => {
     if (!selectedGym) return;
+
+    // Валидация данных перед сохранением
+    const validationResult = validateGymData(formData);
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
+      toast.error(`Ошибка валидации: ${firstError.message}`);
+      return;
+    }
 
     const confirmed = await confirmDialog.confirm({
       title: "Сохранить изменения?",

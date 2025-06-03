@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { Partner } from "@/types";
+import { validateGymData } from "@/utils/gymValidation";
+import { useState } from "react";
 
 interface GymFormData {
   name: string;
@@ -47,21 +49,49 @@ export const AdminGymForm = ({
   onRemoveAdditionalImage,
   imageUploading
 }: AdminGymFormProps) => {
-  const addFeature = (feature: string) => {
-    if (feature && !formData.features.includes(feature)) {
-      setFormData({
-        ...formData,
-        features: [...formData.features, feature]
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateField = (fieldName: keyof GymFormData, value: any) => {
+    const result = validateGymData({ ...formData, [fieldName]: value });
+    if (!result.success) {
+      const fieldError = result.error.errors.find(err => err.path[0] === fieldName);
+      if (fieldError) {
+        setErrors(prev => ({ ...prev, [fieldName]: fieldError.message }));
+      } else {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[fieldName];
+          return newErrors;
+        });
+      }
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldName];
+        return newErrors;
       });
     }
   };
 
-  const removeFeature = (feature: string) => {
-    setFormData({
-      ...formData,
-      features: formData.features.filter(f => f !== feature)
-    });
+  const handleFieldChange = (fieldName: keyof GymFormData, value: any) => {
+    const newData = { ...formData, [fieldName]: value };
+    setFormData(newData);
+    validateField(fieldName, value);
   };
+
+  const addFeature = (feature: string) => {
+    if (feature && !formData.features.includes(feature)) {
+      const newFeatures = [...formData.features, feature];
+      handleFieldChange('features', newFeatures);
+    }
+  };
+
+  const removeFeature = (feature: string) => {
+    const newFeatures = formData.features.filter(f => f !== feature);
+    handleFieldChange('features', newFeatures);
+  };
+
+  const getFieldError = (fieldName: string) => errors[fieldName];
 
   return (
     <div className="space-y-6">
@@ -71,8 +101,12 @@ export const AdminGymForm = ({
           <Input
             id="name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => handleFieldChange('name', e.target.value)}
+            className={getFieldError('name') ? 'border-red-500' : ''}
           />
+          {getFieldError('name') && (
+            <p className="text-sm text-red-500 mt-1">{getFieldError('name')}</p>
+          )}
         </div>
         
         <div>
@@ -80,8 +114,12 @@ export const AdminGymForm = ({
           <Input
             id="category"
             value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            onChange={(e) => handleFieldChange('category', e.target.value)}
+            className={getFieldError('category') ? 'border-red-500' : ''}
           />
+          {getFieldError('category') && (
+            <p className="text-sm text-red-500 mt-1">{getFieldError('category')}</p>
+          )}
         </div>
         
         <div>
@@ -89,8 +127,12 @@ export const AdminGymForm = ({
           <Input
             id="city"
             value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            onChange={(e) => handleFieldChange('city', e.target.value)}
+            className={getFieldError('city') ? 'border-red-500' : ''}
           />
+          {getFieldError('city') && (
+            <p className="text-sm text-red-500 mt-1">{getFieldError('city')}</p>
+          )}
         </div>
         
         <div>
@@ -98,8 +140,12 @@ export const AdminGymForm = ({
           <Input
             id="location"
             value={formData.location}
-            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            onChange={(e) => handleFieldChange('location', e.target.value)}
+            className={getFieldError('location') ? 'border-red-500' : ''}
           />
+          {getFieldError('location') && (
+            <p className="text-sm text-red-500 mt-1">{getFieldError('location')}</p>
+          )}
         </div>
       </div>
       
@@ -108,8 +154,12 @@ export const AdminGymForm = ({
         <Input
           id="address"
           value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+          onChange={(e) => handleFieldChange('address', e.target.value)}
+          className={getFieldError('address') ? 'border-red-500' : ''}
         />
+        {getFieldError('address') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('address')}</p>
+        )}
       </div>
       
       <div>
@@ -117,15 +167,22 @@ export const AdminGymForm = ({
         <Input
           id="working_hours"
           value={formData.working_hours}
-          onChange={(e) => setFormData({ ...formData, working_hours: e.target.value })}
+          onChange={(e) => handleFieldChange('working_hours', e.target.value)}
           placeholder="Пн-Пт: 06:00-24:00, Сб-Вс: 08:00-22:00"
+          className={getFieldError('working_hours') ? 'border-red-500' : ''}
         />
+        {getFieldError('working_hours') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('working_hours')}</p>
+        )}
       </div>
 
       <div>
         <Label htmlFor="partner">Партнер</Label>
-        <Select value={formData.partner_id} onValueChange={(value) => setFormData({ ...formData, partner_id: value })}>
-          <SelectTrigger>
+        <Select 
+          value={formData.partner_id} 
+          onValueChange={(value) => handleFieldChange('partner_id', value)}
+        >
+          <SelectTrigger className={getFieldError('partner_id') ? 'border-red-500' : ''}>
             <SelectValue placeholder="Выберите партнера" />
           </SelectTrigger>
           <SelectContent>
@@ -137,6 +194,9 @@ export const AdminGymForm = ({
             ))}
           </SelectContent>
         </Select>
+        {getFieldError('partner_id') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('partner_id')}</p>
+        )}
       </div>
 
       <div>
@@ -148,6 +208,9 @@ export const AdminGymForm = ({
           accept="image/*"
           maxSize={5}
         />
+        {getFieldError('main_image') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('main_image')}</p>
+        )}
       </div>
 
       <div>
@@ -179,6 +242,9 @@ export const AdminGymForm = ({
           maxSize={5}
           className="mt-4"
         />
+        {getFieldError('images') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('images')}</p>
+        )}
       </div>
       
       <div>
@@ -204,6 +270,9 @@ export const AdminGymForm = ({
             </Button>
           ))}
         </div>
+        {getFieldError('features') && (
+          <p className="text-sm text-red-500 mt-1">{getFieldError('features')}</p>
+        )}
       </div>
     </div>
   );
