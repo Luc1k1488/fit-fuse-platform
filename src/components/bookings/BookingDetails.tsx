@@ -3,10 +3,9 @@ import React from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { DarkCard } from "@/components/ui/dark-card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User, X, Bell } from "lucide-react";
-import { toast } from "sonner";
+import { MapPin, User, Calendar, Clock } from "lucide-react";
+import { BookingStatusBadge } from "./BookingStatusBadge";
+import { BookingActions } from "./BookingActions";
 
 interface BookingDetailsProps {
   booking: {
@@ -19,34 +18,24 @@ interface BookingDetailsProps {
     status: string;
   };
   className?: string;
+  onCancel?: (bookingId: string) => void;
+  onReschedule?: (bookingId: string) => void;
+  onSetReminder?: (bookingId: string) => void;
 }
 
-export const BookingDetails: React.FC<BookingDetailsProps> = ({ booking, className }) => {
-  const handleCancelBooking = () => {
-    toast.info("Отмена бронирования...", {
-      description: "В реальном приложении здесь был бы запрос к API",
-    });
-    // В реальном приложении здесь был бы запрос к API для отмены бронирования
-  };
-  
-  const handleSetReminder = () => {
-    toast.success("Напоминание установлено!");
-    // В реальном приложении здесь был бы запрос к API для установки напоминания
-  };
-  
-  const handleReschedule = () => {
-    toast.info("Открываем диалог переноса бронирования");
-    // В реальном приложении здесь был бы вызов диалога для переноса бронирования
-  };
-  
+export const BookingDetails: React.FC<BookingDetailsProps> = ({ 
+  booking, 
+  className,
+  onCancel,
+  onReschedule,
+  onSetReminder 
+}) => {
   return (
     <DarkCard className={`overflow-hidden animate-fade-in ${className || ""}`} hoverEffect="raise">
       <div className="p-4 border-b border-gray-800">
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-medium text-white">Детали бронирования</h2>
-          <Badge variant={booking.status === 'confirmed' ? 'default' : 'secondary'}>
-            {booking.status === 'confirmed' ? 'Подтверждено' : 'В ожидании'}
-          </Badge>
+          <BookingStatusBadge status={booking.status} />
         </div>
       </div>
       
@@ -78,36 +67,13 @@ export const BookingDetails: React.FC<BookingDetailsProps> = ({ booking, classNa
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            onClick={handleCancelBooking} 
-            className="transition-all hover:scale-105"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Отменить
-          </Button>
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={handleReschedule}
-            className="transition-all hover:scale-105"
-          >
-            <Calendar className="h-4 w-4 mr-1" />
-            Перенести
-          </Button>
-        </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleSetReminder}
-          className="w-full transition-all hover:scale-105"
-        >
-          <Bell className="h-4 w-4 mr-1" />
-          Установить напоминание
-        </Button>
+        <BookingActions
+          bookingId={booking.id}
+          status={booking.status}
+          onCancel={onCancel}
+          onReschedule={onReschedule}
+          onSetReminder={onSetReminder}
+        />
       </div>
     </DarkCard>
   );
