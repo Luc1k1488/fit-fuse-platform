@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Star, StarHalf } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +6,9 @@ import { toast } from "sonner";
 import { AdminReviewsHeader } from "@/components/admin/reviews/AdminReviewsHeader";
 import { AdminReviewsFilters } from "@/components/admin/reviews/AdminReviewsFilters";
 import { AdminReviewsList } from "@/components/admin/reviews/AdminReviewsList";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { useAsyncOperation } from "@/hooks/useAsyncOperation";
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -16,12 +18,16 @@ const AdminReviews = () => {
   const [filterRating, setFilterRating] = useState("all");
   const [loading, setLoading] = useState(true);
 
+  const { loading: hideLoading, execute: executeHide } = useAsyncOperation<void>();
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
+      
       const [reviewsResponse, usersResponse, gymsResponse] = await Promise.all([
         supabase.from('reviews').select('*').order('created_at', { ascending: false }),
         supabase.from('users').select('*'),
@@ -58,20 +64,20 @@ const AdminReviews = () => {
   };
 
   const handleHideReview = async (reviewId: string) => {
-    try {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', reviewId);
+    await executeHide({
+      operation: async () => {
+        const { error } = await supabase
+          .from('reviews')
+          .delete()
+          .eq('id', reviewId);
 
-      if (error) throw error;
-
-      setReviews(reviews.filter(r => r.id !== reviewId));
-      toast.success('Отзыв скрыт');
-    } catch (error) {
-      console.error('Error hiding review:', error);
-      toast.error('Ошибка скрытия отзыва');
-    }
+        if (error) throw error;
+        
+        setReviews(reviews.filter(r => r.id !== reviewId));
+      },
+      successMessage: 'Отзыв скрыт',
+      errorMessage: 'Ошибка скрытия отзыва'
+    });
   };
 
   const filteredReviews = reviews.filter(review => {
@@ -138,40 +144,42 @@ const AdminReviews = () => {
     return (
       <div className="p-4">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          <LoadingSpinner size="lg" />
         </div>
       </div>
     );
   }
   
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Управление отзывами</h1>
-      
-      <AdminReviewsHeader
-        avgRating={avgRating}
-        totalReviews={reviews.length}
-        positivePercentage={positivePercentage}
-        negativePercentage={negativePercentage}
-        renderStars={renderStars}
-      />
-      
-      <AdminReviewsFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filterRating={filterRating}
-        onFilterRatingChange={setFilterRating}
-      />
+    <ErrorBoundary>
+      <div className="p-4 animate-fade-in">
+        <h1 className="text-2xl font-bold mb-4">Управление отзывами</h1>
         
-      <AdminReviewsList
-        reviews={filteredReviews}
-        users={users}
-        gyms={gyms}
-        onHideReview={handleHideReview}
-        formatDate={formatDate}
-        renderStars={renderStars}
-      />
-    </div>
+        <AdminReviewsHeader
+          avgRating={avgRating}
+          totalReviews={reviews.length}
+          positivePercentage={positivePercentage}
+          negativePercentage={negativePercentage}
+          renderStars={renderStars}
+        />
+        
+        <AdminReviewsFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterRating={filterRating}
+          onFilterRatingChange={setFilterRating}
+        />
+          
+        <AdminReviewsList
+          reviews={filteredReviews}
+          users={users}
+          gyms={gyms}
+          onHideReview={handleHideReview}
+          formatDate={formatDate}
+          renderStars={renderStars}
+        />
+      </div>
+    </ErrorBoundary>
   );
 };
 
