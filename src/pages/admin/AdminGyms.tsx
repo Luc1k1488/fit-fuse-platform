@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { AdminGymsHeader } from "@/components/admin/gyms/AdminGymsHeader";
 import { AdminGymsTable } from "@/components/admin/gyms/AdminGymsTable";
 import { AdminGymEditDialog } from "@/components/admin/gyms/AdminGymEditDialog";
+import { AdminGymCreateDialog } from "@/components/admin/gyms/AdminGymCreateDialog";
 import { validateGymData } from "@/utils/gymValidation";
 
 interface GymFormData {
@@ -29,12 +31,26 @@ const AdminGyms = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGym, setSelectedGym] = useState<Gym | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [imageUploading, setImageUploading] = useState(false);
 
   const confirmDialog = useConfirmDialog();
 
   const [formData, setFormData] = useState<GymFormData>({
+    name: "",
+    location: "",
+    address: "",
+    city: "",
+    category: "",
+    working_hours: "",
+    features: [],
+    partner_id: "",
+    main_image: "",
+    images: []
+  });
+
+  const [createFormData, setCreateFormData] = useState<GymFormData>({
     name: "",
     location: "",
     address: "",
@@ -73,6 +89,48 @@ const AdminGyms = () => {
       toast.error('Ошибка загрузки данных');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateGym = async () => {
+    try {
+      const partnerIdToSave = createFormData.partner_id === 'unassigned' ? null : createFormData.partner_id;
+      
+      const { error } = await supabase
+        .from('gyms')
+        .insert([{
+          name: createFormData.name,
+          location: createFormData.location,
+          address: createFormData.address,
+          city: createFormData.city,
+          category: createFormData.category,
+          working_hours: createFormData.working_hours,
+          features: createFormData.features,
+          partner_id: partnerIdToSave,
+          main_image: createFormData.main_image || null,
+          images: createFormData.images
+        }]);
+
+      if (error) throw error;
+
+      await fetchData();
+      setCreateDialogOpen(false);
+      setCreateFormData({
+        name: "",
+        location: "",
+        address: "",
+        city: "",
+        category: "",
+        working_hours: "",
+        features: [],
+        partner_id: "",
+        main_image: "",
+        images: []
+      });
+      toast.success('Зал успешно создан');
+    } catch (error) {
+      console.error('Error creating gym:', error);
+      toast.error('Ошибка создания зала');
     }
   };
 
@@ -130,6 +188,17 @@ const AdminGyms = () => {
     }
   };
 
+  const handleCreateMainImageUpload = async (file: File): Promise<string> => {
+    try {
+      const url = await handleImageUpload(file);
+      setCreateFormData(prev => ({ ...prev, main_image: url }));
+      return url;
+    } catch (error) {
+      console.error('Error uploading main image:', error);
+      throw error;
+    }
+  };
+
   const handleAdditionalImageUpload = async (file: File): Promise<string> => {
     try {
       const url = await handleImageUpload(file);
@@ -144,8 +213,26 @@ const AdminGyms = () => {
     }
   };
 
+  const handleCreateAdditionalImageUpload = async (file: File): Promise<string> => {
+    try {
+      const url = await handleImageUpload(file);
+      setCreateFormData(prev => ({ 
+        ...prev, 
+        images: [...prev.images, url] 
+      }));
+      return url;
+    } catch (error) {
+      console.error('Error uploading additional image:', error);
+      throw error;
+    }
+  };
+
   const handleRemoveMainImage = () => {
     setFormData(prev => ({ ...prev, main_image: "" }));
+  };
+
+  const handleCreateRemoveMainImage = () => {
+    setCreateFormData(prev => ({ ...prev, main_image: "" }));
   };
 
   const handleRemoveAdditionalImage = (index: number) => {
@@ -155,10 +242,16 @@ const AdminGyms = () => {
     }));
   };
 
+  const handleCreateRemoveAdditionalImage = (index: number) => {
+    setCreateFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSaveGym = async () => {
     if (!selectedGym) return;
 
-    // Валидация данных перед сохранением
     const validationResult = validateGymData(formData);
     if (!validationResult.success) {
       const firstError = validationResult.error.errors[0];
@@ -228,6 +321,7 @@ const AdminGyms = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         totalGyms={filteredGyms.length}
+        onCreateGym={() => setCreateDialogOpen(true)}
       />
 
       <Card>
@@ -242,6 +336,20 @@ const AdminGyms = () => {
           />
         </CardContent>
       </Card>
+
+      <AdminGymCreateDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        formData={createFormData}
+        setFormData={setCreateFormData}
+        partners={partners}
+        onCreate={handleCreateGym}
+        onMainImageUpload={handleCreateMainImageUpload}
+        onAdditionalImageUpload={handleCreateAdditionalImageUpload}
+        onRemoveMainImage={handleCreateRemoveMainImage}
+        onRemoveAdditionalImage={handleCreateRemoveAdditionalImage}
+        imageUploading={imageUploading}
+      />
 
       <AdminGymEditDialog
         open={editDialogOpen}
