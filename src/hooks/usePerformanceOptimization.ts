@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { debounce, throttle } from 'lodash';
 
@@ -36,7 +35,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
   const cache = useRef(new Map());
   const observer = useRef<IntersectionObserver | null>(null);
 
-  // Performance measurement
   const measureRenderTime = useCallback((fn: () => void) => {
     const start = performance.now();
     fn();
@@ -48,7 +46,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     }));
   }, []);
 
-  // Memory usage tracking
   const trackMemoryUsage = useCallback(() => {
     if ('memory' in performance) {
       const memory = (performance as any).memory;
@@ -59,7 +56,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     }
   }, []);
 
-  // Cache management
   const cacheGet = useCallback((key: string) => {
     return cache.current.get(key);
   }, []);
@@ -76,7 +72,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     cache.current.clear();
   }, []);
 
-  // Virtualization for large lists
   const getVisibleItems = useCallback((
     items: any[],
     startIndex: number,
@@ -87,7 +82,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     return items.slice(startIndex, endIndex + 1);
   }, [enableVirtualization]);
 
-  // Lazy loading with Intersection Observer
   const setupLazyLoading = useCallback((
     callback: (entries: IntersectionObserverEntry[]) => void,
     options?: IntersectionObserverInit
@@ -105,7 +99,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     return observer.current;
   }, []);
 
-  // Debounced function creator
   const createDebouncedFunction = useCallback(<T extends (...args: any[]) => any>(
     fn: T,
     delay?: number
@@ -113,7 +106,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     return debounce(fn, delay || debounceDelay);
   }, [debounceDelay]);
 
-  // Throttled function creator
   const createThrottledFunction = useCallback(<T extends (...args: any[]) => any>(
     fn: T,
     delay?: number
@@ -121,7 +113,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     return throttle(fn, delay || throttleDelay);
   }, [throttleDelay]);
 
-  // Memoized search function for large datasets
   const createMemoizedSearch = useCallback((
     items: any[],
     searchFields: string[]
@@ -148,7 +139,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     }, [items, searchFields]);
   }, [cacheGet, cacheSet]);
 
-  // Batch processing for large operations
   const processBatch = useCallback(async <T, R>(
     items: T[],
     processor: (item: T) => Promise<R>,
@@ -161,14 +151,12 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
       const batchResults = await Promise.all(batch.map(processor));
       results.push(...batchResults);
       
-      // Allow browser to breathe between batches
       await new Promise(resolve => setTimeout(resolve, 0));
     }
     
     return results;
   }, []);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (observer.current) {
@@ -177,7 +165,6 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
     };
   }, []);
 
-  // Performance monitoring
   useEffect(() => {
     const interval = setInterval(trackMemoryUsage, 5000);
     return () => clearInterval(interval);
@@ -199,12 +186,12 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
   };
 };
 
-// HOC for performance monitoring
-export const withPerformanceMonitoring = <P extends object>(
+// HOC for performance monitoring - Fixed type issues
+export const withPerformanceMonitoring = <P extends Record<string, any>>(
   Component: React.ComponentType<P>,
   componentName: string
-): React.ComponentType<P> => {
-  const WrappedComponent = React.memo((props: P) => {
+) => {
+  const WrappedComponent: React.FC<P> = (props: P) => {
     const { measureRenderTime } = usePerformanceOptimization();
     
     useEffect(() => {
@@ -213,7 +200,7 @@ export const withPerformanceMonitoring = <P extends object>(
     }, []);
 
     return React.createElement(Component, props);
-  });
+  };
 
   WrappedComponent.displayName = `withPerformanceMonitoring(${componentName})`;
   

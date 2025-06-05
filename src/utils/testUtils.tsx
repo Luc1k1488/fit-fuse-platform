@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -44,7 +43,7 @@ const TestWrapper: React.FC<TestWrapperProps> = ({ children }) => {
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0, // Updated from cacheTime to gcTime
       },
     },
   });

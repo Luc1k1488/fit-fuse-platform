@@ -1,6 +1,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import AdminReviews from '../../pages/admin/AdminReviews';
 import { renderWithProviders, mockSupabase, createMockReview, createMockUser, createMockGym } from '../../utils/testUtils';
 
@@ -35,41 +36,43 @@ describe('AdminReviews Integration', () => {
       createMockGym({ id: 'test-gym-id', name: 'Test Fitness Center' }),
     ];
 
-    // Mock API responses
-    mockSupabase.from.mockImplementation((table) => {
-      const mockQuery = {
+    // Mock API responses with proper structure
+    mockSupabase.from.mockImplementation((table: string) => {
+      const mockChain = {
         select: vi.fn().mockReturnThis(),
         order: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         delete: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        single: vi.fn(),
+        maybeSingle: vi.fn(),
       };
 
       if (table === 'reviews') {
-        mockQuery.select.mockResolvedValue({ data: mockReviews, error: null });
-        mockQuery.delete.mockResolvedValue({ data: null, error: null });
+        mockChain.order.mockResolvedValue({ data: mockReviews, error: null });
+        mockChain.delete.mockResolvedValue({ data: null, error: null });
       } else if (table === 'users') {
-        mockQuery.select.mockResolvedValue({ data: mockUsers, error: null });
+        mockChain.select.mockResolvedValue({ data: mockUsers, error: null });
       } else if (table === 'gyms') {
-        mockQuery.select.mockResolvedValue({ data: mockGyms, error: null });
+        mockChain.select.mockResolvedValue({ data: mockGyms, error: null });
       }
 
-      return mockQuery;
+      return mockChain;
     });
 
     renderWithProviders(<AdminReviews />);
 
-    // Wait for data to load
     await waitFor(() => {
       expect(screen.getByText('Управление отзывами')).toBeInTheDocument();
     });
 
-    // Check if reviews are displayed
     await waitFor(() => {
       expect(screen.getByText('Excellent gym!')).toBeInTheDocument();
       expect(screen.getByText('Average place')).toBeInTheDocument();
     });
 
-    // Check if user and gym names are displayed
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Test Fitness Center')).toBeInTheDocument();
   });
@@ -83,6 +86,13 @@ describe('AdminReviews Integration', () => {
     mockSupabase.from.mockReturnValue({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
+      eq: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      maybeSingle: vi.fn(),
     });
 
     renderWithProviders(<AdminReviews />);
@@ -91,14 +101,12 @@ describe('AdminReviews Integration', () => {
       expect(screen.getByText('Все рейтинги')).toBeInTheDocument();
     });
 
-    // Filter by positive reviews
     const filterSelect = screen.getByDisplayValue('Все рейтинги');
     fireEvent.click(filterSelect);
     
     const positiveOption = screen.getByText('Положительные (4-5)');
     fireEvent.click(positiveOption);
 
-    // Should only show positive reviews
     expect(screen.getByText('Excellent!')).toBeInTheDocument();
     expect(screen.queryByText('Poor service')).not.toBeInTheDocument();
   });
@@ -112,6 +120,13 @@ describe('AdminReviews Integration', () => {
     mockSupabase.from.mockReturnValue({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
+      eq: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      maybeSingle: vi.fn(),
     });
 
     renderWithProviders(<AdminReviews />);
@@ -120,11 +135,9 @@ describe('AdminReviews Integration', () => {
       expect(screen.getByPlaceholderText('Поиск по отзывам...')).toBeInTheDocument();
     });
 
-    // Search for specific content
     const searchInput = screen.getByPlaceholderText('Поиск по отзывам...');
     fireEvent.change(searchInput, { target: { value: 'equipment' } });
 
-    // Should only show matching reviews
     await waitFor(() => {
       expect(screen.getByText('Great equipment and staff')).toBeInTheDocument();
       expect(screen.queryByText('Clean facilities')).not.toBeInTheDocument();
@@ -138,17 +151,30 @@ describe('AdminReviews Integration', () => {
 
     const mockDelete = vi.fn().mockResolvedValue({ data: null, error: null });
 
-    mockSupabase.from.mockImplementation((table) => {
+    mockSupabase.from.mockImplementation((table: string) => {
       if (table === 'reviews') {
         return {
           select: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
           delete: vi.fn().mockReturnThis(),
           eq: mockDelete,
+          insert: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          single: vi.fn(),
+          maybeSingle: vi.fn(),
         };
       }
       return {
         select: vi.fn().mockResolvedValue({ data: [], error: null }),
+        order: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        single: vi.fn(),
+        maybeSingle: vi.fn(),
       };
     });
 
@@ -158,7 +184,6 @@ describe('AdminReviews Integration', () => {
       expect(screen.getByText('Review to hide')).toBeInTheDocument();
     });
 
-    // Click hide button
     const hideButton = screen.getByText('Скрыть');
     fireEvent.click(hideButton);
 

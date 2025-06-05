@@ -28,7 +28,7 @@ describe('useReviews', () => {
       createMockReview({ id: '2', rating: 4 }),
     ];
 
-    mockSupabase.from().single.mockResolvedValue({ data: mockReviews, error: null });
+    mockSupabase.from().select().eq().order.mockResolvedValue({ data: mockReviews, error: null });
 
     const { result } = renderHook(() => useReviews('test-gym-id'));
 
@@ -42,7 +42,7 @@ describe('useReviews', () => {
   });
 
   it('should handle fetch error', async () => {
-    mockSupabase.from().single.mockResolvedValue({ 
+    mockSupabase.from().select().eq().order.mockResolvedValue({ 
       data: null, 
       error: new Error('Database error') 
     });
@@ -60,7 +60,7 @@ describe('useReviews', () => {
     const mockReview = createMockReview();
     
     mockSupabase.from().insert.mockResolvedValue({ data: mockReview, error: null });
-    mockSupabase.from().single.mockResolvedValue({ data: [mockReview], error: null });
+    mockSupabase.from().select().eq().order.mockResolvedValue({ data: [mockReview], error: null });
 
     const { result } = renderHook(() => useReviews('test-gym-id'));
 
