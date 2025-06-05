@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 
 // Mock Supabase client for testing
 export const mockSupabase = {
-  from: vi.fn(() => ({
+  from: vi.fn((tableName: string) => ({
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
