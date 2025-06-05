@@ -21,7 +21,7 @@ describe('AdminReviews Integration', () => {
     vi.clearAllMocks();
     
     // Reset the mock to return a fresh chain for each test
-    mockSupabase.from.mockImplementation(() => ({
+    mockSupabase.from.mockImplementation((tableName: string) => ({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -49,15 +49,15 @@ describe('AdminReviews Integration', () => {
     ];
 
     // Mock the reviews query
-    const reviewsChain = mockSupabase.from();
+    const reviewsChain = mockSupabase.from('reviews');
     reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
 
     // Mock the users query
-    const usersChain = mockSupabase.from();
+    const usersChain = mockSupabase.from('users');
     usersChain.select.mockResolvedValue({ data: mockUsers, error: null });
 
     // Mock the gyms query
-    const gymsChain = mockSupabase.from();
+    const gymsChain = mockSupabase.from('gyms');
     gymsChain.select.mockResolvedValue({ data: mockGyms, error: null });
 
     renderWithProviders(<AdminReviews />);
@@ -81,13 +81,13 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '2', rating: 2, comment: 'Poor service' }),
     ];
 
-    const reviewsChain = mockSupabase.from();
+    const reviewsChain = mockSupabase.from('reviews');
     reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
 
-    const usersChain = mockSupabase.from();
+    const usersChain = mockSupabase.from('users');
     usersChain.select.mockResolvedValue({ data: [], error: null });
 
-    const gymsChain = mockSupabase.from();
+    const gymsChain = mockSupabase.from('gyms');
     gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
@@ -112,13 +112,13 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '2', comment: 'Clean facilities' }),
     ];
 
-    const reviewsChain = mockSupabase.from();
+    const reviewsChain = mockSupabase.from('reviews');
     reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
 
-    const usersChain = mockSupabase.from();
+    const usersChain = mockSupabase.from('users');
     usersChain.select.mockResolvedValue({ data: [], error: null });
 
-    const gymsChain = mockSupabase.from();
+    const gymsChain = mockSupabase.from('gyms');
     gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
@@ -141,15 +141,15 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '1', comment: 'Review to hide' }),
     ];
 
-    const reviewsChain = mockSupabase.from();
+    const reviewsChain = mockSupabase.from('reviews');
     reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
     reviewsChain.delete.mockReturnThis();
     reviewsChain.eq.mockResolvedValue({ data: null, error: null });
 
-    const usersChain = mockSupabase.from();
+    const usersChain = mockSupabase.from('users');
     usersChain.select.mockResolvedValue({ data: [], error: null });
 
-    const gymsChain = mockSupabase.from();
+    const gymsChain = mockSupabase.from('gyms');
     gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
