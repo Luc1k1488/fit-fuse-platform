@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/react';
 import { ReviewCard } from '../reviews/ReviewCard';
 import { renderWithProviders, createMockReview } from '../../utils/testUtils';
 

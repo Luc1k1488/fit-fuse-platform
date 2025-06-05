@@ -1,7 +1,6 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/dom';
-import { waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminReviews from '../../pages/admin/AdminReviews';
 import { renderWithProviders, mockSupabase, createMockReview, createMockUser, createMockGym } from '../../utils/testUtils';
 
@@ -20,6 +19,19 @@ vi.mock('sonner', () => ({
 describe('AdminReviews Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Reset the mock to return a fresh chain for each test
+    mockSupabase.from.mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      maybeSingle: vi.fn(),
+    });
   });
 
   it('should load and display reviews with user and gym data', async () => {
@@ -36,31 +48,17 @@ describe('AdminReviews Integration', () => {
       createMockGym({ id: 'test-gym-id', name: 'Test Fitness Center' }),
     ];
 
-    // Mock API responses with proper structure
-    mockSupabase.from.mockImplementation((table: string) => {
-      const mockChain = {
-        select: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        delete: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        update: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        single: vi.fn(),
-        maybeSingle: vi.fn(),
-      };
+    // Mock the first call (reviews)
+    const reviewsChain = mockSupabase.from('reviews');
+    reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
 
-      if (table === 'reviews') {
-        mockChain.order.mockResolvedValue({ data: mockReviews, error: null });
-        mockChain.delete.mockResolvedValue({ data: null, error: null });
-      } else if (table === 'users') {
-        mockChain.select.mockResolvedValue({ data: mockUsers, error: null });
-      } else if (table === 'gyms') {
-        mockChain.select.mockResolvedValue({ data: mockGyms, error: null });
-      }
+    // Mock the second call (users)
+    const usersChain = mockSupabase.from('users');
+    usersChain.select.mockResolvedValue({ data: mockUsers, error: null });
 
-      return mockChain;
-    });
+    // Mock the third call (gyms)
+    const gymsChain = mockSupabase.from('gyms');
+    gymsChain.select.mockResolvedValue({ data: mockGyms, error: null });
 
     renderWithProviders(<AdminReviews />);
 
@@ -83,17 +81,14 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '2', rating: 2, comment: 'Poor service' }),
     ];
 
-    mockSupabase.from.mockReturnValue({
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
-      eq: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      single: vi.fn(),
-      maybeSingle: vi.fn(),
-    });
+    const reviewsChain = mockSupabase.from('reviews');
+    reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
+
+    const usersChain = mockSupabase.from('users');
+    usersChain.select.mockResolvedValue({ data: [], error: null });
+
+    const gymsChain = mockSupabase.from('gyms');
+    gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
 
@@ -117,17 +112,14 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '2', comment: 'Clean facilities' }),
     ];
 
-    mockSupabase.from.mockReturnValue({
-      select: vi.fn().mockReturnThis(),
-      order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
-      eq: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      single: vi.fn(),
-      maybeSingle: vi.fn(),
-    });
+    const reviewsChain = mockSupabase.from('reviews');
+    reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
+
+    const usersChain = mockSupabase.from('users');
+    usersChain.select.mockResolvedValue({ data: [], error: null });
+
+    const gymsChain = mockSupabase.from('gyms');
+    gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
 
@@ -149,34 +141,16 @@ describe('AdminReviews Integration', () => {
       createMockReview({ id: '1', comment: 'Review to hide' }),
     ];
 
-    const mockDelete = vi.fn().mockResolvedValue({ data: null, error: null });
+    const reviewsChain = mockSupabase.from('reviews');
+    reviewsChain.order.mockResolvedValue({ data: mockReviews, error: null });
+    reviewsChain.delete.mockReturnThis();
+    reviewsChain.eq.mockResolvedValue({ data: null, error: null });
 
-    mockSupabase.from.mockImplementation((table: string) => {
-      if (table === 'reviews') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          order: vi.fn().mockResolvedValue({ data: mockReviews, error: null }),
-          delete: vi.fn().mockReturnThis(),
-          eq: mockDelete,
-          insert: vi.fn().mockReturnThis(),
-          update: vi.fn().mockReturnThis(),
-          limit: vi.fn().mockReturnThis(),
-          single: vi.fn(),
-          maybeSingle: vi.fn(),
-        };
-      }
-      return {
-        select: vi.fn().mockResolvedValue({ data: [], error: null }),
-        order: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        delete: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        update: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        single: vi.fn(),
-        maybeSingle: vi.fn(),
-      };
-    });
+    const usersChain = mockSupabase.from('users');
+    usersChain.select.mockResolvedValue({ data: [], error: null });
+
+    const gymsChain = mockSupabase.from('gyms');
+    gymsChain.select.mockResolvedValue({ data: [], error: null });
 
     renderWithProviders(<AdminReviews />);
 
@@ -188,7 +162,7 @@ describe('AdminReviews Integration', () => {
     fireEvent.click(hideButton);
 
     await waitFor(() => {
-      expect(mockDelete).toHaveBeenCalledWith('1');
+      expect(reviewsChain.eq).toHaveBeenCalledWith('id', '1');
     });
   });
 });
