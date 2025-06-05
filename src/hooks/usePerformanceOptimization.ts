@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { debounce, throttle } from 'lodash';
 
 interface PerformanceConfig {
@@ -203,8 +203,8 @@ export const usePerformanceOptimization = (config: PerformanceConfig = {}) => {
 export const withPerformanceMonitoring = <P extends object>(
   Component: React.ComponentType<P>,
   componentName: string
-) => {
-  return React.memo((props: P) => {
+): React.ComponentType<P> => {
+  const WrappedComponent = React.memo((props: P) => {
     const { measureRenderTime } = usePerformanceOptimization();
     
     useEffect(() => {
@@ -212,8 +212,10 @@ export const withPerformanceMonitoring = <P extends object>(
       return () => console.log(`${componentName} unmounted`);
     }, []);
 
-    return (
-      <Component {...props} />
-    );
+    return React.createElement(Component, props);
   });
+
+  WrappedComponent.displayName = `withPerformanceMonitoring(${componentName})`;
+  
+  return WrappedComponent;
 };
