@@ -28,7 +28,7 @@ describe('useReviews', () => {
       createMockReview({ id: '2', rating: 4 }),
     ];
 
-    mockSupabase.from().select().eq().order.mockResolvedValue({ data: mockReviews, error: null });
+    mockSupabase.from('reviews').select().eq().order.mockResolvedValue({ data: mockReviews, error: null });
 
     const { result } = renderHook(() => useReviews('test-gym-id'));
 
@@ -42,7 +42,7 @@ describe('useReviews', () => {
   });
 
   it('should handle fetch error', async () => {
-    mockSupabase.from().select().eq().order.mockResolvedValue({ 
+    mockSupabase.from('reviews').select().eq().order.mockResolvedValue({ 
       data: null, 
       error: new Error('Database error') 
     });
@@ -59,8 +59,8 @@ describe('useReviews', () => {
   it('should submit review successfully', async () => {
     const mockReview = createMockReview();
     
-    mockSupabase.from().insert.mockResolvedValue({ data: mockReview, error: null });
-    mockSupabase.from().select().eq().order.mockResolvedValue({ data: [mockReview], error: null });
+    mockSupabase.from('reviews').insert.mockResolvedValue({ data: mockReview, error: null });
+    mockSupabase.from('reviews').select().eq().order.mockResolvedValue({ data: [mockReview], error: null });
 
     const { result } = renderHook(() => useReviews('test-gym-id'));
 
@@ -74,7 +74,7 @@ describe('useReviews', () => {
     );
 
     expect(success).toBe(true);
-    expect(mockSupabase.from().insert).toHaveBeenCalledWith({
+    expect(mockSupabase.from('reviews').insert).toHaveBeenCalledWith({
       gym_id: 'test-gym-id',
       user_id: 'test-user-id',
       rating: 5,
