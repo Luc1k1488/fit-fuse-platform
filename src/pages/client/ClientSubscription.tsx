@@ -79,10 +79,16 @@ const ClientSubscription = () => {
   };
 
   const handleCancelSubscription = () => {
-    toast({
-      title: "Подписка отменена",
+    toast.success("Подписка отменена", {
       description: "Подписка будет активна до конца оплаченного периода",
     });
+  };
+
+  const handleSwitchToPlans = () => {
+    const plansTab = document.querySelector('[data-value="plans"]') as HTMLElement;
+    if (plansTab) {
+      plansTab.click();
+    }
   };
 
   return (
@@ -303,7 +309,7 @@ const ClientSubscription = () => {
                   <p className="text-slate-400 mb-4">
                     Оформите подписку, чтобы получить доступ ко всем залам сети
                   </p>
-                  <Button onClick={() => document.querySelector('[data-state="inactive"][value="plans"]')?.click()}>
+                  <Button onClick={handleSwitchToPlans}>
                     Выбрать план
                   </Button>
                 </CardContent>

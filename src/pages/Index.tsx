@@ -1,295 +1,367 @@
 
-import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle, Menu, User, LogOut } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, MapPin, Clock, Users, CheckCircle, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
-  const { user, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const features = [
+    {
+      title: "Единый абонемент",
+      description: "Доступ ко всем залам сети с одной подпиской",
+      icon: "🎯"
+    },
+    {
+      title: "Удобное бронирование",
+      description: "Забронируйте занятие в несколько кликов",
+      icon: "📱"
+    },
+    {
+      title: "Гибкое расписание",
+      description: "Тренируйтесь когда удобно вам",
+      icon: "⏰"
+    }
+  ];
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success("Вы успешно вышли из системы");
-    } catch (error) {
-      console.error("Ошибка выхода:", error);
-      toast.error("Не удалось выйти из системы");
+  const gyms = [
+    {
+      id: 1,
+      name: "FitLife Центр",
+      location: "ул. Пушкина, 15",
+      rating: 4.8,
+      image: "/placeholder.svg",
+      features: ["Кардио зона", "Силовые тренажеры", "Групповые занятия"]
+    },
+    {
+      id: 2, 
+      name: "Power Gym",
+      location: "пр. Ленина, 42",
+      rating: 4.6,
+      image: "/placeholder.svg",
+      features: ["Бокс", "Функциональный тренинг", "Персональные тренировки"]
+    },
+    {
+      id: 3,
+      name: "Здоровье+",
+      location: "ул. Советская, 8",
+      rating: 4.9,
+      image: "/placeholder.svg", 
+      features: ["Йога", "Пилатес", "Массаж"]
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Анна Петрова",
+      text: "Отличное приложение! Очень удобно бронировать занятия и следить за расписанием.",
+      rating: 5,
+      avatar: "/placeholder.svg"
+    },
+    {
+      name: "Михаил Иванов", 
+      text: "Единый абонемент - это супер! Могу ходить в разные залы в зависимости от настроения.",
+      rating: 5,
+      avatar: "/placeholder.svg"
+    },
+    {
+      name: "Елена Сидорова",
+      text: "Приложение помогло мне наконец начать регулярно заниматься спортом. Рекомендую!",
+      rating: 5,
+      avatar: "/placeholder.svg"
+    }
+  ];
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-      {/* Верхняя навигация */}
-      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700 py-4">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-white">GoodFit</Link>
-          
-          {/* Мобильное меню */}
-          <div className="md:hidden">
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-white">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-slate-900 border-slate-700 p-4">
-                <nav className="flex flex-col gap-2">
-                  <Link to="/info/about" className="text-slate-300 hover:text-white py-2">О проекте</Link>
-                  <Link to="/info/gyms" className="text-slate-300 hover:text-white py-2">Наши залы</Link>
-                  <Link to="/info/pricing" className="text-slate-300 hover:text-white py-2">Цены</Link>
-                  <Link to="/info/contact" className="text-slate-300 hover:text-white py-2">Контакты</Link>
-                  <div className="mt-4 pt-4 border-t border-slate-700">
-                    {user ? (
-                      <>
-                        <Link to="/app" className="flex items-center gap-2 text-purple-400 hover:text-purple-300 py-2">
-                          <User className="h-4 w-4" />
-                          Личный кабинет
-                        </Link>
-                        <button 
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 text-red-400 hover:text-red-300 py-2"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Выйти
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Link to="/login" className="flex items-center gap-2 text-purple-400 hover:text-purple-300 py-2">
-                          Войти
-                        </Link>
-                        <Link to="/register" className="flex items-center gap-2 text-purple-400 hover:text-purple-300 py-2">
-                          Зарегистрироваться
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </nav>
-              </SheetContent>
-            </Sheet>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
+      {/* Header */}
+      <header className="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
+        <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold">GoodFit</div>
+          <div className="hidden md:flex space-x-6">
+            <button onClick={() => scrollToSection('features')} className="hover:text-blue-400 transition-colors">
+              Возможности
+            </button>
+            <button onClick={() => scrollToSection('gyms')} className="hover:text-blue-400 transition-colors">
+              Залы
+            </button>
+            <button onClick={() => scrollToSection('testimonials')} className="hover:text-blue-400 transition-colors">
+              Отзывы
+            </button>
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-blue-400 transition-colors">
+              Тарифы
+            </button>
           </div>
-          
-          {/* Десктопное меню */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/info/about" className="text-slate-300 hover:text-white">О проекте</Link>
-            <Link to="/info/gyms" className="text-slate-300 hover:text-white">Наши залы</Link>
-            <Link to="/info/pricing" className="text-slate-300 hover:text-white">Цены</Link>
-            <Link to="/info/contact" className="text-slate-300 hover:text-white">Контакты</Link>
-
-            {user ? (
-              <div className="flex items-center gap-4">
-                <Link to="/app">
-                  <Button>Личный кабинет</Button>
-                </Link>
-                <Button variant="ghost" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Выйти
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link to="/login">
-                  <Button variant="outline" className="border-slate-600">
-                    Войти
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button>Зарегистрироваться</Button>
-                </Link>
-              </div>
-            )}
-          </nav>
-        </div>
-      </header>
-
-      {/* Главная секция */}
-      <section className="py-20 px-4 md:py-32">
-        <div className="container mx-auto max-w-5xl">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="md:w-1/2">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-                Найдите идеальный зал для тренировок
-              </h1>
-              <p className="text-lg text-slate-300 mb-8">
-                GoodFit объединяет лучшие фитнес-центры, залы и студии в одном месте.
-                Находите, бронируйте и тренируйтесь с комфортом.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to={user ? "/app" : "/register"}>
-                  <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                    {user ? "Перейти в приложение" : "Начать бесплатно"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link to="/info/gyms">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-slate-600">
-                    Посмотреть залы
-                  </Button>
-                </Link>
-              </div>
-            </div>
-            
-            <div className="md:w-1/2">
-              <div className="relative">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-1">
-                  <img 
-                    src="/images/app-preview.jpg" 
-                    alt="GoodFit App Preview"
-                    className="rounded-lg object-cover h-80 w-full"
-                    // При отсутствии изображения, можно использовать стандартный div
-                    onError={({ currentTarget }) => {
-                      currentTarget.onerror = null;
-                      currentTarget.style.display = "none";
-                      currentTarget.nextElementSibling!.style.display = "flex";
-                    }}
-                  />
-                  <div 
-                    className="hidden rounded-lg h-80 w-full bg-slate-800 items-center justify-center text-slate-400 text-xl"
-                  >
-                    Приложение GoodFit
-                  </div>
-                </div>
-                
-                <div className="absolute -bottom-5 -right-5 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-lg border border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <span className="text-white font-bold text-xl">4.9</span>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <svg key={star} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-slate-400 text-sm">120+ отзывов</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Секция преимуществ */}
-      <section className="py-16 bg-slate-900/50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-white text-center mb-12">Почему выбирают нас</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 transition-transform hover:scale-105">
-              <div className="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center mb-4">
-                <CheckCircle className="h-6 w-6 text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Удобный поиск</h3>
-              <p className="text-slate-300">
-                Найдите идеальный зал по местоположению, категории и рейтингу в пару кликов.
-              </p>
-            </div>
-            
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 transition-transform hover:scale-105">
-              <div className="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center mb-4">
-                <CheckCircle className="h-6 w-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Простое бронирование</h3>
-              <p className="text-slate-300">
-                Забронируйте тренировку онлайн без звонков и ожидания ответа.
-              </p>
-            </div>
-            
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 transition-transform hover:scale-105">
-              <div className="w-12 h-12 rounded-full bg-green-600/20 flex items-center justify-center mb-4">
-                <CheckCircle className="h-6 w-6 text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Отслеживание прогресса</h3>
-              <p className="text-slate-300">
-                Ведите учет тренировок и следите за своими достижениями в личном кабинете.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Призыв к действию */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 backdrop-blur-sm border border-slate-700 rounded-xl p-8 md:p-12 text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Готовы начать тренировки?</h2>
-            <p className="text-slate-300 mb-8 max-w-2xl mx-auto">
-              Присоединяйтесь к нам прямо сейчас и получите доступ ко всем функциям приложения.
-              Первая неделя бесплатно!
-            </p>
-            <Link to={user ? "/app" : "/register"}>
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                {user ? "Перейти в приложение" : "Зарегистрироваться"}
-                <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="flex space-x-2">
+            <Link to="/login">
+              <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-800">
+                Войти
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                Начать
               </Button>
             </Link>
           </div>
+        </nav>
+      </header>
+
+      {/* Hero Section */}
+      <section className="pt-24 pb-16 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Твой фитнес, твои правила
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
+            Единый абонемент на все фитнес-залы города. Тренируйся где хочешь, когда хочешь.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
+                Получить доступ
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-slate-600 text-white hover:bg-slate-800 text-lg px-8 py-3"
+              onClick={() => scrollToSection('gyms')}
+            >
+              Посмотреть залы
+            </Button>
+          </div>
         </div>
       </section>
 
-      {/* Футер */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-12 px-4">
+      {/* Features Section */}
+      <section id="features" className="py-16 px-4">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">GoodFit</h3>
-              <p className="text-slate-400">
-                Платформа для поиска и бронирования спортивных залов и тренировок.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Навигация</h4>
-              <ul className="space-y-2">
-                <li><Link to="/" className="text-slate-400 hover:text-white">Главная</Link></li>
-                <li><Link to="/info/about" className="text-slate-400 hover:text-white">О нас</Link></li>
-                <li><Link to="/info/gyms" className="text-slate-400 hover:text-white">Залы</Link></li>
-                <li><Link to="/info/pricing" className="text-slate-400 hover:text-white">Цены</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Контакты</h4>
-              <ul className="space-y-2 text-slate-400">
-                <li>support@goodfit.ru</li>
-                <li>+7 (800) 123-45-67</li>
-                <li>Махачкала, Россия</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-4">Социальные сети</h4>
-              <div className="flex gap-4">
-                <a href="#" className="text-slate-400 hover:text-white">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </a>
-                <a href="#" className="text-slate-400 hover:text-white">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clipRule="evenodd" />
-                  </svg>
-                </a>
-                <a href="#" className="text-slate-400 hover:text-white">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Почему выбирают GoodFit?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <CardHeader>
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <CardTitle className="text-white">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-slate-300">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          
-          <div className="mt-12 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-slate-500 text-sm">
-            <p>&copy; 2024 GoodFit. Все права защищены.</p>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <Link to="/info/privacy" className="hover:text-white">Политика конфиденциальности</Link>
-              <Link to="/info/terms" className="hover:text-white">Условия использования</Link>
-            </div>
+        </div>
+      </section>
+
+      {/* Gyms Section */}
+      <section id="gyms" className="py-16 px-4 bg-slate-900/50">
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Популярные залы
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {gyms.map((gym) => (
+              <Card key={gym.id} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden">
+                <div className="relative h-48">
+                  <img 
+                    src={gym.image} 
+                    alt={gym.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <Badge className="absolute top-2 right-2 bg-green-600">
+                    <Star className="h-3 w-3 mr-1" />
+                    {gym.rating}
+                  </Badge>
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-white">{gym.name}</CardTitle>
+                  <div className="flex items-center text-slate-400">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {gym.location}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {gym.features.map((feature, index) => (
+                      <Badge key={index} variant="outline" className="border-slate-600 text-slate-300">
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-16 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Что говорят наши пользователи
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={testimonial.avatar} 
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div>
+                      <CardTitle className="text-white text-lg">{testimonial.name}</CardTitle>
+                      <div className="flex">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-300">"{testimonial.text}"</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-16 px-4 bg-slate-900/50">
+        <div className="container mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Выберите свой план
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Базовый</CardTitle>
+                <div className="text-3xl font-bold text-blue-400">1,500₽ <span className="text-lg text-slate-400">/мес</span></div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">До 12 посещений</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Доступ к базовым залам</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Мобильное приложение</span>
+                  </div>
+                </div>
+                <Button className="w-full" variant="outline">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-blue-500 backdrop-blur-sm ring-2 ring-blue-500">
+              <CardHeader>
+                <Badge className="w-fit bg-blue-600">Популярный</Badge>
+                <CardTitle className="text-white">Премиум</CardTitle>
+                <div className="text-3xl font-bold text-blue-400">2,500₽ <span className="text-lg text-slate-400">/мес</span></div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Безлимитные посещения</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Все залы сети</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Персональные тренировки</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Приоритетная поддержка</span>
+                  </div>
+                </div>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Про</CardTitle>
+                <div className="text-3xl font-bold text-blue-400">3,500₽ <span className="text-lg text-slate-400">/мес</span></div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Все из Премиум</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Консультации по питанию</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">VIP зоны</span>
+                  </div>
+                  <div className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                    <span className="text-slate-300">Индивидуальные программы</span>
+                  </div>
+                </div>
+                <Button className="w-full" variant="outline">
+                  Выбрать план
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Готовы начать свой фитнес-путь?
+          </h2>
+          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+            Присоединяйтесь к тысячам пользователей, которые уже изменили свою жизнь с GoodFit
+          </p>
+          <Link to="/register">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
+              Зарегистрироваться бесплатно
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-4 border-t border-slate-700">
+        <div className="container mx-auto text-center text-slate-400">
+          <p>&copy; 2024 GoodFit. Все права защищены.</p>
         </div>
       </footer>
     </div>

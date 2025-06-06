@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth_context";
 import AdminProtectedRoute from "@/components/auth/AdminProtectedRoute";
 import ClientProtectedRoute from "@/components/auth/ClientProtectedRoute";
@@ -86,7 +86,9 @@ const App = () => {
               {/* Admin routes */}
               <Route path="/admin" element={
                 <AdminProtectedRoute allowedRoles={["admin"]}>
-                  <AdminLayout />
+                  <AdminLayout>
+                    <Outlet />
+                  </AdminLayout>
                 </AdminProtectedRoute>
               }>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
@@ -105,7 +107,9 @@ const App = () => {
               {/* Partner routes */}
               <Route path="/admin/partner" element={
                 <AdminProtectedRoute allowedRoles={["partner"]}>
-                  <AdminLayout />
+                  <AdminLayout>
+                    <Outlet />
+                  </AdminLayout>
                 </AdminProtectedRoute>
               }>
                 <Route index element={<PartnerDashboard />} />
@@ -119,7 +123,9 @@ const App = () => {
               {/* Support routes */}
               <Route path="/admin/support-portal" element={
                 <AdminProtectedRoute allowedRoles={["support"]}>
-                  <AdminLayout />
+                  <AdminLayout>
+                    <Outlet />
+                  </AdminLayout>
                 </AdminProtectedRoute>
               }>
                 <Route index element={<SupportDashboard />} />
@@ -131,7 +137,9 @@ const App = () => {
               {/* Client routes */}
               <Route path="/app" element={
                 <ClientProtectedRoute>
-                  <ClientLayout />
+                  <ClientLayout>
+                    <Outlet />
+                  </ClientLayout>
                 </ClientProtectedRoute>
               }>
                 <Route index element={<ClientHome />} />

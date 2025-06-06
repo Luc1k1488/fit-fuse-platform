@@ -90,7 +90,7 @@ export const FitnessTrackerConnect: React.FC<FitnessTrackerConnectProps> = ({
     if (!connectedDevice) {
       return (
         <DarkCard 
-          className="p-4 text-center animate-fade-in" 
+          className="p-4 text-center animate-fade-in cursor-pointer" 
           variant="intense" 
           gradient 
           hoverEffect="raise"

@@ -1,125 +1,172 @@
 
-export interface Gym {
-  id: string;
-  name: string | null;
-  location: string | null;
-  address: string | null;
-  city: string | null;
-  category: string | null;
-  working_hours: string | null;
-  features: string[] | null;
-  partner_id: string | null;
-  main_image: string | null;
-  images: string[] | null;
-  rating: number | null;
-  review_count: number | null;
-  created_at: string;
-  description: string | null;
-  phone: string | null;
-  owner_id?: string | null;
-}
-
-export interface Partner {
-  id: string;
-  name: string;
-  email: string;
-  company_name: string | null;
-  phone: string | null;
-  status: string;
-  gym_count: number | null;
-  user_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface User {
   id: string;
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  role: string | null;
-  profile_image: string | null;
-  subscription_id: string | null;
+  email?: string;
+  name?: string;
+  phone?: string;
+  profile_image?: string;
+  role: "user" | "admin" | "partner" | "support";
   created_at: string;
+  subscription_id?: string;
+  is_blocked?: boolean;
+  blocked_at?: string | null;
+  blocked_reason?: string | null;
 }
 
-export interface Class {
+export interface Gym {
   id: string;
-  title: string | null;
-  description: string | null;
-  instructor: string | null;
-  category: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  capacity: number | null;
-  booked_count: number | null;
-  gym_id: string | null;
+  name: string;
+  description?: string;
+  location: string;
+  address: string;
+  city: string;
+  phone?: string;
+  working_hours?: string;
+  category: string;
+  features?: string[];
+  main_image?: string;
+  images?: string[];
+  rating: number;
+  review_count: number;
+  owner_id?: string;
+  partner_id?: string;
   created_at: string;
 }
 
-export interface ClassWithGym extends Class {
-  gym: Gym;
+export interface GymClass {
+  id: string;
+  title: string;
+  description?: string;
+  instructor: string;
+  start_time: string;
+  end_time: string;
+  capacity: number;
+  booked_count: number;
+  category: string;
+  gym_id: string;
+  created_at: string;
 }
 
 export interface Booking {
   id: string;
-  user_id: string | null;
-  gym_id: string | null;
-  class_id: string | null;
-  date_time: string | null;
-  status: string | null;
+  user_id: string;
+  gym_id?: string;
+  class_id?: string;
+  date_time: string;
+  status: "booked" | "completed" | "cancelled";
   created_at: string;
-}
-
-export interface BookingWithDetails extends Booking {
-  gym: Gym;
-  class: Class;
-  user?: User;
-}
-
-export interface UserStats {
-  id: string;
-  user_id: string | null;
-  total_bookings: number | null;
-  completed_workouts: number | null;
-  current_streak_days: number | null;
-  best_streak_days: number | null;
-  total_hours_trained: number | null;
-  last_workout_date: string | null;
-  favorite_gym_id: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Review {
   id: string;
-  user_id: string | null;
-  gym_id: string | null;
-  rating: number | null;
-  comment: string | null;
+  user_id: string;
+  gym_id: string;
+  rating: number;
+  comment?: string;
   created_at: string;
 }
 
 export interface Subscription {
   id: string;
-  user_id: string | null;
-  plan_id: string | null;
-  plan_name: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  status: string | null;
-  price: number | null;
-  subscription_type: string | null;
+  user_id: string;
+  plan_id?: string;
+  plan_name?: string;
+  status: "active" | "inactive" | "cancelled" | "expired";
+  start_date?: string;
+  end_date?: string;
+  price?: number;
+  subscription_type?: string;
   created_at: string;
 }
 
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  description: string | null;
+  description?: string;
   price: number;
   duration_days: number;
-  features: string[] | null;
-  is_active: boolean | null;
+  features?: string[];
+  is_active: boolean;
   created_at: string;
+}
+
+export interface Partner {
+  id: string;
+  user_id?: string;
+  name: string;
+  email: string;
+  company_name?: string;
+  phone?: string;
+  status: "pending" | "approved" | "rejected";
+  gym_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  subject?: string;
+  message?: string;
+  status: "open" | "in_progress" | "resolved" | "closed";
+  assigned_support_id?: string;
+  created_at: string;
+  resolved_at?: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount_percentage?: number;
+  discount_amount?: number;
+  valid_from?: string;
+  valid_until?: string;
+  max_uses?: number;
+  current_uses: number;
+  active: boolean;
+  created_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  message?: string;
+  sent_at: string;
+}
+
+export interface UserStats {
+  id: string;
+  user_id: string;
+  total_bookings: number;
+  completed_workouts: number;
+  total_hours_trained: number;
+  current_streak_days: number;
+  best_streak_days: number;
+  last_workout_date?: string;
+  favorite_gym_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GiftSubscription {
+  id: string;
+  giver_user_id: string;
+  receiver_user_id?: string;
+  receiver_email?: string;
+  subscription_id?: string;
+  gift_code?: string;
+  message?: string;
+  is_activated: boolean;
+  activated_at?: string;
+  expires_at?: string;
+  created_at: string;
+}
+
+export interface PromoCodeUsage {
+  id: string;
+  promo_code_id: string;
+  user_id: string;
+  subscription_id?: string;
+  used_at: string;
 }

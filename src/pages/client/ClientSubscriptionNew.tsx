@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth_context";
-import { SubscriptionPlan, Subscription, PromoCode } from "@/types";
+import { SubscriptionPlan, Subscription } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +89,6 @@ const ClientSubscriptionNew = () => {
         return;
       }
 
-      // Проверяем срок действия
       const now = new Date();
       if (data.valid_until && new Date(data.valid_until) < now) {
         toast({
@@ -110,7 +108,6 @@ const ClientSubscriptionNew = () => {
         return;
       }
 
-      // Проверяем лимит использования
       if (data.max_uses && data.current_uses >= data.max_uses) {
         toast({
           variant: "destructive",
