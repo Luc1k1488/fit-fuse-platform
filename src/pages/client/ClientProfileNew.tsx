@@ -60,12 +60,12 @@ const ClientProfileNew = () => {
 
   // Подготавливаем данные для компонентов
   const profileUser = {
-    name: user?.name || "Пользователь",
+    name: user?.user_metadata?.name || user?.email?.split('@')[0] || "Пользователь",
     email: user?.email || "",
     phone: user?.phone || "+7 (999) 123-45-67",
     location: "Москва, Россия",
     joinDate: user?.created_at ? new Date(user.created_at).getFullYear().toString() : "2024",
-    avatar: user?.profile_image || "",
+    avatar: user?.user_metadata?.avatar_url || "",
   };
 
   const stats = {
