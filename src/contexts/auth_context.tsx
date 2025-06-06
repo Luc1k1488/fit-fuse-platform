@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 
@@ -6,12 +6,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   is_loading: boolean;
-  is_authenticated: boolean; // Added missing property
+  is_authenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error: string | null }>;
   register: (email: string, password: string, name: string) => Promise<{ success: boolean; error: string | null }>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ success: boolean; error: string | null }>;
-  // Added missing properties for phone authentication
   phoneLogin: (phone: string) => Promise<{ success: boolean; error: string | null }>;
   login_with_phone: (phone: string, code: string) => Promise<{ success: boolean; error: string | null }>;
 }
@@ -26,12 +25,11 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   is_loading: true,
-  is_authenticated: false, // Added missing property
+  is_authenticated: false,
   login: async () => ({ success: false, error: "Not implemented" }),
   register: async () => ({ success: false, error: "Not implemented" }),
   logout: async () => {},
   updateProfile: async () => ({ success: false, error: "Not implemented" }),
-  // Added missing methods
   phoneLogin: async () => ({ success: false, error: "Not implemented" }),
   login_with_phone: async () => ({ success: false, error: "Not implemented" }),
 });
@@ -40,12 +38,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [is_loading, setIsLoading] = useState(true);
-  const [is_authenticated, setIsAuthenticated] = useState(false); // Added state for authentication
+  const [is_authenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     console.info("Setting up auth state listener...");
     
-    // Устанавливаем слушатель событий авторизации СНАЧАЛА
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.info("Auth state changed:", event, {
@@ -55,14 +52,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setIsAuthenticated(!!currentSession?.user); // Set authentication state
+        setIsAuthenticated(!!currentSession?.user);
         setIsLoading(false);
         
         if (event === "SIGNED_IN" && currentSession) {
           console.log("User signed in:", currentSession.user);
-          // Отложенная загрузка дополнительных данных пользователя
           setTimeout(() => {
-            // Можно здесь загружать дополнительные данные о пользователе
+            // Load additional user data
           }, 0);
         } else if (event === "SIGNED_OUT") {
           console.log("User signed out");
@@ -70,7 +66,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // ЗАТЕМ проверяем существующую сессию
     const checkSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -78,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setIsAuthenticated(!!currentSession?.user); // Set authentication state
+        setIsAuthenticated(!!currentSession?.user);
       } catch (error) {
         console.error("Error checking session:", error);
       } finally {
@@ -128,7 +123,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: false, error: error.message };
       }
       
-      // Создаем запись в пользовательской таблице
       if (data.user) {
         const { error: profileError } = await supabase.from("users").insert({
           id: data.user.id,
@@ -139,7 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (profileError) {
           console.error("Error creating user profile:", profileError);
-          // Возвращаем успех, так как учетная запись все равно создана
           return { success: true, error: "Аккаунт создан, но профиль не настроен" };
         }
       }
@@ -182,10 +175,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Add phone login methods
   const phoneLogin = async (phone: string) => {
     try {
-      // This would be implemented with Supabase phone auth
       console.log("Phone login attempt for:", phone);
       return { success: true, error: null };
     } catch (error: any) {
@@ -196,7 +187,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login_with_phone = async (phone: string, code: string) => {
     try {
-      // This would be implemented with Supabase phone auth verification
       console.log("Phone verification for:", phone, "with code:", code);
       return { success: true, error: null };
     } catch (error: any) {
@@ -209,12 +199,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     session,
     is_loading,
-    is_authenticated, // Added authentication state
+    is_authenticated,
     login,
     register,
     logout,
     updateProfile,
-    phoneLogin, // Added phone login methods
+    phoneLogin,
     login_with_phone
   };
 

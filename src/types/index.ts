@@ -33,7 +33,7 @@ export type Gym = {
   name: string | null;
   location: string | null;
   owner_id: string | null;
-  partner_id: string | null; // Новое поле для связи с партнером
+  partner_id: string | null;
   main_image: string | null;
   working_hours: string | null;
   review_count: number | null;
@@ -43,6 +43,8 @@ export type Gym = {
   city: string | null;
   address: string | null;
   images: string[] | null;
+  description: string | null;
+  phone: string | null;
 };
 
 export type Class = {
