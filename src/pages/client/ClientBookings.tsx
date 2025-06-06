@@ -1,324 +1,255 @@
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth_context";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, MapPin, User, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, X, Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Booking, Gym, Class } from "@/types";
-
-// Extended type for bookings with details
-interface BookingWithDetails extends Booking {
-  gym?: Gym;
-  class?: Class;
-}
-
-// Вспомогательная функция для форматирования даты
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return "Дата не указана";
-  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', weekday: 'short' };
-  return new Date(dateString).toLocaleDateString('ru-RU', options);
-};
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth_context";
+import { BookingWithDetails } from "@/types";
+import { toast } from "sonner";
 
 const ClientBookings = () => {
-  const { user, is_authenticated } = useAuth();
-  const { toast } = useToast();
+  const { user } = useAuth();
+  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
-  const queryClient = useQueryClient();
 
-  // Получаем бронирования пользователя
-  const { data: bookings, isLoading, isError } = useQuery({
-    queryKey: ["user-bookings", user?.id],
-    queryFn: async () => {
-      if (!user?.id || !is_authenticated) return [];
-      
-      console.log("Fetching bookings for user:", user.id);
-      
+  useEffect(() => {
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
+
+  const fetchBookings = async () => {
+    if (!user) return;
+
+    try {
       const { data, error } = await supabase
-        .from("bookings")
+        .from('bookings')
         .select(`
           *,
           gym:gym_id (*),
           class:class_id (*)
         `)
-        .eq("user_id", user.id)
+        .eq('user_id', user.id)
         .order('date_time', { ascending: false });
 
       if (error) {
-        console.error("Error fetching bookings:", error);
-        throw error;
+        console.error('Error fetching bookings:', error);
+        toast.error('Ошибка загрузки бронирований');
+        return;
       }
 
-      console.log("Bookings loaded:", data);
-      return data as BookingWithDetails[];
-    },
-    enabled: !!user?.id && is_authenticated,
-  });
+      // Приводим к правильному типу
+      const typedBookings: BookingWithDetails[] = (data || []).map(booking => ({
+        ...booking,
+        gym: {
+          ...booking.gym,
+          description: booking.gym?.description || null,
+          phone: booking.gym?.phone || null,
+        }
+      }));
 
-  // Мутация для отмены бронирования
-  const cancelBookingMutation = useMutation({
-    mutationFn: async (bookingId: string) => {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", bookingId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Бронирование отменено",
-        description: "Ваше бронирование было успешно отменено",
-      });
-      queryClient.invalidateQueries({ queryKey: ["user-bookings"] });
-    },
-    onError: (error) => {
-      console.error("Error cancelling booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Не удалось отменить бронирование",
-      });
-    },
-  });
-
-  // Функция для отмены бронирования
-  const handleCancelBooking = (bookingId: string) => {
-    cancelBookingMutation.mutate(bookingId);
-  };
-
-  // Фильтруем бронирования по статусу
-  const filterBookingsByStatus = (status: string) => {
-    if (!bookings) return [];
-    
-    const now = new Date();
-    
-    switch (status) {
-      case "upcoming":
-        return bookings.filter(booking => 
-          booking.status !== "cancelled" && 
-          booking.date_time && 
-          new Date(booking.date_time) > now
-        );
-      case "past":
-        return bookings.filter(booking => 
-          booking.status !== "cancelled" && 
-          booking.date_time && 
-          new Date(booking.date_time) <= now
-        );
-      case "cancelled":
-        return bookings.filter(booking => booking.status === "cancelled");
-      default:
-        return [];
+      setBookings(typedBookings);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const upcomingBookings = filterBookingsByStatus("upcoming");
-  const pastBookings = filterBookingsByStatus("past");
-  const cancelledBookings = filterBookingsByStatus("cancelled");
+  const cancelBooking = async (bookingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingId);
 
-  if (!is_authenticated) {
+      if (error) {
+        console.error('Error cancelling booking:', error);
+        toast.error('Ошибка отмены бронирования');
+        return;
+      }
+
+      toast.success('Бронирование отменено');
+      fetchBookings();
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Ошибка отмены бронирования');
+    }
+  };
+
+  const upcomingBookings = bookings.filter(booking => 
+    booking.status === 'booked' && 
+    booking.date_time && 
+    new Date(booking.date_time) > new Date()
+  );
+
+  const pastBookings = bookings.filter(booking => 
+    booking.date_time && 
+    new Date(booking.date_time) <= new Date()
+  );
+
+  const cancelledBookings = bookings.filter(booking => 
+    booking.status === 'cancelled'
+  );
+
+  if (loading) {
     return (
-      <div className="pb-16">
-        <h1 className="text-2xl font-bold mb-4">Мои бронирования</h1>
-        <div className="text-center py-12 bg-gray-900 rounded-lg">
-          <p className="text-gray-400 mb-4">Необходимо войти в систему для просмотра бронирований</p>
-          <Button asChild>
-            <a href="/login">Войти в систему</a>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
+        <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
+          <h1 className="text-2xl font-bold text-white">Мои бронирования</h1>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const BookingCard = ({ booking, showCancelButton = false }: { 
+    booking: BookingWithDetails; 
+    showCancelButton?: boolean;
+  }) => (
+    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 space-y-4">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-white mb-2">
+            {booking.class?.title || "Тренировка"}
+          </h3>
+          <div className="flex items-center gap-2 text-slate-400 mb-2">
+            <MapPin className="h-4 w-4" />
+            <span>{booking.gym?.name}</span>
+          </div>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-sm ${
+          booking.status === 'booked' ? 'bg-green-600/30 text-green-300' :
+          booking.status === 'cancelled' ? 'bg-red-600/30 text-red-300' :
+          'bg-gray-600/30 text-gray-300'
+        }`}>
+          {booking.status === 'booked' ? 'Забронировано' :
+           booking.status === 'cancelled' ? 'Отменено' :
+           booking.status}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="flex items-center gap-2 text-slate-400">
+          <Calendar className="h-4 w-4" />
+          <span>
+            {booking.date_time ? 
+              new Date(booking.date_time).toLocaleDateString() : 
+              'Дата не указана'
+            }
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-slate-400">
+          <Clock className="h-4 w-4" />
+          <span>
+            {booking.date_time ? 
+              new Date(booking.date_time).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 
+              'Время не указано'
+            }
+          </span>
+        </div>
+      </div>
+
+      {booking.class?.instructor && (
+        <div className="flex items-center gap-2 text-slate-400 text-sm">
+          <User className="h-4 w-4" />
+          <span>Инструктор: {booking.class.instructor}</span>
+        </div>
+      )}
+
+      {showCancelButton && booking.status === 'booked' && (
+        <div className="pt-2">
+          <Button
+            onClick={() => cancelBooking(booking.id)}
+            variant="destructive"
+            size="sm"
+          >
+            Отменить бронирование
           </Button>
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 
-  if (isLoading) {
-    return (
-      <div className="pb-16">
-        <h1 className="text-2xl font-bold mb-4">Мои бронирования</h1>
-        <div className="text-center py-12">
-          <p className="text-gray-400">Загрузка бронирований...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="pb-16">
-        <h1 className="text-2xl font-bold mb-4">Мои бронирования</h1>
-        <div className="text-center py-12 bg-red-900/20 text-red-400 rounded-lg">
-          <p>Ошибка при загрузке бронирований</p>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="pb-16">
-      <h1 className="text-2xl font-bold mb-4">Мои бронирования</h1>
-      
-      <Tabs defaultValue="upcoming" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-3 mb-6">
-          <TabsTrigger value="upcoming">Предстоящие ({upcomingBookings.length})</TabsTrigger>
-          <TabsTrigger value="past">Прошедшие ({pastBookings.length})</TabsTrigger>
-          <TabsTrigger value="cancelled">Отмененные ({cancelledBookings.length})</TabsTrigger>
-        </TabsList>
-        
-        {/* Предстоящие бронирования */}
-        <TabsContent value="upcoming">
-          {upcomingBookings.length > 0 ? (
-            <div className="space-y-4">
-              {upcomingBookings.map(booking => (
-                <Card key={booking.id} className="overflow-hidden">
-                  <div className="flex flex-row">
-                    <div className="w-1/3 h-24">
-                      <img 
-                        src={booking.gym?.main_image || "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"} 
-                        alt={booking.class?.title || booking.gym?.name || ""} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-3 w-2/3 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-medium">{booking.class?.title || "Занятие"}</h3>
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {booking.gym?.name}, {booking.gym?.location}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Calendar className="h-3 w-3 mr-1 text-gray-500" />
-                          {formatDate(booking.date_time)}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Clock className="h-3 w-3 mr-1 text-gray-500" />
-                          {booking.date_time ? new Date(booking.date_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : "Время не указано"}
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <Button 
-                          variant="outline"
-                          size="sm"
-                          className="text-xs" 
-                          onClick={() => handleCancelBooking(booking.id)}
-                          disabled={cancelBookingMutation.isPending}
-                        >
-                          {cancelBookingMutation.isPending ? "Отмена..." : "Отменить"}
-                        </Button>
-                        <Badge variant="default">Подтверждено</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-900 rounded-lg">
-              <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-              <p className="mt-2 text-gray-400">У вас нет предстоящих бронирований</p>
-              <Button className="mt-4" asChild>
-                <a href="/app/classes">Найти занятия</a>
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-        
-        {/* Прошедшие бронирования */}
-        <TabsContent value="past">
-          {pastBookings.length > 0 ? (
-            <div className="space-y-4">
-              {pastBookings.map(booking => (
-                <Card key={booking.id} className="overflow-hidden">
-                  <div className="flex flex-row">
-                    <div className="w-1/3 h-24">
-                      <img 
-                        src={booking.gym?.main_image || "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"} 
-                        alt={booking.class?.title || booking.gym?.name || ""} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-3 w-2/3 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between">
-                          <h3 className="font-medium">{booking.class?.title || "Занятие"}</h3>
-                          <Badge variant="default">Завершено</Badge>
-                        </div>
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {booking.gym?.name}, {booking.gym?.location}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Calendar className="h-3 w-3 mr-1 text-gray-500" />
-                          {formatDate(booking.date_time)}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Clock className="h-3 w-3 mr-1 text-gray-500" />
-                          {booking.date_time ? new Date(booking.date_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : "Время не указано"}
-                        </div>
-                      </div>
-                      <Button size="sm" className="mt-2 text-xs">Оставить отзыв</Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-900 rounded-lg">
-              <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-              <p className="mt-2 text-gray-400">У вас нет прошедших бронирований</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        {/* Отмененные бронирования */}
-        <TabsContent value="cancelled">
-          {cancelledBookings.length > 0 ? (
-            <div className="space-y-4">
-              {cancelledBookings.map(booking => (
-                <Card key={booking.id} className="overflow-hidden">
-                  <div className="flex flex-row">
-                    <div className="w-1/3 h-24">
-                      <img 
-                        src={booking.gym?.main_image || "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60"} 
-                        alt={booking.class?.title || booking.gym?.name || ""} 
-                        className="w-full h-full object-cover opacity-70"
-                      />
-                    </div>
-                    <div className="p-3 w-2/3 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between">
-                          <h3 className="font-medium">{booking.class?.title || "Занятие"}</h3>
-                          <Badge variant="secondary">Отменено</Badge>
-                        </div>
-                        <div className="flex items-center mt-1 text-xs text-gray-500">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {booking.gym?.name}, {booking.gym?.location}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Calendar className="h-3 w-3 mr-1 text-gray-500" />
-                          {formatDate(booking.date_time)}
-                        </div>
-                        <div className="flex items-center mt-1 text-xs">
-                          <Clock className="h-3 w-3 mr-1 text-gray-500" />
-                          {booking.date_time ? new Date(booking.date_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : "Время не указано"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-gray-900 rounded-lg">
-              <Check className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-              <p className="mt-2 text-gray-400">У вас нет отмененных бронирований</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
+      {/* Header */}
+      <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
+        <h1 className="text-2xl font-bold text-white mb-2">Мои бронирования</h1>
+        <p className="text-slate-300">Управляйте своими записями на тренировки</p>
+      </div>
+
+      <div className="px-4 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 backdrop-blur-sm border-slate-700">
+            <TabsTrigger 
+              value="upcoming" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+            >
+              Предстоящие ({upcomingBookings.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="past" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+            >
+              Прошедшие ({pastBookings.length})
+            </TabsTrigger>
+            <TabsTrigger 
+              value="cancelled" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+            >
+              Отмененные ({cancelledBookings.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upcoming" className="space-y-4 mt-6">
+            {upcomingBookings.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-slate-400 mb-4">У вас нет предстоящих бронирований</p>
+                <Button asChild>
+                  <a href="/app/classes">Найти занятия</a>
+                </Button>
+              </div>
+            ) : (
+              upcomingBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} showCancelButton={true} />
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="past" className="space-y-4 mt-6">
+            {pastBookings.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-slate-400">У вас нет прошедших тренировок</p>
+              </div>
+            ) : (
+              pastBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="cancelled" className="space-y-4 mt-6">
+            {cancelledBookings.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-slate-400">У вас нет отмененных бронирований</p>
+              </div>
+            ) : (
+              cancelledBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

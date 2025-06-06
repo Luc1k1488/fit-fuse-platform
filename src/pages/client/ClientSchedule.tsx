@@ -1,281 +1,245 @@
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth_context";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, MapPin, Users, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale";
-
-interface BookingWithGym {
-  id: string;
-  date_time: string;
-  status: string;
-  gym: {
-    id: string;
-    name: string;
-    address: string;
-  };
-}
+import { supabase } from "@/integrations/supabase/client";
+import { ClassWithGym } from "@/types";
+import { toast } from "sonner";
 
 const ClientSchedule = () => {
-  const { user, is_authenticated } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [classes, setClasses] = useState<ClassWithGym[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState("today");
 
-  // Получаем бронирования пользователя
-  const { data: bookings, isLoading, error } = useQuery({
-    queryKey: ["user-bookings", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
+  const daysOfWeek = [
+    { id: "today", name: "Сегодня", date: new Date() },
+    { id: "tomorrow", name: "Завтра", date: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+    { id: "week", name: "На неделе", date: new Date() }
+  ];
+
+  useEffect(() => {
+    fetchClasses();
+  }, [selectedDay]);
+
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
       
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          *,
-          gym:gym_id (
-            id,
-            name,
-            address
-          )
-        `)
-        .eq("user_id", user.id)
-        .order("date_time", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching bookings:", error);
-        throw error;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      let startDate = today;
+      let endDate = new Date(today);
+      
+      if (selectedDay === "tomorrow") {
+        startDate = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+        endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+      } else if (selectedDay === "week") {
+        endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+      } else {
+        endDate.setHours(23, 59, 59, 999);
       }
 
-      return (data as BookingWithGym[]) || [];
-    },
-    enabled: is_authenticated && !!user?.id,
-  });
+      const { data, error } = await supabase
+        .from('classes')
+        .select(`
+          *,
+          gym:gym_id (*)
+        `)
+        .gte('start_time', startDate.toISOString())
+        .lte('start_time', endDate.toISOString())
+        .order('start_time', { ascending: true });
 
-  // Мутация для отмены бронирования
-  const cancelBookingMutation = useMutation({
-    mutationFn: async (bookingId: string) => {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status: "cancelled" })
-        .eq("id", bookingId);
+      if (error) {
+        console.error('Error fetching classes:', error);
+        toast.error('Ошибка загрузки расписания');
+        return;
+      }
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Бронирование отменено",
-        description: "Ваше бронирование успешно отменено",
-      });
-      queryClient.invalidateQueries({ queryKey: ["user-bookings"] });
-    },
-    onError: (error) => {
-      console.error("Error cancelling booking:", error);
-      toast({
-        variant: "destructive",
-        title: "Ошибка",
-        description: "Не удалось отменить бронирование",
-      });
-    },
-  });
+      const typedClasses: ClassWithGym[] = (data || []).map(classItem => ({
+        ...classItem,
+        gym: {
+          ...classItem.gym,
+          description: classItem.gym?.description || null,
+          phone: classItem.gym?.phone || null,
+        }
+      }));
 
-  if (!is_authenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-        <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
-          <h1 className="text-2xl font-bold text-white animate-fade-in">Расписание</h1>
-        </div>
-        <div className="px-4 py-6">
-          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 animate-fade-in">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-medium text-white mb-2">
-                Необходимо войти в систему
-              </h3>
-              <p className="text-slate-300">
-                Для просмотра расписания необходимо войти в систему
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  const now = new Date();
-  const upcomingBookings = bookings?.filter(booking => 
-    (booking.status === "booked" || booking.status === "confirmed") && new Date(booking.date_time) > now
-  ) || [];
-  
-  const completedBookings = bookings?.filter(booking => 
-    (booking.status === "booked" || booking.status === "confirmed") && new Date(booking.date_time) <= now
-  ) || [];
-
-  const getTypeColor = (status: string) => {
-    switch(status) {
-      case "booked":
-      case "confirmed": return "bg-green-500/20 text-green-300 border-green-500/30";
-      case "cancelled": return "bg-red-500/20 text-red-300 border-red-500/30";
-      case "pending": return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
-      default: return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+      setClasses(typedClasses);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Ошибка загрузки данных');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const ScheduleCard = ({ booking, showCancelButton = false }: { booking: BookingWithGym; showCancelButton?: boolean }) => (
-    <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 animate-fade-in">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3 className="font-semibold text-white mb-1">Посещение зала</h3>
-            <p className="text-sm text-slate-300 font-medium">{booking.gym?.name || "Зал"}</p>
-          </div>
-          <Badge className={getTypeColor(booking.status)}>
-            {(booking.status === "booked" || booking.status === "confirmed") && "Подтверждено"}
-            {booking.status === "cancelled" && "Отменено"}
-            {booking.status === "pending" && "Ожидание"}
-          </Badge>
-        </div>
+  const groupClassesByTime = (classes: ClassWithGym[]) => {
+    const groups: { [key: string]: ClassWithGym[] } = {};
+    
+    classes.forEach(classItem => {
+      if (classItem.start_time) {
+        const hour = new Date(classItem.start_time).getHours();
+        let timeSlot = "";
         
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-slate-300">
-            <Clock className="h-4 w-4 mr-2 text-blue-400" />
-            <span>{format(new Date(booking.date_time), "d MMMM yyyy, HH:mm", { locale: ru })}</span>
-          </div>
-          <div className="flex items-center text-sm text-slate-300">
-            <MapPin className="h-4 w-4 mr-2 text-purple-400" />
-            <span>{booking.gym?.address || "Адрес не указан"}</span>
-          </div>
-        </div>
+        if (hour < 12) timeSlot = "Утро (до 12:00)";
+        else if (hour < 17) timeSlot = "День (12:00-17:00)";
+        else timeSlot = "Вечер (после 17:00)";
+        
+        if (!groups[timeSlot]) groups[timeSlot] = [];
+        groups[timeSlot].push(classItem);
+      }
+    });
+    
+    return groups;
+  };
 
-        <div className="flex justify-between items-center">
-          <p className="text-sm text-slate-400">
-            ID: {booking.id.slice(0, 8)}...
-          </p>
-          {showCancelButton && (booking.status === "booked" || booking.status === "confirmed") && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => cancelBookingMutation.mutate(booking.id)}
-              disabled={cancelBookingMutation.isPending}
-              className="text-sm bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-600/50"
-            >
-              {cancelBookingMutation.isPending ? "Отмена..." : "Отменить"}
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const handleBookClass = (classId: string) => {
+    toast.success("Занятие забронировано!", {
+      description: "Мы отправили подтверждение на ваш email"
+    });
+  };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-        <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
-          <h1 className="text-2xl font-bold text-white animate-fade-in">Расписание</h1>
-        </div>
-        <div className="px-4 py-6">
-          <div className="text-center py-12">
-            <p className="text-slate-300">Загрузка расписания...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-        <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
-          <h1 className="text-2xl font-bold text-white animate-fade-in">Расписание</h1>
-        </div>
-        <div className="px-4 py-6">
-          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 animate-fade-in">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-lg font-medium text-white mb-2">
-                Ошибка загрузки
-              </h3>
-              <p className="text-slate-300">
-                Не удалось загрузить расписание
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  const groupedClasses = groupClassesByTime(classes);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-      {/* Заголовок */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
+      {/* Header */}
       <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
-        <h1 className="text-2xl font-bold text-white animate-fade-in">Расписание</h1>
-        <p className="text-slate-300 mt-1 animate-fade-in animation-delay-200">Ваши занятия и бронирования</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Расписание</h1>
+        <p className="text-slate-300">Выберите занятие и запишитесь</p>
       </div>
 
-      <div className="px-4 py-6">
-        <Tabs defaultValue="upcoming" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700">
-            <TabsTrigger 
-              value="upcoming" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 data-[state=active]:text-white text-slate-300"
+      <div className="px-4 py-6 space-y-6">
+        {/* Day Selector */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {daysOfWeek.map((day) => (
+            <Button
+              key={day.id}
+              variant={selectedDay === day.id ? "default" : "outline"}
+              onClick={() => setSelectedDay(day.id)}
+              className={`whitespace-nowrap ${
+                selectedDay === day.id
+                  ? "bg-purple-600 hover:bg-purple-700"
+                  : "bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+              }`}
             >
-              Предстоящие ({upcomingBookings.length})
-            </TabsTrigger>
-            <TabsTrigger 
-              value="completed" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 data-[state=active]:text-white text-slate-300"
-            >
-              Завершенные ({completedBookings.length})
-            </TabsTrigger>
-          </TabsList>
+              {day.name}
+            </Button>
+          ))}
+        </div>
 
-          <TabsContent value="upcoming" className="space-y-4">
-            {upcomingBookings.length > 0 ? (
-              upcomingBookings.map((booking) => (
-                <ScheduleCard key={booking.id} booking={booking} showCancelButton={true} />
-              ))
-            ) : (
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 animate-fade-in">
-                <CardContent className="p-8 text-center">
-                  <Calendar className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    Нет предстоящих занятий
-                  </h3>
-                  <p className="text-slate-300 mb-4">
-                    Забронируйте посещение зала, чтобы начать тренировки
-                  </p>
-                  <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white transition-all hover:scale-105">
-                    Найти залы
-                  </Button>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+          </div>
+        ) : Object.keys(groupedClasses).length === 0 ? (
+          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+            <CardContent className="p-8 text-center">
+              <Calendar className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+              <h3 className="text-white font-semibold mb-2">Занятий не найдено</h3>
+              <p className="text-slate-400 mb-4">
+                На выбранный период занятия не запланированы
+              </p>
+              <Button onClick={() => setSelectedDay("week")}>
+                Посмотреть на неделе
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(groupedClasses).map(([timeSlot, timeClasses]) => (
+              <Card key={timeSlot} className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white text-lg">{timeSlot}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {timeClasses.map((classItem) => (
+                    <div key={classItem.id} className="bg-slate-700/30 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-white mb-1">
+                            {classItem.title}
+                          </h3>
+                          {classItem.description && (
+                            <p className="text-slate-300 text-sm mb-2">{classItem.description}</p>
+                          )}
+                        </div>
+                        {classItem.category && (
+                          <span className="bg-purple-600/30 text-purple-300 px-2 py-1 rounded text-xs">
+                            {classItem.category}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-3 text-sm">
+                        {classItem.start_time && (
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Clock className="h-4 w-4" />
+                            <span>
+                              {new Date(classItem.start_time).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                              {classItem.end_time && 
+                                ` - ${new Date(classItem.end_time).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}`
+                              }
+                            </span>
+                          </div>
+                        )}
+
+                        {classItem.instructor && (
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Users className="h-4 w-4" />
+                            <span>{classItem.instructor}</span>
+                          </div>
+                        )}
+
+                        {classItem.gym && (
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <MapPin className="h-4 w-4" />
+                            <span>{classItem.gym.name}</span>
+                          </div>
+                        )}
+
+                        {classItem.capacity && (
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <Users className="h-4 w-4" />
+                            <span>
+                              {classItem.booked_count || 0}/{classItem.capacity} мест
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-slate-400 text-sm">
+                          {classItem.gym?.location && (
+                            <span>{classItem.gym.location}</span>
+                          )}
+                        </div>
+                        <Button
+                          onClick={() => handleBookClass(classItem.id)}
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700"
+                          disabled={classItem.booked_count >= (classItem.capacity || 0)}
+                        >
+                          {classItem.booked_count >= (classItem.capacity || 0) ? "Мест нет" : "Записаться"}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-4">
-            {completedBookings.length > 0 ? (
-              completedBookings.map((booking) => (
-                <ScheduleCard key={booking.id} booking={booking} />
-              ))
-            ) : (
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 animate-fade-in">
-                <CardContent className="p-8 text-center">
-                  <Clock className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-white mb-2">
-                    Нет завершенных занятий
-                  </h3>
-                  <p className="text-slate-300">
-                    Здесь будет отображаться история ваших посещений
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

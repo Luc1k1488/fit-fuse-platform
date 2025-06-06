@@ -1,6 +1,6 @@
 
-import { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 
 interface ClientProtectedRouteProps {
@@ -8,28 +8,27 @@ interface ClientProtectedRouteProps {
 }
 
 const ClientProtectedRoute = ({ children }: ClientProtectedRouteProps) => {
-  const { user, is_authenticated, is_loading } = useAuth();
-  const location = useLocation();
+  const { user, is_loading } = useAuth();
+  const navigate = useNavigate();
 
-  console.log("ClientProtectedRoute check:", { user, is_authenticated, is_loading });
+  useEffect(() => {
+    if (!is_loading && !user) {
+      // Если пользователь не авторизован, перенаправляем на страницу входа
+      navigate("/login");
+    }
+  }, [user, is_loading, navigate]);
 
+  // Показываем экран загрузки, пока проверяем авторизацию
   if (is_loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-600">Загрузка...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
   }
 
-  if (!is_authenticated) {
-    // Для мобильного приложения редиректим на мобильный логин
-    return <Navigate to="/login/mobile" state={{ from: location }} replace />;
-  }
-
-  return <>{children}</>;
+  // Если пользователь авторизован, показываем контент
+  return user ? <>{children}</> : null;
 };
 
 export default ClientProtectedRoute;

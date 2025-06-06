@@ -5,53 +5,49 @@ import { useAuth } from "@/contexts/auth_context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User } from "lucide-react";
 
 const RegisterPage = () => {
-  const [name, set_name] = useState("");
-  const [phone, set_phone] = useState("");
-  const [email, set_email] = useState("");
-  const [password, set_password] = useState("");
-  const [confirmPassword, set_confirmPassword] = useState("");
-  const [error, set_error] = useState("");
-  const [is_loading, set_is_loading] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handle_submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    set_error("");
-
-    // Валидация
-    if (!email || !password || !name) {
-      set_error("Пожалуйста, заполните все обязательные поля");
-      return;
-    }
-
+    setError("");
+    
+    // Проверка совпадения паролей
     if (password !== confirmPassword) {
-      set_error("Пароли не совпадают");
+      setError("Пароли не совпадают");
       return;
     }
 
+    // Проверка сложности пароля
     if (password.length < 6) {
-      set_error("Пароль должен содержать минимум 6 символов");
+      setError("Пароль должен содержать не менее 6 символов");
       return;
     }
-
-    set_is_loading(true);
+    
+    setIsLoading(true);
 
     try {
       const result = await register(email, password, name);
       
       if (result.success) {
-        navigate("/login");
+        navigate("/app", { replace: true });
       } else {
-        set_error(result.error || "Регистрация не удалась. Пожалуйста, попробуйте еще раз.");
+        setError(result.error || "Ошибка регистрации. Попробуйте еще раз.");
       }
     } catch (err) {
-      set_error("Регистрация не удалась. Пожалуйста, попробуйте еще раз.");
+      console.error("Registration error:", err);
+      setError("Произошла ошибка при регистрации");
     } finally {
-      set_is_loading(false);
+      setIsLoading(false);
     }
   };
 
@@ -59,21 +55,21 @@ const RegisterPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <div className="max-w-md w-full">
         <div className="mb-6 flex items-center justify-between">
-          <Link to="/login" className="flex items-center text-gray-600">
+          <Link to="/" className="flex items-center text-gray-600">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Назад к входу
+            На главную
           </Link>
           <h1 className="text-2xl font-bold text-center">GoodFit</h1>
         </div>
         
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Создать аккаунт</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Создайте аккаунт</CardTitle>
             <CardDescription className="text-center">
-              Введите свои данные для создания аккаунта
+              Введите данные для регистрации
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handle_submit}>
+          <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
@@ -82,87 +78,90 @@ const RegisterPage = () => {
               )}
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">
-                  Имя и фамилия *
+                  Имя
                 </label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => set_name(e.target.value)}
-                  placeholder="Иван Иванов"
-                  required
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ваше имя"
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
-                  Email *
+                  Email
                 </label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => set_email(e.target.value)}
-                  placeholder="ivan@example.com"
-                  required
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ivan@example.com"
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium">
-                  Пароль *
+                  Пароль
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => set_password(e.target.value)}
-                  placeholder="Минимум 6 символов"
-                  required
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Создайте пароль"
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-sm font-medium">
-                  Подтвердите пароль *
+                  Подтверждение пароля
                 </label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => set_confirmPassword(e.target.value)}
-                  placeholder="Повторите пароль"
-                  required
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Повторите пароль"
+                    required
+                    className="pl-10"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label htmlFor="phone" className="text-sm font-medium">
-                  Номер телефона (необязательно)
-                </label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => set_phone(e.target.value)}
-                  placeholder="+7 (999) 123-45-67"
-                />
-              </div>
-              <div className="text-sm text-gray-600">
-                Регистрируясь, вы соглашаетесь с нашими{" "}
-                <Link to="/terms" className="text-primary hover:underline">
+              <p className="text-xs text-gray-500">
+                Регистрируясь, вы соглашаетесь с{" "}
+                <Link to="/info/terms" className="text-primary hover:underline">
                   Условиями использования
                 </Link>{" "}
                 и{" "}
-                <Link to="/privacy" className="text-primary hover:underline">
+                <Link to="/info/privacy" className="text-primary hover:underline">
                   Политикой конфиденциальности
                 </Link>
-                .
-              </div>
+              </p>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button
                 type="submit"
                 className="w-full"
-                disabled={is_loading}
+                disabled={isLoading}
               >
-                {is_loading ? "Создание аккаунта..." : "Создать аккаунт"}
+                {isLoading ? "Регистрация..." : "Зарегистрироваться"}
               </Button>
               <div className="text-center text-sm">
                 Уже есть аккаунт?{" "}

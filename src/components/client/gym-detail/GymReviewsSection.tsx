@@ -1,106 +1,122 @@
 
-import { useState } from "react";
-import { useAuth } from "@/contexts/auth_context";
-import { useReviews } from "@/hooks/useReviews";
-import { ReviewCard } from "@/components/reviews/ReviewCard";
-import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { useState, useEffect } from "react";
+import { Star, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Review {
+  id: string;
+  user_id: string | null;
+  rating: number | null;
+  comment: string | null;
+  created_at: string;
+}
 
 interface GymReviewsSectionProps {
   gymId: string;
 }
 
 export const GymReviewsSection = ({ gymId }: GymReviewsSectionProps) => {
-  const { user } = useAuth();
-  const { reviews, reviewCount, getAverageRating, submitReview, loading } = useReviews(gymId);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  
-  const toggleReviewForm = () => {
-    if (!user) {
-      // Если пользователь не авторизован, перенаправим на страницу входа
-      // или покажем всплывающее сообщение
-      return;
-    }
-    setShowReviewForm(prev => !prev);
-  };
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmitReview = async (reviewData: { rating: number; comment: string }) => {
-    if (!user) return false;
-    
-    const success = await submitReview(reviewData, user.id);
-    if (success) {
-      setShowReviewForm(false);
-    }
-    return success;
-  };
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('gym_id', gymId)
+          .order('created_at', { ascending: false })
+          .limit(5);
 
-  // Отображение звездочек для среднего рейтинга
-  const renderRatingStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-5 w-5 ${
-          i < Math.floor(rating) ? 'fill-amber-500 text-amber-500' : 'text-gray-300'
-        }`}
-      />
-    ));
-  };
+        if (error) {
+          console.error('Error fetching reviews:', error);
+        } else {
+          setReviews(data || []);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [gymId]);
+
+  if (loading) {
+    return (
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Отзывы</h2>
+        <div className="animate-pulse space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-slate-700/50 rounded-lg h-20"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section className="mt-8 space-y-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div>
-          <h2 className="text-xl font-bold text-white">Отзывы ({reviewCount})</h2>
-          <div className="flex items-center space-x-2 mt-1">
-            <div className="flex">
-              {renderRatingStars(getAverageRating())}
+    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+      <h2 className="text-xl font-semibold text-white mb-4">Отзывы ({reviews.length})</h2>
+      
+      {reviews.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-400 mb-4">Отзывов пока нет</p>
+          <Button className="bg-purple-600 hover:bg-purple-700">
+            Оставить первый отзыв
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-slate-700/30 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-gray-300" />
+                </div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-white font-medium">Пользователь</span>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${
+                            star <= (review.rating || 0)
+                              ? 'text-yellow-500 fill-yellow-500'
+                              : 'text-gray-400'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {review.comment && (
+                    <p className="text-gray-300 text-sm">{review.comment}</p>
+                  )}
+                  
+                  <p className="text-gray-500 text-xs mt-2">
+                    {new Date(review.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
             </div>
-            <span className="text-lg font-semibold text-white">{getAverageRating()}</span>
-          </div>
-        </div>
-        
-        <Button 
-          onClick={toggleReviewForm}
-          className="mt-4 md:mt-0"
-        >
-          {showReviewForm ? 'Отменить' : 'Оставить отзыв'}
-        </Button>
-      </div>
-      
-      {showReviewForm && (
-        <div className="py-4">
-          <ReviewForm 
-            gymId={gymId} 
-            onSubmit={handleSubmitReview} 
-          />
-          <Separator className="my-6 bg-gray-700" />
-        </div>
-      )}
-      
-      <div className="space-y-4">
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
-        ) : reviews.length > 0 ? (
-          reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))
-        ) : (
-          <div className="text-center py-8 bg-gray-800 rounded-lg border border-gray-700">
-            <p className="text-gray-400">Пока нет отзывов</p>
-            <Button 
-              variant="outline" 
-              onClick={toggleReviewForm} 
-              className="mt-4"
-            >
-              Будьте первым, кто оставит отзыв
+          ))}
+          
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-700/50">
+              Посмотреть все отзывы
+            </Button>
+            <Button className="bg-purple-600 hover:bg-purple-700">
+              Написать отзыв
             </Button>
           </div>
-        )}
-      </div>
-    </section>
+        </div>
+      )}
+    </div>
   );
 };

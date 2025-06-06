@@ -15,19 +15,25 @@ export const GymFilters = ({
   selectedCity,
   selectedCategory,
   setSelectedCity,
-  setSelectedCategory
+  setSelectedCategory,
 }: GymFiltersProps) => {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-2 mb-2 overflow-auto no-scrollbar">
-        <CitySelector 
-          cities={cities} 
-          selectedCity={selectedCity} 
-          setSelectedCity={setSelectedCity} 
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Город
+        </label>
+        <CitySelector
+          cities={cities}
+          selectedCity={selectedCity}
+          onCityChange={setSelectedCity}
         />
       </div>
       
-      <div className="mb-2 overflow-auto w-full no-scrollbar">
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Категория
+        </label>
         <CategoryTabs
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}

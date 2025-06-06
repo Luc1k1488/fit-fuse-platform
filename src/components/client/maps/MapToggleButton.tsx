@@ -1,7 +1,6 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Map, List } from 'lucide-react';
+import { Map, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MapToggleButtonProps {
   showMap: boolean;
@@ -10,11 +9,11 @@ interface MapToggleButtonProps {
 
 export const MapToggleButton = ({ showMap, onToggle }: MapToggleButtonProps) => {
   return (
-    <Button 
-      variant="outline" 
-      size="sm"
+    <Button
       onClick={onToggle}
-      className="bg-slate-800/50 backdrop-blur-sm border-slate-700 text-slate-300 hover:bg-slate-700/50"
+      variant="outline"
+      size="sm"
+      className="bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
     >
       {showMap ? (
         <>

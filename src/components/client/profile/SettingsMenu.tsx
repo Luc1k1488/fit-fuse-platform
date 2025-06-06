@@ -1,211 +1,126 @@
 
 import { useState } from "react";
-import { 
-  User, 
-  CreditCard, 
-  Bell, 
-  Shield, 
-  HelpCircle,
-  LogOut,
-  ChevronRight
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
+import { Bell, Shield, CreditCard, HelpCircle, LogOut, User, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/auth_context";
 import { useToast } from "@/hooks/use-toast";
-
-interface MenuItem {
-  icon: any;
-  title: string;
-  description: string;
-  action: () => void;
-  hasToggle?: boolean;
-  toggleValue?: boolean;
-  onToggleChange?: (value: boolean) => void;
-}
 
 const SettingsMenu = () => {
   const { logout } = useAuth();
   const { toast } = useToast();
-  
-  // Состояния для переключателей
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [publicProfile, setPublicProfile] = useState(false);
-  const [showStats, setShowStats] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+  const [darkMode, setDarkMode] = useState(true);
 
   const handleLogout = async () => {
     try {
       await logout();
       toast({
-        title: "Выход выполнен",
-        description: "Вы успешно вышли из аккаунта",
+        title: "Вы вышли из системы",
+        description: "До свидания!",
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Ошибка",
-        description: "Не удалось выйти из аккаунта",
+        description: "Не удалось выйти из системы",
       });
     }
   };
 
-  const showComingSoon = (feature: string) => {
-    toast({
-      title: "Скоро будет доступно",
-      description: `Функция "${feature}" будет добавлена в следующем обновлении`,
-    });
-  };
-
-  const menuSections = [
+  const settingsItems = [
     {
-      title: "Аккаунт",
-      items: [
-        {
-          icon: User,
-          title: "Персональные данные",
-          description: "Имя, телефон, email",
-          action: () => showComingSoon("Персональные данные")
-        },
-        {
-          icon: CreditCard,
-          title: "Способы оплаты",
-          description: "Карты и платежные методы",
-          action: () => showComingSoon("Способы оплаты")
-        },
-      ]
+      icon: User,
+      title: "Персональные данные",
+      description: "Управление профилем и контактной информацией",
+      action: () => toast({ title: "Скоро", description: "Функция в разработке" }),
     },
     {
-      title: "Уведомления",
-      items: [
-        {
-          icon: Bell,
-          title: "Push-уведомления",
-          description: "Уведомления о бронированиях",
-          action: () => {},
-          hasToggle: true,
-          toggleValue: pushNotifications,
-          onToggleChange: setPushNotifications
-        },
-        {
-          icon: Bell,
-          title: "Email уведомления",
-          description: "Новости и акции на email",
-          action: () => {},
-          hasToggle: true,
-          toggleValue: emailNotifications,
-          onToggleChange: setEmailNotifications
-        },
-        {
-          icon: Bell,
-          title: "SMS уведомления",
-          description: "Напоминания о тренировках",
-          action: () => {},
-          hasToggle: true,
-          toggleValue: smsNotifications,
-          onToggleChange: setSmsNotifications
-        },
-      ]
+      icon: CreditCard,
+      title: "Подписка и платежи",
+      description: "Управление подпиской и способами оплаты",
+      action: () => toast({ title: "Скоро", description: "Функция в разработке" }),
     },
     {
-      title: "Приватность",
-      items: [
-        {
-          icon: Shield,
-          title: "Публичный профиль",
-          description: "Разрешить другим видеть профиль",
-          action: () => {},
-          hasToggle: true,
-          toggleValue: publicProfile,
-          onToggleChange: setPublicProfile
-        },
-        {
-          icon: Shield,
-          title: "Показывать статистику",
-          description: "Делиться достижениями",
-          action: () => {},
-          hasToggle: true,
-          toggleValue: showStats,
-          onToggleChange: setShowStats
-        },
-        {
-          icon: Shield,
-          title: "Приватность и безопасность",
-          description: "Пароль, двухфакторная аутентификация",
-          action: () => showComingSoon("Приватность и безопасность")
-        },
-      ]
+      icon: Shield,
+      title: "Приватность и безопасность",
+      description: "Настройки безопасности аккаунта",
+      action: () => toast({ title: "Скоро", description: "Функция в разработке" }),
     },
     {
-      title: "Поддержка",
-      items: [
-        {
-          icon: HelpCircle,
-          title: "Помощь и поддержка",
-          description: "FAQ, связаться с поддержкой",
-          action: () => showComingSoon("Помощь и поддержка")
-        }
-      ]
-    }
+      icon: HelpCircle,
+      title: "Помощь и поддержка",
+      description: "Центр помощи и связь с поддержкой",
+      action: () => toast({ title: "Скоро", description: "Функция в разработке" }),
+    },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in animation-delay-400">
-      {menuSections.map((section, sectionIndex) => (
-        <Card key={sectionIndex} className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-lg text-white">{section.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {section.items.map((item, itemIndex) => (
-              <div key={itemIndex}>
-                <div className="w-full p-4 flex items-center space-x-3 hover:bg-slate-700/30 transition-colors">
-                  <item.icon className="h-5 w-5 text-slate-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-white">{item.title}</div>
-                    <div className="text-sm text-slate-400">{item.description}</div>
-                  </div>
-                  <div className="flex items-center">
-                    {item.hasToggle && item.onToggleChange ? (
-                      <Switch
-                        checked={item.toggleValue}
-                        onCheckedChange={item.onToggleChange}
-                      />
-                    ) : (
-                      <button
-                        onClick={item.action}
-                        className="flex items-center text-slate-400 hover:text-white transition-colors"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                {itemIndex < section.items.length - 1 && <Separator className="bg-slate-700" />}
+    <div className="space-y-4 animate-fade-in animation-delay-200">
+      {/* Toggle Settings */}
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Быстрые настройки</h3>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-white font-medium">Уведомления</p>
+                <p className="text-sm text-gray-400">Push-уведомления о занятиях</p>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
-      
-      {/* Выход из аккаунта */}
-      <Card className="bg-slate-800/50 backdrop-blur-sm border-red-700/50">
-        <CardContent className="p-0">
-          <button
-            onClick={handleLogout}
-            className="w-full p-4 flex items-center space-x-3 text-red-400 hover:bg-red-500/10 transition-colors"
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            <div className="flex-1 text-left">
-              <div className="font-medium">Выйти из аккаунта</div>
-              <div className="text-sm text-red-400/70">Завершить текущую сессию</div>
             </div>
-          </button>
-        </CardContent>
-      </Card>
+            <Switch 
+              checked={notifications} 
+              onCheckedChange={setNotifications}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {darkMode ? <Moon className="h-5 w-5 text-gray-400" /> : <Sun className="h-5 w-5 text-gray-400" />}
+              <div>
+                <p className="text-white font-medium">Темная тема</p>
+                <p className="text-sm text-gray-400">Внешний вид приложения</p>
+              </div>
+            </div>
+            <Switch 
+              checked={darkMode} 
+              onCheckedChange={setDarkMode}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Items */}
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg overflow-hidden">
+        {settingsItems.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={index}
+              onClick={item.action}
+              className="w-full flex items-center gap-4 p-4 text-left hover:bg-slate-700/30 transition-colors border-b border-slate-700 last:border-b-0"
+            >
+              <Icon className="h-5 w-5 text-gray-400" />
+              <div className="flex-1">
+                <p className="text-white font-medium">{item.title}</p>
+                <p className="text-sm text-gray-400">{item.description}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Logout Button */}
+      <Button 
+        onClick={handleLogout}
+        variant="destructive" 
+        className="w-full"
+      >
+        <LogOut className="h-4 w-4 mr-2" />
+        Выйти из аккаунта
+      </Button>
     </div>
   );
 };

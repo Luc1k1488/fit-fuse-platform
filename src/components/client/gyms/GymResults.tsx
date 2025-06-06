@@ -1,9 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { Gym } from "@/types";
+import { RefreshCw } from "lucide-react";
 import { GymCard } from "./GymCard";
 import { YandexMap } from "../maps/YandexMap";
-import { Loader2 } from "lucide-react";
+import { Gym } from "@/types";
 
 interface GymResultsProps {
   gyms: Gym[] | undefined;
@@ -14,9 +14,9 @@ interface GymResultsProps {
   toggleFavorite: (gymId: string) => void;
   refetch: () => void;
   resetFilters: () => void;
-  showMap?: boolean;
-  selectedGym?: Gym | null;
-  onGymSelect?: (gym: Gym) => void;
+  showMap: boolean;
+  selectedGym: Gym | null;
+  onGymSelect: (gym: Gym) => void;
 }
 
 export const GymResults = ({
@@ -28,74 +28,98 @@ export const GymResults = ({
   toggleFavorite,
   refetch,
   resetFilters,
-  showMap = false,
+  showMap,
   selectedGym,
-  onGymSelect
+  onGymSelect,
 }: GymResultsProps) => {
-  console.log("GymResults rendering with:", { gyms, isLoading, isError, gymsCount: gyms?.length, showMap });
-  
   if (isLoading) {
     return (
-      <div className="text-center py-12 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl animate-fade-in">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-400" />
-        <p className="text-slate-300">Загрузка списка залов...</p>
+      <div className="flex flex-col items-center justify-center py-12 animate-fade-in">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+        <p className="text-slate-300">Загружаем залы...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-center py-12 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl animate-fade-in">
-        <p className="text-red-400 mb-2">Ошибка при загрузке данных</p>
-        <p className="text-sm text-slate-400 mb-4">{error?.message || "Неизвестная ошибка"}</p>
-        <Button onClick={refetch} className="mt-2 transition-all hover:scale-105 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
-          Попробовать снова
-        </Button>
+      <div className="text-center py-12 animate-fade-in">
+        <div className="bg-red-900/20 border border-red-800 rounded-lg p-6 max-w-md mx-auto">
+          <h3 className="text-red-400 font-semibold mb-2">Ошибка загрузки</h3>
+          <p className="text-red-300 text-sm mb-4">
+            {error?.message || "Не удалось загрузить список залов"}
+          </p>
+          <div className="flex gap-2 justify-center">
+            <Button 
+              onClick={() => refetch()} 
+              variant="outline" 
+              size="sm"
+              className="border-red-700 text-red-400 hover:bg-red-900/30"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Повторить
+            </Button>
+            <Button 
+              onClick={resetFilters} 
+              variant="outline" 
+              size="sm"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            >
+              Сбросить фильтры
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!gyms || gyms.length === 0) {
     return (
-      <div className="text-center py-12 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl animate-fade-in">
-        <p className="text-slate-300 mb-4">Залы не найдены по вашим критериям.</p>
-        <p className="text-sm text-slate-400 mb-6">Попробуйте изменить фильтры поиска.</p>
-        <Button onClick={resetFilters} className="transition-all hover:scale-105 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700">
-          Сбросить фильтры
-        </Button>
+      <div className="text-center py-12 animate-fade-in">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-8 max-w-md mx-auto">
+          <h3 className="text-slate-300 font-semibold mb-2">Залы не найдены</h3>
+          <p className="text-slate-400 text-sm mb-4">
+            Попробуйте изменить параметры поиска или выбрать другой город
+          </p>
+          <Button 
+            onClick={resetFilters} 
+            variant="outline"
+            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+          >
+            Сбросить фильтры
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (showMap) {
     return (
-      <div className="space-y-4">
-        <div className="text-sm text-slate-400 mb-4">
-          Найдено залов: {gyms.length}
-        </div>
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
-          <YandexMap 
-            gyms={gyms} 
-            selectedGym={selectedGym}
-            onGymSelect={onGymSelect}
-            height="500px"
-          />
-        </div>
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden animate-fade-in">
+        <YandexMap 
+          gyms={gyms} 
+          selectedGym={selectedGym}
+          onGymSelect={onGymSelect}
+          height="600px"
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm text-slate-400 mb-4">
-        Найдено залов: {gyms.length}
+    <div className="animate-fade-in">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-white">
+          Найдено {gyms.length} {gyms.length === 1 ? 'зал' : gyms.length < 5 ? 'зала' : 'залов'}
+        </h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {gyms.map((gym, idx) => (
-          <GymCard 
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {gyms.map((gym, index) => (
+          <GymCard
             key={gym.id}
             gym={gym}
-            index={idx}
+            index={index}
             favoriteGyms={favoriteGyms}
             toggleFavorite={toggleFavorite}
           />

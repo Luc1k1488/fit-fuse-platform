@@ -1,154 +1,93 @@
 
 import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-export interface GymGallerySectionProps {
+interface GymGallerySectionProps {
   images: string[];
-  mainImage: string;
+  mainImage: string | null;
 }
 
 export const GymGallerySection = ({ images, mainImage }: GymGallerySectionProps) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  
-  // Combine main image with additional images, ensuring no duplicates
-  const allImages = [mainImage, ...images.filter(img => img !== mainImage)].filter(Boolean);
-  
+  const [currentImage, setCurrentImage] = useState(0);
+  const allImages = mainImage ? [mainImage, ...images] : images;
+
+  if (!allImages || allImages.length === 0) {
+    return (
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Фото</h2>
+        <div className="bg-slate-700 rounded-lg h-48 flex items-center justify-center">
+          <p className="text-gray-400">Фото пока не добавлены</p>
+        </div>
+      </div>
+    );
+  }
+
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    setCurrentImage((prev) => (prev + 1) % allImages.length);
   };
-  
+
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+    setCurrentImage((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
   return (
-    <div className="space-y-3 sticky top-4">
-      <h3 className="text-xl font-bold text-white mb-2">Фотографии</h3>
+    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+      <h2 className="text-xl font-semibold text-white mb-4">Фото ({allImages.length})</h2>
       
-      {allImages.length > 0 ? (
-        <>
-          <div className="grid gap-2">
-            <div 
-              className="aspect-video relative overflow-hidden rounded-lg cursor-pointer"
-              onClick={() => {
-                setCurrentImageIndex(0);
-                setLightboxOpen(true);
-              }}
+      <div className="relative">
+        <img 
+          src={allImages[currentImage]} 
+          alt={`Фото ${currentImage + 1}`}
+          className="w-full h-64 object-cover rounded-lg"
+        />
+        
+        {allImages.length > 1 && (
+          <>
+            <Button
+              onClick={prevImage}
+              variant="ghost"
+              size="sm"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              onClick={nextImage}
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 rounded-full px-2 py-1">
+              <span className="text-white text-sm">
+                {currentImage + 1} / {allImages.length}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {allImages.length > 1 && (
+        <div className="flex gap-2 mt-4 overflow-x-auto">
+          {allImages.map((image, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImage(index)}
+              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
+                index === currentImage ? 'border-purple-500' : 'border-transparent'
+              }`}
             >
               <img 
-                src={allImages[0] || '/placeholder.svg'} 
-                alt="Main view" 
-                className="object-cover w-full h-full transition-transform hover:scale-105"
+                src={image} 
+                alt={`Миниатюра ${index + 1}`}
+                className="w-full h-full object-cover"
               />
-            </div>
-            
-            <div className="grid grid-cols-3 gap-2">
-              {allImages.slice(1, 4).map((image, index) => (
-                <div 
-                  key={index}
-                  className="aspect-square relative overflow-hidden rounded-lg cursor-pointer"
-                  onClick={() => {
-                    setCurrentImageIndex(index + 1);
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <img 
-                    src={image || '/placeholder.svg'} 
-                    alt={`View ${index + 1}`} 
-                    className="object-cover w-full h-full transition-transform hover:scale-105"
-                  />
-                </div>
-              ))}
-              
-              {allImages.length > 4 && (
-                <div 
-                  className="aspect-square relative overflow-hidden rounded-lg cursor-pointer"
-                  onClick={() => {
-                    setCurrentImageIndex(4);
-                    setLightboxOpen(true);
-                  }}
-                >
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="text-white font-medium">+{allImages.length - 4}</span>
-                  </div>
-                  <img 
-                    src={allImages[4] || '/placeholder.svg'} 
-                    alt="More images" 
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Lightbox */}
-          <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-            <DialogContent className="max-w-4xl bg-black/95 border-gray-800">
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 text-white z-10"
-                  onClick={() => setLightboxOpen(false)}
-                >
-                  <X className="h-6 w-6" />
-                </Button>
-                
-                <div className="relative py-8">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      prevImage();
-                    }}
-                  >
-                    <ChevronLeft className="h-8 w-8" />
-                  </Button>
-                  
-                  <AspectRatio ratio={16 / 9}>
-                    <img 
-                      src={allImages[currentImageIndex]} 
-                      alt={`Image ${currentImageIndex + 1}`} 
-                      className="object-contain w-full h-full"
-                    />
-                  </AspectRatio>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-1/2 transform -translate-y-1/2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nextImage();
-                    }}
-                  >
-                    <ChevronRight className="h-8 w-8" />
-                  </Button>
-                </div>
-                
-                <div className="text-center text-sm text-gray-400 mt-2">
-                  {currentImageIndex + 1} / {allImages.length}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
-      ) : (
-        <div className="rounded-lg border border-gray-700 bg-gray-800 aspect-video flex items-center justify-center">
-          <p className="text-gray-400">Нет доступных фотографий</p>
+            </button>
+          ))}
         </div>
       )}
     </div>

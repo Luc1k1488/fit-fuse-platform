@@ -1,5 +1,5 @@
 
-import { MapPin, Clock, Check } from "lucide-react";
+import { MapPin, Clock, Phone, Globe } from "lucide-react";
 import { Gym } from "@/types";
 
 interface GymInfoSectionProps {
@@ -7,53 +7,70 @@ interface GymInfoSectionProps {
 }
 
 export const GymInfoSection = ({ gym }: GymInfoSectionProps) => {
-  // Convert gym data for display
-  const gymData = {
-    name: gym.name || "Unnamed Gym",
-    address: gym.address || "Address not provided",
-    workingHours: gym.working_hours || "Hours not provided",
-    description: gym.description || "No description available",
-    features: gym.features || [],
-    phone: gym.phone || "Phone number not provided",
-  };
-
   return (
-    <div className="px-4 mb-6">
-      <h1 className="text-2xl font-bold mb-1 text-white animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)' }}>
-        {gymData.name}
-      </h1>
-      <div className="flex items-center text-gray-400 animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '100ms' }}>
-        <MapPin className="h-4 w-4 mr-1" />
-        <span>{gymData.address}</span>
-      </div>
-      <div className="flex items-center text-gray-400 mt-1 animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '200ms' }}>
-        <Clock className="h-4 w-4 mr-1" />
-        <span>{gymData.workingHours}</span>
-      </div>
-      
-      <div className="space-y-4 mt-6">
-        <div className="animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '400ms' }}>
-          <h3 className="font-medium mb-2 text-white">О зале</h3>
-          <p className="text-gray-400">{gymData.description}</p>
+    <div className="space-y-6">
+      {/* About */}
+      <div>
+        <h2 className="text-xl font-semibold text-white mb-4">О зале</h2>
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+          {gym.description ? (
+            <p className="text-gray-300 leading-relaxed">{gym.description}</p>
+          ) : (
+            <p className="text-gray-400 italic">Описание зала пока не добавлено</p>
+          )}
         </div>
-        
-        <div className="animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '500ms' }}>
-          <h3 className="font-medium mb-2 text-white">Удобства и услуги</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {gymData.features.map((feature, index) => (
-              <div key={index} className="flex items-center group">
-                <Check className="h-4 w-4 text-primary mr-2 group-hover:scale-110 transition-transform" />
-                <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{feature}</span>
+      </div>
+
+      {/* Contact Info */}
+      <div>
+        <h2 className="text-xl font-semibold text-white mb-4">Контакты</h2>
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <MapPin className="h-5 w-5 text-gray-400" />
+            <div>
+              <p className="text-white font-medium">Адрес</p>
+              <p className="text-gray-300">{gym.address}</p>
+            </div>
+          </div>
+          
+          {gym.phone && (
+            <div className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-white font-medium">Телефон</p>
+                <p className="text-gray-300">{gym.phone}</p>
               </div>
-            ))}
+            </div>
+          )}
+          
+          {gym.working_hours && (
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-white font-medium">Часы работы</p>
+                <p className="text-gray-300">{gym.working_hours}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Features */}
+      {gym.features && gym.features.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-4">Удобства</h2>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-lg p-6">
+            <div className="grid grid-cols-2 gap-3">
+              {gym.features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="text-gray-300">{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        
-        <div className="animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '600ms' }}>
-          <h3 className="font-medium mb-2 text-white">Контакты</h3>
-          <p className="text-gray-400">{gymData.phone}</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

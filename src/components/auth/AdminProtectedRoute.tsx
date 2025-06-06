@@ -1,6 +1,6 @@
 
-import { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 
 interface AdminProtectedRouteProps {
@@ -8,41 +8,39 @@ interface AdminProtectedRouteProps {
   allowedRoles?: string[];
 }
 
-const AdminProtectedRoute = ({ children, allowedRoles = ["admin"] }: AdminProtectedRouteProps) => {
-  const { user, is_authenticated, is_loading } = useAuth();
-  const location = useLocation();
+const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "support"] }: AdminProtectedRouteProps) => {
+  const { user, is_loading } = useAuth();
+  const navigate = useNavigate();
 
-  console.log("AdminProtectedRoute check:", { user, is_authenticated, is_loading, allowedRoles });
+  // Проверка роли пользователя
+  const checkUserRole = () => {
+    if (!user) return false;
+    
+    const userRole = user.user_metadata?.role || "user";
+    return allowedRoles.includes(userRole);
+  };
 
+  useEffect(() => {
+    if (!is_loading && !user) {
+      // Если пользователь не авторизован, перенаправляем на страницу входа для админа
+      navigate("/admin/login");
+    } else if (!is_loading && user && !checkUserRole()) {
+      // Если пользователь авторизован, но не имеет нужной роли
+      navigate("/");
+    }
+  }, [user, is_loading, navigate]);
+
+  // Показываем экран загрузки, пока проверяем авторизацию
   if (is_loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-gray-300">Проверка доступа...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  if (!is_authenticated) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
-  }
-
-  if (user && !allowedRoles.includes(user.role)) {
-    // Редиректим на соответствующую роли страницу
-    if (user.role === "user") {
-      return <Navigate to="/app" replace />;
-    } else if (user.role === "partner") {
-      return <Navigate to="/admin/partner" replace />;
-    } else if (user.role === "support") {
-      return <Navigate to="/admin/support-portal" replace />;
-    } else {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
-  }
-
-  return <>{children}</>;
+  // Если пользователь авторизован и имеет нужную роль, показываем контент
+  return user && checkUserRole() ? <>{children}</> : null;
 };
 
 export default AdminProtectedRoute;

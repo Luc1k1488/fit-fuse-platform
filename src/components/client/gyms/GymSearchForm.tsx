@@ -1,8 +1,7 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface GymSearchFormProps {
   searchQuery: string;
@@ -12,20 +11,19 @@ interface GymSearchFormProps {
 
 export const GymSearchForm = ({ searchQuery, setSearchQuery, onSearch }: GymSearchFormProps) => {
   return (
-    <form onSubmit={onSearch} className="mb-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+    <form onSubmit={onSearch} className="flex gap-2 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
-          type="text"
-          placeholder="Поиск залов, студий, локаций..."
+          placeholder="Поиск залов по названию или району..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-4 py-2 rounded-lg border-gray-700 bg-gray-800 text-white"
+          className="pl-10 bg-slate-900/50 border-slate-600 text-white placeholder:text-slate-400"
         />
-        <Button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 transition-all hover:scale-105">
-          Поиск
-        </Button>
       </div>
+      <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+        Найти
+      </Button>
     </form>
   );
 };
