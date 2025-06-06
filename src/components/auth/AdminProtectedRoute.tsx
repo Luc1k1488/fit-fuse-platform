@@ -12,35 +12,46 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
   const { user, is_loading } = useAuth();
   const navigate = useNavigate();
 
+  console.log("AdminProtectedRoute - User:", user);
+  console.log("AdminProtectedRoute - Loading:", is_loading);
+  console.log("AdminProtectedRoute - User role:", user?.user_metadata?.role);
+
   // Проверка роли пользователя
   const checkUserRole = () => {
     if (!user) return false;
     
     const userRole = user.user_metadata?.role || "user";
+    console.log("Checking user role:", userRole, "Allowed roles:", allowedRoles);
     return allowedRoles.includes(userRole);
   };
-
-  useEffect(() => {
-    if (!is_loading && !user) {
-      // Если пользователь не авторизован, перенаправляем на страницу входа для админа
-      navigate("/admin/login");
-    } else if (!is_loading && user && !checkUserRole()) {
-      // Если пользователь авторизован, но не имеет нужной роли
-      navigate("/");
-    }
-  }, [user, is_loading, navigate]);
 
   // Показываем экран загрузки, пока проверяем авторизацию
   if (is_loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="text-gray-600">Проверка доступа...</p>
+        </div>
       </div>
     );
   }
 
+  // Если пользователь не авторизован, перенаправляем на страницу входа для админа
+  if (!user) {
+    console.log("No user, redirecting to admin login");
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  // Если пользователь авторизован, но не имеет нужной роли
+  if (!checkUserRole()) {
+    console.log("User doesn't have required role, redirecting to main page");
+    return <Navigate to="/" replace />;
+  }
+
+  console.log("Access granted, rendering children");
   // Если пользователь авторизован и имеет нужную роль, показываем контент
-  return user && checkUserRole() ? <>{children}</> : null;
+  return <>{children}</>;
 };
 
 export default AdminProtectedRoute;

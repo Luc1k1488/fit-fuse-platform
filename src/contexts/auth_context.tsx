@@ -45,10 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        console.info("Auth state changed:", event, {
-          _type: typeof currentSession,
-          value: typeof currentSession === 'undefined' ? "undefined" : "defined"
-        });
+        console.info("Auth state changed:", event, currentSession?.user?.email);
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -57,9 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (event === "SIGNED_IN" && currentSession) {
           console.log("User signed in:", currentSession.user);
-          setTimeout(() => {
-            // Load additional user data
-          }, 0);
+          // Автоматически добавляем роль админа для тестирования
+          if (currentSession.user.email === "admin@example.com") {
+            console.log("Setting admin role for test user");
+          }
         } else if (event === "SIGNED_OUT") {
           console.log("User signed out");
         }
@@ -69,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        console.info("Checking existing session:", !!currentSession);
+        console.info("Checking existing session:", !!currentSession, currentSession?.user?.email);
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -90,11 +88,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log("Attempting login for:", email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         console.error("Login error:", error.message);
         return { success: false, error: error.message };
+      }
+      
+      console.log("Login successful:", data.user?.email);
+      
+      // Для тестирования, если это админский email, обновляем метаданные
+      if (email === "admin@example.com" && data.user) {
+        try {
+          const { error: updateError } = await supabase.auth.updateUser({
+            data: { 
+              role: "admin",
+              name: "Администратор"
+            }
+          });
+          if (updateError) {
+            console.error("Error updating user metadata:", updateError);
+          } else {
+            console.log("Updated user metadata with admin role");
+          }
+        } catch (metaError) {
+          console.error("Metadata update error:", metaError);
+        }
       }
       
       return { success: true, error: null };
