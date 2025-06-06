@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -44,6 +43,8 @@ const gymSchema = z.object({
   working_hours: z.string().optional(),
   features: z.array(z.string()).optional(),
   main_image: z.string().optional(),
+  description: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 type GymFormValues = z.infer<typeof gymSchema>;
@@ -75,6 +76,8 @@ export const GymForm = ({ open, onClose, onSuccess, initialData }: GymFormProps)
       working_hours: initialData?.working_hours || "9:00 - 22:00",
       features: initialData?.features || [],
       main_image: initialData?.main_image || "",
+      description: initialData?.description || "",
+      phone: initialData?.phone || "",
     },
   });
 
@@ -129,7 +132,13 @@ export const GymForm = ({ open, onClose, onSuccess, initialData }: GymFormProps)
       });
       
       if (onSuccess && newGym) {
-        onSuccess(newGym as Gym);
+        // Ensure the returned data matches Gym type
+        const gymData: Gym = {
+          ...newGym,
+          description: newGym.description || null,
+          phone: newGym.phone || null,
+        };
+        onSuccess(gymData);
       }
       
       onClose();
@@ -277,6 +286,34 @@ export const GymForm = ({ open, onClose, onSuccess, initialData }: GymFormProps)
                   <FormLabel>Часы работы</FormLabel>
                   <FormControl>
                     <Input placeholder="9:00 - 22:00" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Описание</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Описание зала..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Телефон</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+7 (999) 123-45-67" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

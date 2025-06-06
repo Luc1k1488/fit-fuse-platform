@@ -220,6 +220,7 @@ export type Database = {
           category: string | null
           city: string | null
           created_at: string | null
+          description: string | null
           features: string[] | null
           id: string
           images: string[] | null
@@ -228,6 +229,7 @@ export type Database = {
           name: string | null
           owner_id: string | null
           partner_id: string | null
+          phone: string | null
           rating: number | null
           review_count: number | null
           working_hours: string | null
@@ -237,6 +239,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string | null
+          description?: string | null
           features?: string[] | null
           id?: string
           images?: string[] | null
@@ -245,6 +248,7 @@ export type Database = {
           name?: string | null
           owner_id?: string | null
           partner_id?: string | null
+          phone?: string | null
           rating?: number | null
           review_count?: number | null
           working_hours?: string | null
@@ -254,6 +258,7 @@ export type Database = {
           category?: string | null
           city?: string | null
           created_at?: string | null
+          description?: string | null
           features?: string[] | null
           id?: string
           images?: string[] | null
@@ -262,6 +267,7 @@ export type Database = {
           name?: string | null
           owner_id?: string | null
           partner_id?: string | null
+          phone?: string | null
           rating?: number | null
           review_count?: number | null
           working_hours?: string | null

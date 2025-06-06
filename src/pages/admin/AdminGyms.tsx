@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,7 +74,15 @@ const AdminGyms = () => {
         .order('created_at', { ascending: false });
 
       if (gymsError) throw gymsError;
-      setGyms(gymsData || []);
+      
+      // Ensure all gym objects have the required fields
+      const typedGyms: Gym[] = (gymsData || []).map(gym => ({
+        ...gym,
+        description: gym.description || null,
+        phone: gym.phone || null,
+      }));
+      
+      setGyms(typedGyms);
       
       const { data: partnersData, error: partnersError } = await supabase
         .from('partners')
