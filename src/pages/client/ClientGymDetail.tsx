@@ -1,116 +1,89 @@
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "@/contexts/auth_context";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { BookingDialog } from "@/components/bookings/BookingDialog";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { GymHeader } from "@/components/client/gym-detail/GymHeader";
 import { GymInfoSection } from "@/components/client/gym-detail/GymInfoSection";
-import { GymClassesSection } from "@/components/client/gym-detail/GymClassesSection";
 import { GymGallerySection } from "@/components/client/gym-detail/GymGallerySection";
-import { BookingButton } from "@/components/client/gym-detail/BookingButton";
-import { useGymBooking } from "@/hooks/useGymBooking";
+import { GymClassesSection } from "@/components/client/gym-detail/GymClassesSection";
+import { GymReviewsSection } from "@/components/client/gym-detail/GymReviewsSection";
+import { Separator } from "@/components/ui/separator";
+import { Gym } from "@/types";
 
 const ClientGymDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { is_authenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState("info");
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const { toast } = useToast();
-  const { createBookingMutation, handleBookingSubmit } = useGymBooking();
-  
-  // Данные по залу (в реальном приложении будут загружаться по ID)
-  const gymData = {
-    id: id,
-    name: id === "gym-1" ? "Фитнес Элит" : id === "gym-2" ? "Пауэр Хаус" : id === "crossfit-1" ? "CrossFit Arena" : "Спортзал",
-    location: "Центр",
-    city: "Москва",
-    address: "ул. Тверская, 18, Москва",
-    phone: "+7 (999) 123-45-67",
-    description: "Современный фитнес-центр с новейшим оборудованием и широким спектром групповых программ. Профессиональные тренеры помогут достичь ваших целей.",
-    workingHours: "Пн-Пт: 6:00 - 23:00, Сб-Вс: 8:00 - 22:00",
-    mainImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Z3ltfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60",
-    galleryImages: [
-      "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Z3ltfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60",
-      "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGd5bXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60",
-    ],
-    rating: 4.9,
-    reviewCount: 120,
-    features: ["Бассейн", "Сауна", "Парковка", "Групповые тренировки", "Персональный тренер", "Детская комната"],
-    classes: [
-      { id: "class1", name: "Силовая тренировка", time: "Пн, Ср, Пт: 10:00 - 11:00", trainer: "Алексей И." },
-      { id: "class2", name: "Йога", time: "Вт, Чт: 18:00 - 19:30", trainer: "Елена С." },
-      { id: "class3", name: "Кроссфит", time: "Пн, Пт: 19:00 - 20:00", trainer: "Дмитрий К." },
-    ],
-  };
+  const [gym, setGym] = useState<Gym | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleBookVisit = () => {
-    if (!is_authenticated) {
-      toast({
-        variant: "destructive",
-        title: "Необходимо войти в систему",
-        description: "Для бронирования необходимо войти в систему",
-      });
-      return;
-    }
-    setShowBookingDialog(true);
-  };
-
-  const onBookingSubmit = (bookingData: any) => {
-    handleBookingSubmit(bookingData, id!, gymData.name);
-    setShowBookingDialog(false);
-  };
-
-  // Эффект для красивого появления контента при загрузке
   useEffect(() => {
-    const elements = document.querySelectorAll('.animate-on-load');
-    elements.forEach((el, i) => {
-      setTimeout(() => {
-        (el as HTMLElement).style.opacity = '1';
-        (el as HTMLElement).style.transform = 'translateY(0)';
-      }, i * 100);
-    });
-  }, []);
+    const fetchGymData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from('gyms')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) {
+          console.error("Error fetching gym details:", error);
+        } else {
+          setGym(data);
+        }
+      } catch (error) {
+        console.error("Exception fetching gym details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchGymData();
+  }, [id]);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
+        <p className="mt-4 text-gray-400">Загрузка информации о зале...</p>
+      </div>
+    );
+  }
+  
+  if (!gym) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h2 className="text-2xl font-bold text-white">Зал не найден</h2>
+        <p className="mt-2 text-gray-400">Запрошенный зал не существует или был удален</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
-      <GymHeader gymData={gymData} />
-      <GymInfoSection gymData={gymData} />
-
-      {/* Вкладки */}
-      <Tabs defaultValue="info" value={activeTab} onValueChange={setActiveTab} className="w-full animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)', transitionDelay: '300ms' }}>
-        <TabsList className="w-full grid grid-cols-3 mb-4 bg-gray-800">
-          <TabsTrigger value="info" className="transition-all hover:text-primary">Информация</TabsTrigger>
-          <TabsTrigger value="classes" className="transition-all hover:text-primary">Занятия</TabsTrigger>
-          <TabsTrigger value="gallery" className="transition-all hover:text-primary">Галерея</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="info" className="px-4">
-          <BookingButton 
-            onBookVisit={handleBookVisit}
-            isLoading={createBookingMutation.isPending}
-          />
-        </TabsContent>
-        
-        <TabsContent value="classes" className="px-4">
-          <GymClassesSection classes={gymData.classes} />
-        </TabsContent>
-        
-        <TabsContent value="gallery" className="px-4">
-          <GymGallerySection 
-            images={[gymData.mainImage, ...gymData.galleryImages]} 
-            gymName={gymData.name}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Диалог бронирования */}
-      <BookingDialog
-        open={showBookingDialog}
-        onOpenChange={setShowBookingDialog}
-        onSubmit={onBookingSubmit}
-      />
+    <div className="min-h-screen pb-16">
+      <GymHeader gym={gym} />
+      
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <GymInfoSection gym={gym} />
+            
+            <Separator className="my-8 bg-gray-700" />
+            
+            <GymClassesSection gymId={gym.id} />
+            
+            <Separator className="my-8 bg-gray-700" />
+            
+            <GymReviewsSection gymId={gym.id} />
+          </div>
+          
+          <div>
+            <GymGallerySection images={gym.images || []} mainImage={gym.main_image} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

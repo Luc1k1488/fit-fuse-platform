@@ -1,83 +1,111 @@
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Review {
   id: string;
-  rating: number;
-  comment: string;
-  user_id: string;
-  gym_id: string;
-  created_at: string;
+  user_id: string | null;
+  gym_id: string | null;
+  rating: number | null;
+  comment: string | null;
+  created_at: string | null;
+  user_name?: string;
+  user_avatar?: string;
 }
 
-export const useReviews = (gymId?: string) => {
+interface ReviewFormData {
+  rating: number;
+  comment: string;
+}
+
+export function useReviews(gymId?: string) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewCount, setReviewCount] = useState(0);
 
-  useEffect(() => {
-    if (gymId) {
-      fetchReviews();
-    }
-  }, [gymId]);
-
+  // Получение отзывов для конкретного зала
   const fetchReviews = async () => {
-    if (!gymId) return;
+    if (!gymId) {
+      setReviews([]);
+      setLoading(false);
+      return;
+    }
 
     try {
+      setLoading(true);
+      
       const { data, error } = await supabase
         .from('reviews')
-        .select('*')
+        .select()
         .eq('gym_id', gymId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setReviews(data || []);
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        toast.error('Не удалось загрузить отзывы');
+      } else if (data) {
+        setReviews(data);
+        setReviewCount(data.length);
+      }
     } catch (error) {
-      console.error('Error fetching reviews:', error);
-      toast.error("Ошибка загрузки отзывов");
+      console.error('Exception fetching reviews:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const submitReview = async (reviewData: { rating: number; comment: string }, userId: string) => {
+  // Отправка нового отзыва
+  const submitReview = async (formData: ReviewFormData, userId: string): Promise<boolean> => {
     if (!gymId) return false;
 
     try {
+      const reviewData = {
+        gym_id: gymId,
+        user_id: userId,
+        rating: formData.rating,
+        comment: formData.comment,
+      };
+
       const { error } = await supabase
         .from('reviews')
-        .insert({
-          gym_id: gymId,
-          user_id: userId,
-          rating: reviewData.rating,
-          comment: reviewData.comment
-        });
+        .insert(reviewData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error submitting review:', error);
+        toast.error('Не удалось отправить отзыв');
+        return false;
+      }
 
-      toast.success("Отзыв добавлен!");
+      toast.success('Отзыв успешно отправлен');
       await fetchReviews(); // Обновляем список отзывов
       return true;
     } catch (error) {
-      console.error('Error submitting review:', error);
-      toast.error("Ошибка добавления отзыва");
+      console.error('Exception submitting review:', error);
+      toast.error('Произошла ошибка при отправке отзыва');
       return false;
     }
   };
 
-  const getAverageRating = () => {
+  // Вычисляем средний рейтинг на основе отзывов
+  const getAverageRating = (): number => {
     if (reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return Math.round((sum / reviews.length) * 10) / 10;
+    
+    const sum = reviews.reduce((total, review) => total + (review.rating || 0), 0);
+    return parseFloat((sum / reviews.length).toFixed(1));
   };
+
+  // Загружаем отзывы при монтировании компонента или изменении gymId
+  useEffect(() => {
+    fetchReviews();
+  }, [gymId]);
 
   return {
     reviews,
     loading,
+    reviewCount,
     submitReview,
     getAverageRating,
-    reviewCount: reviews.length
+    fetchReviews
   };
-};
+}
