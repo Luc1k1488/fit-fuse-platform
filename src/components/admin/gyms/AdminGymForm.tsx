@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,9 +186,9 @@ export const AdminGymForm = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="unassigned">Не назначен</SelectItem>
-            {partners.filter(p => p.status === 'active').map((partner) => (
+            {partners?.filter(partner => partner.status === "approved").map((partner) => (
               <SelectItem key={partner.id} value={partner.id}>
-                {partner.name} ({partner.email})
+                {partner.name} ({partner.company_name})
               </SelectItem>
             ))}
           </SelectContent>

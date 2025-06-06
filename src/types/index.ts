@@ -47,6 +47,9 @@ export interface GymClass {
   created_at: string;
 }
 
+// Добавляем алиас для совместимости
+export type Class = GymClass;
+
 export interface Booking {
   id: string;
   user_id: string;
@@ -169,4 +172,14 @@ export interface PromoCodeUsage {
   user_id: string;
   subscription_id?: string;
   used_at: string;
+}
+
+// Составные типы для работы с joined данными
+export interface BookingWithDetails extends Booking {
+  gym?: Gym;
+  class?: GymClass;
+}
+
+export interface ClassWithGym extends GymClass {
+  gym?: Gym;
 }
