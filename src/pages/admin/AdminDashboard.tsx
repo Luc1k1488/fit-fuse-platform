@@ -1,4 +1,5 @@
 
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -108,91 +109,96 @@ const AdminDashboard = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "booked":
-        return <Badge className="bg-green-100 text-green-800">Забронировано</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-300">Забронировано</Badge>;
       case "completed":
-        return <Badge className="bg-blue-100 text-blue-800">Завершено</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 border-blue-300">Завершено</Badge>;
       case "cancelled":
-        return <Badge className="bg-red-100 text-red-800">Отменено</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-300">Отменено</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 border-gray-300">{status}</Badge>;
     }
   };
 
   return (
-    <div className="grid gap-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Всего пользователей</CardTitle>
-            <CardDescription>Зарегистрированные пользователи</CardDescription>
+    <div className="space-y-6 bg-slate-50 min-h-screen p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Панель управления</h1>
+        <p className="text-slate-600">Обзор основных показателей системы</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Всего пользователей</CardTitle>
+            <CardDescription className="text-slate-500">Зарегистрированные пользователи</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <Users className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">{totalUsers}</div>
+            <Users className="h-8 w-8 text-blue-600" />
+            <div className="text-2xl font-bold text-slate-900">{totalUsers}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Всего залов</CardTitle>
-            <CardDescription>Активные спортивные залы</CardDescription>
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Всего залов</CardTitle>
+            <CardDescription className="text-slate-500">Активные спортивные залы</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <Building className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">{totalGyms}</div>
+            <Building className="h-8 w-8 text-green-600" />
+            <div className="text-2xl font-bold text-slate-900">{totalGyms}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Активные бронирования</CardTitle>
-            <CardDescription>Подтвержденные бронирования</CardDescription>
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Активные бронирования</CardTitle>
+            <CardDescription className="text-slate-500">Подтвержденные бронирования</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <Calendar className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">{completedBookings}</div>
+            <Calendar className="h-8 w-8 text-purple-600" />
+            <div className="text-2xl font-bold text-slate-900">{completedBookings}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Средний рейтинг</CardTitle>
-            <CardDescription>Общий рейтинг залов</CardDescription>
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Средний рейтинг</CardTitle>
+            <CardDescription className="text-slate-500">Общий рейтинг залов</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <Star className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">{averageRating.toFixed(1)}</div>
+            <Star className="h-8 w-8 text-yellow-600" />
+            <div className="text-2xl font-bold text-slate-900">{averageRating.toFixed(1)}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Активные партнеры</CardTitle>
-            <CardDescription>Количество активных партнеров</CardDescription>
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Активные партнеры</CardTitle>
+            <CardDescription className="text-slate-500">Количество активных партнеров</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <TrendingUp className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">{activePartners}</div>
+            <TrendingUp className="h-8 w-8 text-indigo-600" />
+            <div className="text-2xl font-bold text-slate-900">{activePartners}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Общий доход</CardTitle>
-            <CardDescription>Приблизительный доход от подписок</CardDescription>
+        <Card className="border border-slate-200 shadow-sm bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-slate-900 text-sm font-medium">Общий доход</CardTitle>
+            <CardDescription className="text-slate-500">Приблизительный доход от подписок</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center space-x-4">
-            <DollarSign className="h-10 w-10 text-gray-500" />
-            <div className="text-3xl font-bold">Недоступно</div>
+            <DollarSign className="h-8 w-8 text-emerald-600" />
+            <div className="text-2xl font-bold text-slate-500">Недоступно</div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border border-slate-200 shadow-sm bg-white">
           <CardHeader>
-            <CardTitle>Статистика бронирований</CardTitle>
-            <CardDescription>Распределение бронирований по статусам</CardDescription>
+            <CardTitle className="text-slate-900">Статистика бронирований</CardTitle>
+            <CardDescription className="text-slate-500">Распределение бронирований по статусам</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -218,24 +224,24 @@ const AdminDashboard = () => {
               {bookingStats.map((stat, index) => (
                 <div key={index} className="flex items-center space-x-2 mr-4">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stat.color }}></div>
-                  <div>{stat.name}</div>
+                  <div className="text-slate-700 text-sm">{stat.name}</div>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-slate-200 shadow-sm bg-white">
           <CardHeader>
-            <CardTitle>Активность пользователей</CardTitle>
-            <CardDescription>Последние действия пользователей</CardDescription>
+            <CardTitle className="text-slate-900">Активность пользователей</CardTitle>
+            <CardDescription className="text-slate-500">Последние действия пользователей</CardDescription>
           </CardHeader>
           <CardContent>
             {bookings && bookings.length > 0 ? (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-slate-200">
                 {bookings.slice(0, 5).map((booking) => (
-                  <div key={booking.id} className="py-2 flex items-center justify-between">
-                    <div>
+                  <div key={booking.id} className="py-3 flex items-center justify-between">
+                    <div className="text-slate-900 font-medium">
                       Бронирование №{booking.id}
                     </div>
                     <div>
@@ -245,7 +251,7 @@ const AdminDashboard = () => {
                 ))}
               </div>
             ) : (
-              <div>Нет данных об активности</div>
+              <div className="text-slate-500 text-center py-8">Нет данных об активности</div>
             )}
           </CardContent>
         </Card>

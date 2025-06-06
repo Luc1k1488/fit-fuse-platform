@@ -103,19 +103,19 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   const Sidebar = (
     <aside 
-      className={`h-screen bg-gray-900 border-r border-gray-800 flex flex-col ${
+      className={`h-screen bg-slate-900 border-r border-slate-700 flex flex-col ${
         sidebarCollapsed ? 'w-16' : 'w-64'
       } transition-all duration-300 fixed left-0 top-0 z-30`}
     >
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-gray-800">
+      <div className="p-4 flex items-center justify-between border-b border-slate-700">
         {!sidebarCollapsed && (
           <span className="font-bold text-lg text-white mr-2">GoodFit</span>
         )}
         <Button
           variant="ghost" 
           size="sm" 
-          className="ml-auto text-gray-400 hover:text-white"
+          className="ml-auto text-slate-400 hover:text-white hover:bg-slate-700"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
         >
           {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -123,16 +123,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </div>
 
       {/* User Info */}
-      <div className={`p-4 border-b border-gray-800 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
+      <div className={`p-4 border-b border-slate-700 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
         <div className={`flex items-center ${sidebarCollapsed ? 'flex-col' : 'gap-3'}`}>
           <Avatar>
             <AvatarImage src="" />
-            <AvatarFallback className="bg-primary text-white">{userInitial}</AvatarFallback>
+            <AvatarFallback className="bg-blue-600 text-white">{userInitial}</AvatarFallback>
           </Avatar>
           {!sidebarCollapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-medium text-white">{userName}</span>
-              <span className="text-xs text-gray-400">{userRole}</span>
+              <span className="text-xs text-slate-300">{userRole}</span>
             </div>
           )}
         </div>
@@ -147,8 +147,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 to={item.path}
                 end={item.path === '/admin/dashboard' || item.path === '/admin/partner' || item.path === '/admin/support-portal'}
                 className={({ isActive }) => `
-                  flex items-center gap-3 p-2 rounded-md
-                  ${isActive ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
+                  flex items-center gap-3 p-2 rounded-md transition-colors duration-200
+                  ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}
                   ${sidebarCollapsed ? 'justify-center' : ''}
                 `}
               >
@@ -161,9 +161,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800 space-y-2">
+      <div className="p-4 border-t border-slate-700 space-y-2">
         {!sidebarCollapsed && (
-          <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white w-full p-2 rounded-md hover:bg-gray-800">
+          <Link to="/" className="flex items-center gap-2 text-slate-300 hover:text-white w-full p-2 rounded-md hover:bg-slate-700 transition-colors">
             <ChevronLeft size={20} />
             <span>На сайт</span>
           </Link>
@@ -171,7 +171,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         
         <Button
           variant="ghost"
-          className={`text-gray-400 hover:text-white hover:bg-gray-800 w-full ${sidebarCollapsed ? 'justify-center p-2' : ''}`}
+          className={`text-slate-300 hover:text-white hover:bg-slate-700 w-full transition-colors ${sidebarCollapsed ? 'justify-center p-2' : ''}`}
           onClick={handleLogout}
         >
           <LogOut size={20} />
@@ -182,41 +182,41 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   );
 
   return (
-    <div className="flex bg-gray-100 dark:bg-gray-950">
+    <div className="flex bg-slate-100 min-h-screen">
       {/* Sidebar for desktop */}
       <div className="hidden md:block">
         {Sidebar}
       </div>
       
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-gray-900 border-b border-gray-800 p-4 flex justify-between items-center">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-20 bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center">
         <span className="font-bold text-lg text-white">GoodFit</span>
         
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-gray-400">
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
               <Menu />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-[280px] p-0 bg-gray-900 border-r border-gray-800">
+          <SheetContent side="left" className="w-[280px] p-0 bg-slate-900 border-r border-slate-700">
             {/* Close button */}
-            <div className="p-4 flex justify-between items-center border-b border-gray-800">
+            <div className="p-4 flex justify-between items-center border-b border-slate-700">
               <span className="font-bold text-lg text-white">GoodFit</span>
-              <Button variant="ghost" size="sm" className="text-gray-400" onClick={() => setMenuOpen(false)}>
+              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white" onClick={() => setMenuOpen(false)}>
                 <X />
               </Button>
             </div>
             
             {/* User Info */}
-            <div className="p-4 border-b border-gray-800">
+            <div className="p-4 border-b border-slate-700">
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary text-white">{userInitial}</AvatarFallback>
+                  <AvatarFallback className="bg-blue-600 text-white">{userInitial}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-white">{userName}</span>
-                  <span className="text-xs text-gray-400">{userRole}</span>
+                  <span className="text-xs text-slate-300">{userRole}</span>
                 </div>
               </div>
             </div>
@@ -231,8 +231,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                       end={item.path === '/admin/dashboard' || item.path === '/admin/partner' || item.path === '/admin/support-portal'}
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) => `
-                        flex items-center gap-3 p-3 rounded-md
-                        ${isActive ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}
+                        flex items-center gap-3 p-3 rounded-md transition-colors duration-200
+                        ${isActive ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'}
                       `}
                     >
                       <item.icon size={20} />
@@ -244,11 +244,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </nav>
             
             {/* Footer */}
-            <div className="p-4 border-t border-gray-800 space-y-2">
+            <div className="p-4 border-t border-slate-700 space-y-2">
               <Link 
                 to="/"
                 onClick={() => setMenuOpen(false)} 
-                className="flex items-center gap-2 text-gray-400 hover:text-white w-full p-2 rounded-md hover:bg-gray-800"
+                className="flex items-center gap-2 text-slate-300 hover:text-white w-full p-2 rounded-md hover:bg-slate-700 transition-colors"
               >
                 <ChevronLeft size={20} />
                 <span>На сайт</span>
@@ -256,7 +256,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               
               <Button
                 variant="ghost"
-                className="text-gray-400 hover:text-white hover:bg-gray-800 w-full justify-start"
+                className="text-slate-300 hover:text-white hover:bg-slate-700 w-full justify-start transition-colors"
                 onClick={handleLogout}
               >
                 <LogOut size={20} />
@@ -272,8 +272,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
       } ${
         location.pathname.startsWith('/admin') ? 'pt-16 md:pt-0' : ''
-      }`}>
-        {children}
+      } bg-white min-h-screen`}>
+        <div className="p-6">
+          {children}
+        </div>
       </main>
     </div>
   );
