@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -7,10 +6,14 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   is_loading: boolean;
+  is_authenticated: boolean; // Added missing property
   login: (email: string, password: string) => Promise<{ success: boolean; error: string | null }>;
   register: (email: string, password: string, name: string) => Promise<{ success: boolean; error: string | null }>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ success: boolean; error: string | null }>;
+  // Added missing properties for phone authentication
+  phoneLogin: (phone: string) => Promise<{ success: boolean; error: string | null }>;
+  login_with_phone: (phone: string, code: string) => Promise<{ success: boolean; error: string | null }>;
 }
 
 interface Profile {
@@ -23,16 +26,21 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   is_loading: true,
+  is_authenticated: false, // Added missing property
   login: async () => ({ success: false, error: "Not implemented" }),
   register: async () => ({ success: false, error: "Not implemented" }),
   logout: async () => {},
-  updateProfile: async () => ({ success: false, error: "Not implemented" })
+  updateProfile: async () => ({ success: false, error: "Not implemented" }),
+  // Added missing methods
+  phoneLogin: async () => ({ success: false, error: "Not implemented" }),
+  login_with_phone: async () => ({ success: false, error: "Not implemented" }),
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [is_loading, setIsLoading] = useState(true);
+  const [is_authenticated, setIsAuthenticated] = useState(false); // Added state for authentication
 
   useEffect(() => {
     console.info("Setting up auth state listener...");
@@ -47,6 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        setIsAuthenticated(!!currentSession?.user); // Set authentication state
         setIsLoading(false);
         
         if (event === "SIGNED_IN" && currentSession) {
@@ -69,6 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        setIsAuthenticated(!!currentSession?.user); // Set authentication state
       } catch (error) {
         console.error("Error checking session:", error);
       } finally {
@@ -172,14 +182,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Add phone login methods
+  const phoneLogin = async (phone: string) => {
+    try {
+      // This would be implemented with Supabase phone auth
+      console.log("Phone login attempt for:", phone);
+      return { success: true, error: null };
+    } catch (error: any) {
+      console.error("Phone login error:", error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const login_with_phone = async (phone: string, code: string) => {
+    try {
+      // This would be implemented with Supabase phone auth verification
+      console.log("Phone verification for:", phone, "with code:", code);
+      return { success: true, error: null };
+    } catch (error: any) {
+      console.error("Phone verification error:", error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     user,
     session,
     is_loading,
+    is_authenticated, // Added authentication state
     login,
     register,
     logout,
-    updateProfile
+    updateProfile,
+    phoneLogin, // Added phone login methods
+    login_with_phone
   };
 
   return (

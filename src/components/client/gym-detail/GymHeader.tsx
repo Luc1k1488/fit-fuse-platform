@@ -1,80 +1,43 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Star, MapPin, Users } from "lucide-react";
+import { Gym } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Heart, Share, ChevronLeft, Star } from "lucide-react";
 
-interface GymHeaderProps {
-  gymData: {
-    name: string;
-    mainImage: string;
-    rating: number;
-    reviewCount: number;
-  };
+export interface GymHeaderProps {
+  gym: Gym;
 }
 
-export const GymHeader = ({ gymData }: GymHeaderProps) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [showShareTooltip, setShowShareTooltip] = useState(false);
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-  };
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setShowShareTooltip(true);
-    setTimeout(() => setShowShareTooltip(false), 2000);
-  };
-
+export const GymHeader = ({ gym }: GymHeaderProps) => {
   return (
-    <div className="relative mb-4">
-      <div className="h-52 overflow-hidden">
-        <img 
-          src={gymData.mainImage} 
-          alt={gymData.name} 
-          className="w-full h-full object-cover animate-fade-in" 
-        />
-      </div>
-      <div className="absolute top-2 left-2">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20 transition-all hover:scale-105" 
-          asChild
-        >
-          <Link to="/app/gyms" className="flex items-center">
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Назад
-          </Link>
-        </Button>
-      </div>
-      <div className="absolute bottom-0 transform translate-y-1/2 left-4 bg-white p-2 shadow rounded-lg animate-fade-in">
-        <div className="flex items-center gap-2">
-          <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-          <span className="font-bold">{gymData.rating}</span>
-          <span className="text-sm text-gray-500">({gymData.reviewCount} отзывов)</span>
-        </div>
-      </div>
-      <div className="absolute top-2 right-2 flex gap-2">
-        <button 
-          onClick={toggleFavorite}
-          className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all"
-        >
-          <Heart className={`h-5 w-5 ${isFavorite ? 'text-red-500 fill-red-500' : 'text-white'} transition-colors`} />
-        </button>
-        <div className="relative">
-          <button 
-            onClick={handleShare}
-            className="p-2 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all"
-          >
-            <Share className="h-5 w-5 text-white" />
-          </button>
-          {showShareTooltip && (
-            <div className="absolute top-full right-0 mt-2 bg-gray-900 text-white text-xs px-2 py-1 rounded animate-fade-in">
-              Ссылка скопирована
+    <div 
+      className="relative w-full h-64 bg-cover bg-center" 
+      style={{ 
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url(${gym.main_image || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'})` 
+      }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
+      <div className="absolute bottom-0 w-full p-4 md:p-6">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-1">
+              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+              <span className="text-white font-semibold">{gym.rating || '0.0'}</span>
+              <span className="text-gray-300 text-sm">({gym.review_count || 0} отзывов)</span>
             </div>
-          )}
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 text-gray-300 mr-1" />
+              <span className="text-gray-300 text-sm">{gym.location || gym.address || "Адрес не указан"}</span>
+            </div>
+            <div className="flex items-center">
+              <Users className="h-4 w-4 text-gray-300 mr-1" />
+              <span className="text-gray-300 text-sm">Посещаемость: высокая</span>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <Button className="bg-primary hover:bg-primary/90">
+              Забронировать
+            </Button>
+          </div>
         </div>
       </div>
     </div>

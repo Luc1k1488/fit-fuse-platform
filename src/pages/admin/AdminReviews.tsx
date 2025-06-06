@@ -2,11 +2,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminReviewsHeader } from "@/components/admin/reviews/AdminReviewsHeader";
-import { AdminReviewsFilters } from "@/components/admin/reviews/AdminReviewsFilters";
+import { AdminReviewsFilters, Rating } from "@/components/admin/reviews/AdminReviewsFilters";
 import { AdminReviewsList } from "@/components/admin/reviews/AdminReviewsList";
 import { toast } from "sonner";
-
-type Rating = "all" | "positive" | "neutral" | "negative";
+import { Star } from "lucide-react";
 
 interface AdminReview {
   id: string;
@@ -176,10 +175,65 @@ const AdminReviews = () => {
   useEffect(() => {
     applyFilters();
   }, [reviews, ratingFilter, searchQuery]);
+
+  // Calculate statistics for AdminReviewsHeader
+  const calculateStatistics = () => {
+    const totalReviews = reviews.length;
+    if (totalReviews === 0) {
+      return {
+        avgRating: 0,
+        totalReviews: 0,
+        positivePercentage: 0,
+        negativePercentage: 0
+      };
+    }
+
+    // Calculate average rating
+    const totalRating = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+    const avgRating = totalRating / totalReviews;
+
+    // Calculate positive and negative percentages
+    const positiveReviews = reviews.filter(review => (review.rating || 0) >= 4).length;
+    const negativeReviews = reviews.filter(review => (review.rating || 0) <= 2).length;
+
+    const positivePercentage = Math.round((positiveReviews / totalReviews) * 100);
+    const negativePercentage = Math.round((negativeReviews / totalReviews) * 100);
+
+    return {
+      avgRating,
+      totalReviews,
+      positivePercentage,
+      negativePercentage
+    };
+  };
+
+  const stats = calculateStatistics();
+
+  // Render stars based on rating for header
+  const renderStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Star
+          key={i}
+          className={`h-4 w-4 ${
+            i <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          }`}
+        />
+      );
+    }
+    return stars;
+  };
   
   return (
     <div className="space-y-6">
-      <AdminReviewsHeader />
+      <AdminReviewsHeader 
+        avgRating={stats.avgRating}
+        totalReviews={stats.totalReviews}
+        positivePercentage={stats.positivePercentage}
+        negativePercentage={stats.negativePercentage}
+        renderStars={renderStars}
+      />
       
       <AdminReviewsFilters
         ratingFilter={ratingFilter}

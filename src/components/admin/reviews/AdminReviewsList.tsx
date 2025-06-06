@@ -1,98 +1,173 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AlertTriangle } from "lucide-react";
-import { Review, User, Gym } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Star, MoreVertical, RefreshCcw, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface AdminReviewsListProps {
-  reviews: Review[];
-  users: Record<string, User>;
-  gyms: Record<string, Gym>;
-  onHideReview: (reviewId: string) => void;
-  formatDate: (dateString: string | null) => string;
-  renderStars: (rating: number | null) => JSX.Element | null;
+interface AdminReview {
+  id: string;
+  user_id: string | null;
+  gym_id: string | null;
+  rating: number | null;
+  comment: string | null;
+  created_at: string | null;
+  user_name?: string;
+  user_avatar?: string;
+  gym_name?: string;
 }
 
-export const AdminReviewsList = ({
+export interface AdminReviewsListProps {
+  reviews: AdminReview[];
+  loading: boolean;
+  onHideReview: (id: string) => Promise<void>;
+  onRefresh: () => Promise<void>;
+}
+
+export const AdminReviewsList: React.FC<AdminReviewsListProps> = ({
   reviews,
-  users,
-  gyms,
+  loading,
   onHideReview,
-  formatDate,
-  renderStars
-}: AdminReviewsListProps) => {
+  onRefresh
+}) => {
+  const [actioningReviewId, setActioningReviewId] = useState<string | null>(null);
+
+  // Render stars based on rating
+  const renderStars = (rating: number | null) => {
+    const stars = [];
+    const ratingValue = rating || 0;
+    
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <Star
+          key={i}
+          className={`h-4 w-4 ${
+            i <= ratingValue ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+          }`}
+        />
+      );
+    }
+    
+    return <div className="flex">{stars}</div>;
+  };
+
+  const handleHideReview = async (id: string) => {
+    setActioningReviewId(id);
+    await onHideReview(id);
+    setActioningReviewId(null);
+  };
+
+  // Format date
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (reviews.length === 0) {
     return (
       <Card>
-        <CardContent className="p-8 text-center text-gray-500">
-          <AlertTriangle className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium mb-2">Ничего не найдено</h3>
-          <p>По вашему запросу не найдено отзывов. Попробуйте изменить параметры поиска.</p>
+        <CardContent className="py-10 text-center">
+          <p className="text-muted-foreground mb-4">Отзывы не найдены</p>
+          <Button variant="outline" onClick={onRefresh} size="sm">
+            <RefreshCcw className="h-4 w-4 mr-2" />
+            Обновить
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {reviews.map(review => {
-            const user = users[review.user_id || ''];
-            const gym = gyms[review.gym_id || ''];
-            
-            return (
-              <div key={review.id} className="p-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center">
-                    <Avatar className="h-10 w-10 mr-3">
-                      <AvatarImage src={user?.profile_image || ""} />
-                      <AvatarFallback>
-                        {user?.name ? user.name.substring(0, 2) : 'ПО'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center">
-                        <h3 className="font-medium">{user?.name || 'Пользователь'}</h3>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <span>{formatDate(review.created_at)}</span>
-                        <span className="mx-2">•</span>
-                        <span>{gym?.name || 'Неизвестный зал'}</span>
-                        {gym?.location && (
-                          <>
-                            <span className="mx-2">•</span>
-                            <span>{gym.location}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    {renderStars(review.rating)}
-                  </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-muted-foreground">
+          Найдено отзывов: {reviews.length}
+        </div>
+        <Button variant="outline" size="sm" onClick={onRefresh}>
+          <RefreshCcw className="h-4 w-4 mr-2" />
+          Обновить
+        </Button>
+      </div>
+      
+      {reviews.map((review) => (
+        <Card key={review.id} className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                  {review.user_avatar ? (
+                    <img
+                      src={review.user_avatar}
+                      alt={review.user_name || "User"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-lg font-medium">{(review.user_name || "U")[0]}</span>
+                  )}
                 </div>
-                
-                <div className="mt-3">
-                  <p>{review.comment}</p>
-                </div>
-                
-                <div className="mt-4 flex justify-end space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => onHideReview(review.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
-                    Скрыть
-                  </Button>
+                <div className="ml-3">
+                  <div className="font-medium">{review.user_name || "Неизвестный пользователь"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatDate(review.created_at)}
+                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+              
+              <div className="flex items-center">
+                {renderStars(review.rating)}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      className="text-red-600 focus:text-red-600"
+                      onClick={() => handleHideReview(review.id)}
+                      disabled={actioningReviewId === review.id}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Скрыть отзыв
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <p className="text-sm">{review.comment || "Нет комментария"}</p>
+            </div>
+            
+            <div className="mt-3 pt-3 border-t border-border">
+              <div className="text-sm text-muted-foreground flex items-center">
+                <span>Зал:</span>
+                <span className="ml-1 font-medium text-foreground">
+                  {review.gym_name || "Неизвестный зал"}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 };

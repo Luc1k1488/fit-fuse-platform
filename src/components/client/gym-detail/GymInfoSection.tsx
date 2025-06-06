@@ -1,18 +1,22 @@
 
 import { MapPin, Clock, Check } from "lucide-react";
+import { Gym } from "@/types";
 
 interface GymInfoSectionProps {
-  gymData: {
-    name: string;
-    address: string;
-    workingHours: string;
-    description: string;
-    features: string[];
-    phone: string;
-  };
+  gym: Gym;
 }
 
-export const GymInfoSection = ({ gymData }: GymInfoSectionProps) => {
+export const GymInfoSection = ({ gym }: GymInfoSectionProps) => {
+  // Convert gym data for display
+  const gymData = {
+    name: gym.name || "Unnamed Gym",
+    address: gym.address || "Address not provided",
+    workingHours: gym.working_hours || "Hours not provided",
+    description: gym.description || "No description available",
+    features: gym.features || [],
+    phone: gym.phone || "Phone number not provided",
+  };
+
   return (
     <div className="px-4 mb-6">
       <h1 className="text-2xl font-bold mb-1 text-white animate-on-load opacity-0 transition-all duration-500" style={{ transform: 'translateY(10px)' }}>
