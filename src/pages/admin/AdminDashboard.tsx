@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -10,62 +11,63 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Users, Building, Calendar, TrendingUp, Star, DollarSign } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import { User, Gym, Booking, Review, Partner } from "@/types";
 
 const AdminDashboard = () => {
-  const { data: users, isLoading: isLoadingUsers } = useQuery(
-    ["users"],
-    async () => {
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("users").select("*");
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data as User[];
     }
-  );
+  });
 
-  const { data: gyms, isLoading: isLoadingGyms } = useQuery(
-    ["gyms"],
-    async () => {
+  const { data: gyms, isLoading: isLoadingGyms } = useQuery({
+    queryKey: ["gyms"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("gyms").select("*");
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data as Gym[];
     }
-  );
+  });
 
-  const { data: bookings, isLoading: isLoadingBookings } = useQuery(
-    ["bookings"],
-    async () => {
+  const { data: bookings, isLoading: isLoadingBookings } = useQuery({
+    queryKey: ["bookings"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("bookings").select("*");
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data as Booking[];
     }
-  );
+  });
 
-  const { data: reviews, isLoading: isLoadingReviews } = useQuery(
-    ["reviews"],
-    async () => {
+  const { data: reviews, isLoading: isLoadingReviews } = useQuery({
+    queryKey: ["reviews"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("reviews").select("*");
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data as Review[];
     }
-  );
+  });
 
-  const { data: partners, isLoading: isLoadingPartners } = useQuery(
-    ["partners"],
-    async () => {
+  const { data: partners, isLoading: isLoadingPartners } = useQuery({
+    queryKey: ["partners"],
+    queryFn: async () => {
       const { data, error } = await supabase.from("partners").select("*");
       if (error) {
         throw new Error(error.message);
       }
-      return data;
+      return data as Partner[];
     }
-  );
+  });
 
   const totalUsers = users?.length || 0;
   const totalGyms = gyms?.length || 0;

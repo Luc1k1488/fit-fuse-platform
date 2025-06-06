@@ -5,8 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth_context";
-import { BookingWithDetails } from "@/types";
+import { Booking, Gym, GymClass } from "@/types";
 import { toast } from "sonner";
+
+interface BookingWithDetails extends Booking {
+  gym?: Gym;
+  class?: GymClass;
+}
 
 const ClientBookings = () => {
   const { user } = useAuth();
@@ -43,11 +48,12 @@ const ClientBookings = () => {
       // Приводим к правильному типу
       const typedBookings: BookingWithDetails[] = (data || []).map(booking => ({
         ...booking,
-        gym: {
+        status: booking.status as "booked" | "completed" | "cancelled",
+        gym: booking.gym ? {
           ...booking.gym,
           description: booking.gym?.description || null,
           phone: booking.gym?.phone || null,
-        }
+        } : undefined
       }));
 
       setBookings(typedBookings);
