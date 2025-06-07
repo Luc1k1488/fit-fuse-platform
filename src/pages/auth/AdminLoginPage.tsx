@@ -74,7 +74,7 @@ const AdminLoginPage = () => {
                 type="email"
                 value={email}
                 onChange={(e) => set_email(e.target.value)}
-                placeholder="admin@example.com"
+                placeholder="your-email@example.com"
                 required
                 className="bg-white border-gray-300"
               />
@@ -102,9 +102,8 @@ const AdminLoginPage = () => {
               />
             </div>
             <div className="text-sm text-gray-600">
-              Для входа в панель администратора используйте:<br/>
-              Email: admin@example.com<br/>
-              Пароль: admin123
+              Используйте ваш реальный email и пароль для входа.<br/>
+              Если у вас нет админских прав, обратитесь к администратору.
             </div>
           </CardContent>
           <CardFooter>

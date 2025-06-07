@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.info("Setting up auth state listener...");
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.info("Auth state changed:", event, currentSession?.user?.email);
         
         setSession(currentSession);
@@ -53,10 +54,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
         
         if (event === "SIGNED_IN" && currentSession) {
-          console.log("User signed in:", currentSession.user);
-          // Автоматически добавляем роль админа для тестирования
-          if (currentSession.user.email === "admin@example.com") {
-            console.log("Setting admin role for test user");
+          console.log("User signed in:", currentSession.user.email);
+          
+          // Проверяем роль пользователя в базе данных
+          if (currentSession.user) {
+            try {
+              const { data: userData, error } = await supabase
+                .from("users")
+                .select("role")
+                .eq("id", currentSession.user.id)
+                .maybeSingle();
+              
+              if (error) {
+                console.error("Error fetching user role:", error);
+              } else if (userData) {
+                console.log("User role from database:", userData.role);
+                
+                // Обновляем метаданные пользователя с ролью из базы
+                const { error: updateError } = await supabase.auth.updateUser({
+                  data: { 
+                    role: userData.role,
+                    name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0]
+                  }
+                });
+                
+                if (updateError) {
+                  console.error("Error updating user metadata:", updateError);
+                } else {
+                  console.log("Updated user metadata with role:", userData.role);
+                }
+              } else {
+                // Пользователь не найден в таблице users, создаем запись
+                console.log("User not found in users table, creating...");
+                const { error: insertError } = await supabase
+                  .from("users")
+                  .insert({
+                    id: currentSession.user.id,
+                    email: currentSession.user.email,
+                    name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
+                    role: "user" // По умолчанию обычный пользователь
+                  });
+                
+                if (insertError) {
+                  console.error("Error creating user record:", insertError);
+                } else {
+                  console.log("Created user record with role: user");
+                }
+              }
+            } catch (error) {
+              console.error("Error in user role check:", error);
+            }
           }
         } else if (event === "SIGNED_OUT") {
           console.log("User signed out");
@@ -98,26 +145,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       console.log("Login successful:", data.user?.email);
-      
-      // Для тестирования, если это админский email, обновляем метаданные
-      if (email === "admin@example.com" && data.user) {
-        try {
-          const { error: updateError } = await supabase.auth.updateUser({
-            data: { 
-              role: "admin",
-              name: "Администратор"
-            }
-          });
-          if (updateError) {
-            console.error("Error updating user metadata:", updateError);
-          } else {
-            console.log("Updated user metadata with admin role");
-          }
-        } catch (metaError) {
-          console.error("Metadata update error:", metaError);
-        }
-      }
-      
       return { success: true, error: null };
     } catch (error: any) {
       console.error("Login exception:", error.message);

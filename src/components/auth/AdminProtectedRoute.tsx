@@ -14,12 +14,13 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
 
   console.log("AdminProtectedRoute - User:", user);
   console.log("AdminProtectedRoute - Loading:", is_loading);
-  console.log("AdminProtectedRoute - User role:", user?.user_metadata?.role);
+  console.log("AdminProtectedRoute - User role from metadata:", user?.user_metadata?.role);
 
   // Проверка роли пользователя
   const checkUserRole = () => {
     if (!user) return false;
     
+    // Проверяем роль из метаданных пользователя
     const userRole = user.user_metadata?.role || "user";
     console.log("Checking user role:", userRole, "Allowed roles:", allowedRoles);
     return allowedRoles.includes(userRole);
