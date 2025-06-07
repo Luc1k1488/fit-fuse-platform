@@ -117,7 +117,7 @@ const AdminLoginPage = () => {
             </Button>
           </CardFooter>
         </form>
-      </CardContent>
+      </Card>
     </div>
   );
 };
