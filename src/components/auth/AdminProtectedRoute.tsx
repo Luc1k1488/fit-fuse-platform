@@ -1,6 +1,6 @@
 
-import { ReactNode, useEffect } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 
 interface AdminProtectedRouteProps {
@@ -9,11 +9,11 @@ interface AdminProtectedRouteProps {
 }
 
 const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "support"] }: AdminProtectedRouteProps) => {
-  const { user, is_loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, is_loading, is_authenticated } = useAuth();
 
-  console.log("AdminProtectedRoute - User:", user);
+  console.log("AdminProtectedRoute - User:", user?.email || 'no user');
   console.log("AdminProtectedRoute - Loading:", is_loading);
+  console.log("AdminProtectedRoute - Authenticated:", is_authenticated);
   console.log("AdminProtectedRoute - User role from metadata:", user?.user_metadata?.role);
 
   // Проверка роли пользователя
@@ -39,8 +39,8 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
   }
 
   // Если пользователь не авторизован, перенаправляем на страницу входа для админа
-  if (!user) {
-    console.log("No user, redirecting to admin login");
+  if (!is_authenticated) {
+    console.log("User not authenticated, redirecting to admin login");
     return <Navigate to="/admin/login" replace />;
   }
 

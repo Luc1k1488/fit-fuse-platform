@@ -46,77 +46,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.info("Auth state changed:", event, currentSession?.user?.email);
+        console.info("Auth state changed:", event, currentSession?.user?.email || 'no user');
         
         try {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
           setIsAuthenticated(!!currentSession?.user);
-          setIsLoading(false);
           
           if (event === "SIGNED_IN" && currentSession?.user) {
             console.log("User signed in:", currentSession.user.email);
             
-            // Проверяем роль пользователя в базе данных
-            try {
-              const { data: userData, error } = await supabase
-                .from("users")
-                .select("role")
-                .eq("id", currentSession.user.id)
-                .maybeSingle();
-              
-              if (error) {
-                console.error("Error fetching user role:", error);
-              } else if (userData) {
-                console.log("User role from database:", userData.role);
+            // Отложенная проверка роли пользователя
+            setTimeout(async () => {
+              try {
+                const { data: userData, error } = await supabase
+                  .from("users")
+                  .select("role")
+                  .eq("id", currentSession.user.id)
+                  .maybeSingle();
                 
-                // Обновляем метаданные пользователя с ролью из базы
-                try {
-                  const { error: updateError } = await supabase.auth.updateUser({
-                    data: { 
-                      role: userData.role,
-                      name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0]
-                    }
-                  });
+                if (error) {
+                  console.error("Error fetching user role:", error);
+                } else if (userData) {
+                  console.log("User role from database:", userData.role);
                   
-                  if (updateError) {
-                    console.error("Error updating user metadata:", updateError);
-                  } else {
-                    console.log("Updated user metadata with role:", userData.role);
-                  }
-                } catch (metaError) {
-                  console.error("Error in metadata update:", metaError);
-                }
-              } else {
-                // Пользователь не найден в таблице users, создаем запись
-                console.log("User not found in users table, creating...");
-                try {
-                  const { error: insertError } = await supabase
-                    .from("users")
-                    .insert({
-                      id: currentSession.user.id,
-                      email: currentSession.user.email,
-                      name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
-                      role: "user" // По умолчанию обычный пользователь
+                  try {
+                    const { error: updateError } = await supabase.auth.updateUser({
+                      data: { 
+                        role: userData.role,
+                        name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0]
+                      }
                     });
-                  
-                  if (insertError) {
-                    console.error("Error creating user record:", insertError);
-                  } else {
-                    console.log("Created user record with role: user");
+                    
+                    if (updateError) {
+                      console.error("Error updating user metadata:", updateError);
+                    }
+                  } catch (metaError) {
+                    console.error("Error in metadata update:", metaError);
                   }
-                } catch (insertError) {
-                  console.error("Error in user creation:", insertError);
+                } else {
+                  console.log("User not found in users table, creating...");
+                  try {
+                    const { error: insertError } = await supabase
+                      .from("users")
+                      .insert({
+                        id: currentSession.user.id,
+                        email: currentSession.user.email,
+                        name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
+                        role: "user"
+                      });
+                    
+                    if (insertError) {
+                      console.error("Error creating user record:", insertError);
+                    }
+                  } catch (insertError) {
+                    console.error("Error in user creation:", insertError);
+                  }
                 }
+              } catch (error) {
+                console.error("Error in user role check:", error);
               }
-            } catch (error) {
-              console.error("Error in user role check:", error);
-            }
+            }, 100);
           } else if (event === "SIGNED_OUT") {
             console.log("User signed out");
           }
         } catch (error) {
           console.error("Error in auth state change handler:", error);
+        } finally {
           setIsLoading(false);
         }
       }
@@ -125,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        console.info("Checking existing session:", !!currentSession, currentSession?.user?.email);
+        console.info("Checking existing session:", !!currentSession, currentSession?.user?.email || 'no user');
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);

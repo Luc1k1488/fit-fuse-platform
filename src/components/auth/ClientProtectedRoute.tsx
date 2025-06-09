@@ -1,6 +1,6 @@
 
-import { ReactNode, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth_context";
 
 interface ClientProtectedRouteProps {
@@ -8,15 +8,7 @@ interface ClientProtectedRouteProps {
 }
 
 const ClientProtectedRoute = ({ children }: ClientProtectedRouteProps) => {
-  const { user, is_loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!is_loading && !user) {
-      // Если пользователь не авторизован, перенаправляем на страницу входа
-      navigate("/login");
-    }
-  }, [user, is_loading, navigate]);
+  const { is_authenticated, is_loading } = useAuth();
 
   // Показываем экран загрузки, пока проверяем авторизацию
   if (is_loading) {
@@ -27,8 +19,13 @@ const ClientProtectedRoute = ({ children }: ClientProtectedRouteProps) => {
     );
   }
 
+  // Если пользователь не авторизован, перенаправляем на страницу входа
+  if (!is_authenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   // Если пользователь авторизован, показываем контент
-  return user ? <>{children}</> : null;
+  return <>{children}</>;
 };
 
 export default ClientProtectedRoute;
