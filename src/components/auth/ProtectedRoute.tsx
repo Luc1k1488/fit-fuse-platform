@@ -36,16 +36,20 @@ const ProtectedRoute = ({ children, roles = [] }: ProtectedRouteProps) => {
   }
 
   // Если указаны роли и пользователь не имеет нужной роли
-  if (roles.length > 0 && user && !roles.includes(user.role)) {
-    // Редиректим на соответствующую роли страницу
-    if (user.role === "admin") {
-      return <Navigate to="/admin/dashboard" replace />;
-    } else if (user.role === "partner") {
-      return <Navigate to="/admin/partner" replace />;
-    } else if (user.role === "support") {
-      return <Navigate to="/admin/support-portal" replace />;
-    } else {
-      return <Navigate to="/app" replace />;
+  if (roles.length > 0 && user) {
+    const userRole = user.user_metadata?.role || "user";
+    
+    if (!roles.includes(userRole)) {
+      // Редиректим на соответствующую роли страницу
+      if (userRole === "admin") {
+        return <Navigate to="/admin/dashboard" replace />;
+      } else if (userRole === "partner") {
+        return <Navigate to="/admin/partner" replace />;
+      } else if (userRole === "support") {
+        return <Navigate to="/admin/support-portal" replace />;
+      } else {
+        return <Navigate to="/app" replace />;
+      }
     }
   }
 

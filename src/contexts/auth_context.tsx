@@ -48,16 +48,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, currentSession) => {
         console.info("Auth state changed:", event, currentSession?.user?.email);
         
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setIsAuthenticated(!!currentSession?.user);
-        setIsLoading(false);
-        
-        if (event === "SIGNED_IN" && currentSession) {
-          console.log("User signed in:", currentSession.user.email);
+        try {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          setIsAuthenticated(!!currentSession?.user);
+          setIsLoading(false);
           
-          // Проверяем роль пользователя в базе данных
-          if (currentSession.user) {
+          if (event === "SIGNED_IN" && currentSession?.user) {
+            console.log("User signed in:", currentSession.user.email);
+            
+            // Проверяем роль пользователя в базе данных
             try {
               const { data: userData, error } = await supabase
                 .from("users")
@@ -71,42 +71,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 console.log("User role from database:", userData.role);
                 
                 // Обновляем метаданные пользователя с ролью из базы
-                const { error: updateError } = await supabase.auth.updateUser({
-                  data: { 
-                    role: userData.role,
-                    name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0]
+                try {
+                  const { error: updateError } = await supabase.auth.updateUser({
+                    data: { 
+                      role: userData.role,
+                      name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0]
+                    }
+                  });
+                  
+                  if (updateError) {
+                    console.error("Error updating user metadata:", updateError);
+                  } else {
+                    console.log("Updated user metadata with role:", userData.role);
                   }
-                });
-                
-                if (updateError) {
-                  console.error("Error updating user metadata:", updateError);
-                } else {
-                  console.log("Updated user metadata with role:", userData.role);
+                } catch (metaError) {
+                  console.error("Error in metadata update:", metaError);
                 }
               } else {
                 // Пользователь не найден в таблице users, создаем запись
                 console.log("User not found in users table, creating...");
-                const { error: insertError } = await supabase
-                  .from("users")
-                  .insert({
-                    id: currentSession.user.id,
-                    email: currentSession.user.email,
-                    name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
-                    role: "user" // По умолчанию обычный пользователь
-                  });
-                
-                if (insertError) {
-                  console.error("Error creating user record:", insertError);
-                } else {
-                  console.log("Created user record with role: user");
+                try {
+                  const { error: insertError } = await supabase
+                    .from("users")
+                    .insert({
+                      id: currentSession.user.id,
+                      email: currentSession.user.email,
+                      name: currentSession.user.user_metadata?.name || currentSession.user.email?.split('@')[0],
+                      role: "user" // По умолчанию обычный пользователь
+                    });
+                  
+                  if (insertError) {
+                    console.error("Error creating user record:", insertError);
+                  } else {
+                    console.log("Created user record with role: user");
+                  }
+                } catch (insertError) {
+                  console.error("Error in user creation:", insertError);
                 }
               }
             } catch (error) {
               console.error("Error in user role check:", error);
             }
+          } else if (event === "SIGNED_OUT") {
+            console.log("User signed out");
           }
-        } else if (event === "SIGNED_OUT") {
-          console.log("User signed out");
+        } catch (error) {
+          console.error("Error in auth state change handler:", error);
+          setIsLoading(false);
         }
       }
     );
@@ -172,16 +183,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       if (data.user) {
-        const { error: profileError } = await supabase.from("users").insert({
-          id: data.user.id,
-          name,
-          email,
-          role: "user"
-        });
-        
-        if (profileError) {
-          console.error("Error creating user profile:", profileError);
-          return { success: true, error: "Аккаунт создан, но профиль не настроен" };
+        try {
+          const { error: profileError } = await supabase.from("users").insert({
+            id: data.user.id,
+            name,
+            email,
+            role: "user"
+          });
+          
+          if (profileError) {
+            console.error("Error creating user profile:", profileError);
+            return { success: true, error: "Аккаунт создан, но профиль не настроен" };
+          }
+        } catch (profileError) {
+          console.error("Error in profile creation:", profileError);
         }
       }
       
