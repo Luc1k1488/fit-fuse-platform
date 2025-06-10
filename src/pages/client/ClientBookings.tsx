@@ -1,105 +1,63 @@
 
 import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, User, Filter } from "lucide-react";
+import { useBooking } from "@/hooks/useBooking";
+import { BookingCard } from "@/components/booking/BookingCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth_context";
-import { Booking, Gym, GymClass } from "@/types";
-import { toast } from "sonner";
-
-interface BookingWithDetails extends Booking {
-  gym?: Gym;
-  class?: GymClass;
-}
+import { Calendar, Clock, RefreshCw } from "lucide-react";
 
 const ClientBookings = () => {
-  const { user } = useAuth();
-  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const { fetchUserBookings, cancelBooking, loading: actionLoading } = useBooking();
+
+  const loadBookings = async () => {
+    setLoading(true);
+    const result = await fetchUserBookings();
+    if (result.success && result.data) {
+      setBookings(result.data);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (user) {
-      fetchBookings();
-    }
-  }, [user]);
+    loadBookings();
+  }, []);
 
-  const fetchBookings = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          gym:gym_id (*),
-          class:class_id (*)
-        `)
-        .eq('user_id', user.id)
-        .order('date_time', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching bookings:', error);
-        toast.error('Ошибка загрузки бронирований');
-        return;
-      }
-
-      // Приводим к правильному типу
-      const typedBookings: BookingWithDetails[] = (data || []).map(booking => ({
-        ...booking,
-        status: booking.status as "booked" | "completed" | "cancelled",
-        gym: booking.gym ? {
-          ...booking.gym,
-          description: booking.gym?.description || null,
-          phone: booking.gym?.phone || null,
-        } : undefined
-      }));
-
-      setBookings(typedBookings);
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Ошибка загрузки данных');
-    } finally {
-      setLoading(false);
+  const handleCancel = async (bookingId: string) => {
+    const result = await cancelBooking(bookingId);
+    if (result.success) {
+      await loadBookings();
     }
   };
 
-  const cancelBooking = async (bookingId: string) => {
-    try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', bookingId);
-
-      if (error) {
-        console.error('Error cancelling booking:', error);
-        toast.error('Ошибка отмены бронирования');
-        return;
-      }
-
-      toast.success('Бронирование отменено');
-      fetchBookings();
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Ошибка отмены бронирования');
+  const filterBookings = (status: string) => {
+    const now = new Date();
+    
+    switch (status) {
+      case "upcoming":
+        return bookings.filter(b => 
+          b.status === 'booked' && 
+          b.date_time && 
+          new Date(b.date_time) > now
+        );
+      case "past":
+        return bookings.filter(b => 
+          (b.status === 'completed' || 
+           (b.status === 'booked' && b.date_time && new Date(b.date_time) <= now))
+        );
+      case "cancelled":
+        return bookings.filter(b => b.status === 'cancelled');
+      default:
+        return bookings;
     }
   };
 
-  const upcomingBookings = bookings.filter(booking => 
-    booking.status === 'booked' && 
-    booking.date_time && 
-    new Date(booking.date_time) > new Date()
-  );
-
-  const pastBookings = bookings.filter(booking => 
-    booking.date_time && 
-    new Date(booking.date_time) <= new Date()
-  );
-
-  const cancelledBookings = bookings.filter(booking => 
-    booking.status === 'cancelled'
-  );
+  const upcomingBookings = filterBookings("upcoming");
+  const pastBookings = filterBookings("past");
+  const cancelledBookings = filterBookings("cancelled");
 
   if (loading) {
     return (
@@ -114,144 +72,123 @@ const ClientBookings = () => {
     );
   }
 
-  const BookingCard = ({ booking, showCancelButton = false }: { 
-    booking: BookingWithDetails; 
-    showCancelButton?: boolean;
-  }) => (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 space-y-4">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white mb-2">
-            {booking.class?.title || "Тренировка"}
-          </h3>
-          <div className="flex items-center gap-2 text-slate-400 mb-2">
-            <MapPin className="h-4 w-4" />
-            <span>{booking.gym?.name}</span>
-          </div>
-        </div>
-        <span className={`px-3 py-1 rounded-full text-sm ${
-          booking.status === 'booked' ? 'bg-green-600/30 text-green-300' :
-          booking.status === 'cancelled' ? 'bg-red-600/30 text-red-300' :
-          'bg-gray-600/30 text-gray-300'
-        }`}>
-          {booking.status === 'booked' ? 'Забронировано' :
-           booking.status === 'cancelled' ? 'Отменено' :
-           booking.status}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center gap-2 text-slate-400">
-          <Calendar className="h-4 w-4" />
-          <span>
-            {booking.date_time ? 
-              new Date(booking.date_time).toLocaleDateString() : 
-              'Дата не указана'
-            }
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <Clock className="h-4 w-4" />
-          <span>
-            {booking.date_time ? 
-              new Date(booking.date_time).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : 
-              'Время не указано'
-            }
-          </span>
-        </div>
-      </div>
-
-      {booking.class?.instructor && (
-        <div className="flex items-center gap-2 text-slate-400 text-sm">
-          <User className="h-4 w-4" />
-          <span>Инструктор: {booking.class.instructor}</span>
-        </div>
-      )}
-
-      {showCancelButton && booking.status === 'booked' && (
-        <div className="pt-2">
-          <Button
-            onClick={() => cancelBooking(booking.id)}
-            variant="destructive"
-            size="sm"
-          >
-            Отменить бронирование
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 pb-16">
-      {/* Header */}
       <div className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700 px-4 py-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Мои бронирования</h1>
-        <p className="text-slate-300">Управляйте своими записями на тренировки</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-2">Мои бронирования</h1>
+            <p className="text-slate-300">Управляйте своими записями</p>
+          </div>
+          <Button
+            onClick={loadBookings}
+            variant="outline"
+            size="sm"
+            className="bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-700/50"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Обновить
+          </Button>
+        </div>
       </div>
 
       <div className="px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 backdrop-blur-sm border-slate-700">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border-slate-700">
             <TabsTrigger 
               value="upcoming" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               Предстоящие ({upcomingBookings.length})
             </TabsTrigger>
             <TabsTrigger 
-              value="past" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+              value="past"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
               Прошедшие ({pastBookings.length})
             </TabsTrigger>
             <TabsTrigger 
-              value="cancelled" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-600 text-white"
+              value="cancelled"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
-              Отмененные ({cancelledBookings.length})
+              Отменённые ({cancelledBookings.length})
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="upcoming" className="space-y-4 mt-6">
+          <TabsContent value="upcoming" className="space-y-4">
             {upcomingBookings.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-slate-400 mb-4">У вас нет предстоящих бронирований</p>
-                <Button asChild>
-                  <a href="/app/classes">Найти занятия</a>
-                </Button>
-              </div>
+              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+                <CardContent className="p-8 text-center">
+                  <Calendar className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+                  <h3 className="text-white font-semibold mb-2">Нет предстоящих бронирований</h3>
+                  <p className="text-slate-400 mb-4">
+                    Забронируйте зал или запишитесь на занятие
+                  </p>
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    Найти залы
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
-              upcomingBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} showCancelButton={true} />
-              ))
+              <div className="space-y-4">
+                {upcomingBookings.map((booking) => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onCancel={handleCancel}
+                    loading={actionLoading}
+                  />
+                ))}
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="past" className="space-y-4 mt-6">
+          <TabsContent value="past" className="space-y-4">
             {pastBookings.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-slate-400">У вас нет прошедших тренировок</p>
-              </div>
+              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+                <CardContent className="p-8 text-center">
+                  <Clock className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+                  <h3 className="text-white font-semibold mb-2">Нет прошедших бронирований</h3>
+                  <p className="text-slate-400">
+                    Здесь будет история ваших посещений
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              pastBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
+              <div className="space-y-4">
+                {pastBookings.map((booking) => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onCancel={handleCancel}
+                    loading={actionLoading}
+                  />
+                ))}
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="cancelled" className="space-y-4 mt-6">
+          <TabsContent value="cancelled" className="space-y-4">
             {cancelledBookings.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-slate-400">У вас нет отмененных бронирований</p>
-              </div>
+              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-white font-semibold mb-2">Нет отменённых бронирований</h3>
+                  <p className="text-slate-400">
+                    Отменённые бронирования будут отображаться здесь
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              cancelledBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} />
-              ))
+              <div className="space-y-4">
+                {cancelledBookings.map((booking) => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onCancel={handleCancel}
+                    loading={actionLoading}
+                  />
+                ))}
+              </div>
             )}
           </TabsContent>
         </Tabs>

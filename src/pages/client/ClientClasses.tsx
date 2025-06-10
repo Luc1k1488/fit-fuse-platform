@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Calendar, Clock, Users, MapPin, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { ClassWithGym } from "@/types";
 import { toast } from "sonner";
+import { ClassBookingDialog } from "@/components/booking/ClassBookingDialog";
 
 const ClientClasses = () => {
   const [classes, setClasses] = useState<ClassWithGym[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [selectedClass, setSelectedClass] = useState<ClassWithGym | null>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   const categories = [
     { id: "all", name: "Все занятия" },
@@ -69,10 +71,9 @@ const ClientClasses = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleBookClass = (classId: string) => {
-    toast.success("Занятие забронировано!", {
-      description: "Мы отправили подтверждение на ваш email"
-    });
+  const handleBookClass = (classItem: ClassWithGym) => {
+    setSelectedClass(classItem);
+    setBookingDialogOpen(true);
   };
 
   if (loading) {
@@ -214,7 +215,7 @@ const ClientClasses = () => {
                       )}
                     </div>
                     <Button
-                      onClick={() => handleBookClass(classItem.id)}
+                      onClick={() => handleBookClass(classItem)}
                       className="bg-purple-600 hover:bg-purple-700"
                       disabled={classItem.booked_count >= (classItem.capacity || 0)}
                     >
@@ -227,6 +228,14 @@ const ClientClasses = () => {
           )}
         </div>
       </div>
+
+      {selectedClass && (
+        <ClassBookingDialog
+          open={bookingDialogOpen}
+          onOpenChange={setBookingDialogOpen}
+          classItem={selectedClass}
+        />
+      )}
     </div>
   );
 };
