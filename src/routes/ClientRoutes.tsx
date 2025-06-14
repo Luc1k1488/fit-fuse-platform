@@ -20,25 +20,115 @@ import ClientSubscriptionManagement from "@/pages/client/ClientSubscriptionManag
 import ClientSupport from "@/pages/client/ClientSupport";
 
 export const clientRoutes = [
-  <Route key="app" path="/app/*" element={
+  <Route key="app-dashboard" path="/app" element={
     <ClientProtectedRoute>
       <ClientLayout>
-        <Route index element={<ClientDashboard />} />
-        <Route path="home" element={<ClientHome />} />
-        <Route path="gyms" element={<ClientGyms />} />
-        <Route path="gyms/:id" element={<ClientGymDetail />} />
-        <Route path="classes" element={<ClientClasses />} />
-        <Route path="bookings" element={<ClientBookings />} />
-        <Route path="profile" element={<ClientProfile />} />
-        <Route path="profile-new" element={<ClientProfileNew />} />
-        <Route path="calendar" element={<ClientCalendar />} />
-        <Route path="progress" element={<ClientProgress />} />
-        <Route path="schedule" element={<ClientSchedule />} />
-        <Route path="search" element={<ClientSearch />} />
-        <Route path="subscription" element={<ClientSubscription />} />
-        <Route path="subscription-new" element={<ClientSubscriptionNew />} />
-        <Route path="subscription-management" element={<ClientSubscriptionManagement />} />
-        <Route path="support" element={<ClientSupport />} />
+        <ClientDashboard />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-home" path="/app/home" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientHome />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-gyms" path="/app/gyms" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientGyms />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-gym-detail" path="/app/gyms/:id" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientGymDetail />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-classes" path="/app/classes" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientClasses />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-bookings" path="/app/bookings" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientBookings />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-profile" path="/app/profile" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientProfile />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-profile-new" path="/app/profile-new" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientProfileNew />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-calendar" path="/app/calendar" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientCalendar />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-progress" path="/app/progress" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientProgress />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-schedule" path="/app/schedule" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSchedule />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-search" path="/app/search" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSearch />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-subscription" path="/app/subscription" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSubscription />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-subscription-new" path="/app/subscription-new" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSubscriptionNew />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-subscription-management" path="/app/subscription-management" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSubscriptionManagement />
+      </ClientLayout>
+    </ClientProtectedRoute>
+  } />,
+  <Route key="app-support" path="/app/support" element={
+    <ClientProtectedRoute>
+      <ClientLayout>
+        <ClientSupport />
       </ClientLayout>
     </ClientProtectedRoute>
   } />

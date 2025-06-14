@@ -10,15 +10,45 @@ import PartnerReviews from "@/pages/partner/PartnerReviews";
 import PartnerAnalytics from "@/pages/partner/PartnerAnalytics";
 
 export const partnerRoutes = [
-  <Route key="partner" path="/partner/*" element={
+  <Route key="partner-dashboard" path="/partner/dashboard" element={
     <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
       <AdminLayout>
-        <Route path="dashboard" element={<PartnerDashboard />} />
-        <Route path="gyms" element={<PartnerGyms />} />
-        <Route path="classes" element={<PartnerClasses />} />
-        <Route path="bookings" element={<PartnerBookings />} />
-        <Route path="reviews" element={<PartnerReviews />} />
-        <Route path="analytics" element={<PartnerAnalytics />} />
+        <PartnerDashboard />
+      </AdminLayout>
+    </AdminProtectedRoute>
+  } />,
+  <Route key="partner-gyms" path="/partner/gyms" element={
+    <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+      <AdminLayout>
+        <PartnerGyms />
+      </AdminLayout>
+    </AdminProtectedRoute>
+  } />,
+  <Route key="partner-classes" path="/partner/classes" element={
+    <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+      <AdminLayout>
+        <PartnerClasses />
+      </AdminLayout>
+    </AdminProtectedRoute>
+  } />,
+  <Route key="partner-bookings" path="/partner/bookings" element={
+    <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+      <AdminLayout>
+        <PartnerBookings />
+      </AdminLayout>
+    </AdminProtectedRoute>
+  } />,
+  <Route key="partner-reviews" path="/partner/reviews" element={
+    <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+      <AdminLayout>
+        <PartnerReviews />
+      </AdminLayout>
+    </AdminProtectedRoute>
+  } />,
+  <Route key="partner-analytics" path="/partner/analytics" element={
+    <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+      <AdminLayout>
+        <PartnerAnalytics />
       </AdminLayout>
     </AdminProtectedRoute>
   } />
