@@ -69,7 +69,7 @@ import SupportTickets from "@/pages/support/SupportTickets";
 import SupportUsers from "@/pages/support/SupportUsers";
 
 // Layouts
-import AdminLayout from "@/layouts/AdminLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import ClientLayout from "@/layouts/ClientLayout";
 
 // Protected Routes
