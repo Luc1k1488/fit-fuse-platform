@@ -591,6 +591,74 @@ export type Database = {
           },
         ]
       }
+      support_chats: {
+        Row: {
+          created_at: string
+          id: string
+          priority: string
+          status: string
+          subject: string
+          support_user_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject: string
+          support_user_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject?: string
+          support_user_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          is_from_support: boolean
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          is_from_support?: boolean
+          message: string
+          sender_id: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          is_from_support?: boolean
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "support_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           assigned_support_id: string | null

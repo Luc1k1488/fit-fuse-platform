@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email?: string;
@@ -182,4 +181,24 @@ export interface BookingWithDetails extends Booking {
 
 export interface ClassWithGym extends GymClass {
   gym?: Gym;
+}
+
+export interface SupportChat {
+  id: string;
+  user_id: string;
+  support_user_id?: string | null;
+  subject: string;
+  status: "open" | "in_progress" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  chat_id: string;
+  sender_id: string;
+  message: string;
+  is_from_support: boolean;
+  created_at: string;
 }
