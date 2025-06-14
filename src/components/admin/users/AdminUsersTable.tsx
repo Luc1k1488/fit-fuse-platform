@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,8 @@ import AdminUsersQuickActions from "./AdminUsersQuickActions";
 import AdminUsersLoading from "./AdminUsersLoading";
 import AdminUsersTableContent from "./AdminUsersTableContent";
 import AdminUsersPagination from "./AdminUsersPagination";
+import UserBlockingNotification from "./UserBlockingNotification";
+import UserRoleNotification from "./UserRoleNotification";
 
 const AdminUsersTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,12 +131,45 @@ const AdminUsersTable = () => {
     }
   };
 
+  const handleNotificationSent = (type: string, userEmail: string, oldRole?: string, newRole?: string) => {
+    // Добавляем уведомление через глобальную функцию
+    if ((window as any).addNotification) {
+      if (type === 'block') {
+        (window as any).addNotification('user_blocked', 'Пользователь заблокирован', `${userEmail} был заблокирован`);
+      } else if (type === 'unblock') {
+        (window as any).addNotification('user_unblocked', 'Пользователь разблокирован', `${userEmail} был разблокирован`);
+      } else if (oldRole && newRole) {
+        const getRoleLabel = (role: string) => {
+          switch (role) {
+            case "admin": return "Администратор";
+            case "partner": return "Партнер";
+            case "support": return "Поддержка";
+            default: return "Пользователь";
+          }
+        };
+        (window as any).addNotification(
+          'role_change', 
+          'Роль изменена', 
+          `${userEmail}: ${getRoleLabel(oldRole)} → ${getRoleLabel(newRole)}`
+        );
+      }
+    }
+  };
+
   if (isLoading && !users.length) {
     return <AdminUsersLoading />;
   }
 
   return (
     <div className="space-y-6">
+      {/* Компоненты уведомлений */}
+      <UserBlockingNotification 
+        onNotificationSent={(type, email) => handleNotificationSent(type, email)} 
+      />
+      <UserRoleNotification 
+        onNotificationSent={(email, oldRole, newRole) => handleNotificationSent('role_change', email, oldRole, newRole)} 
+      />
+      
       <Card>
         <AdminUsersHeader />
         <CardContent>

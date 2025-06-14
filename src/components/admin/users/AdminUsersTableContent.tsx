@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserRoleManager from "./UserRoleManager";
 import UserBlockManager from "./UserBlockManager";
+import UserRoleHistory from "./UserRoleHistory";
 import { useEffect, useRef } from "react";
 
 interface User {
@@ -141,12 +142,18 @@ const AdminUsersTableContent = ({
                 </div>
               </TableCell>
               <TableCell>
-                <UserRoleManager
-                  userId={user.id}
-                  userEmail={user.email || ''}
-                  currentRole={user.role as "user" | "admin" | "partner" | "support"}
-                  onRoleUpdated={onUserUpdated}
-                />
+                <div className="flex items-center gap-2">
+                  <UserRoleManager
+                    userId={user.id}
+                    userEmail={user.email || ''}
+                    currentRole={user.role as "user" | "admin" | "partner" | "support"}
+                    onRoleUpdated={onUserUpdated}
+                  />
+                  <UserRoleHistory 
+                    userId={user.id}
+                    userEmail={user.email || ''}
+                  />
+                </div>
               </TableCell>
               <TableCell>
                 <UserBlockManager

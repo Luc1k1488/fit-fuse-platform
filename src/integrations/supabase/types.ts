@@ -707,6 +707,36 @@ export type Database = {
           },
         ]
       }
+      user_role_history: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          id: string
+          new_role: string
+          old_role: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          id?: string
+          new_role: string
+          old_role?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          id?: string
+          new_role?: string
+          old_role?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_stats: {
         Row: {
           best_streak_days: number | null

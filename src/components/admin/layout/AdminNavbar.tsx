@@ -1,51 +1,34 @@
 
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import { AdminUserInfo } from "./AdminUserInfo";
+import { useAuth } from "@/contexts/auth_context";
+import { LogOut } from "lucide-react";
+import AdminUserInfo from "./AdminUserInfo";
+import NotificationCenter from "../notifications/NotificationCenter";
 
-interface AdminNavbarProps {
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
-  isMobileView: boolean;
-  user: any;
-  userRole: string;
-  onLogout: () => void;
-  onSwitchToApp: () => void;
-}
+const AdminNavbar = () => {
+  const { signOut } = useAuth();
 
-export const AdminNavbar: React.FC<AdminNavbarProps> = ({
-  sidebarOpen,
-  setSidebarOpen,
-  isMobileView,
-  user,
-  userRole,
-  onLogout,
-  onSwitchToApp,
-}) => {
   return (
-    <nav className="bg-gray-800 border-b border-gray-700 fixed w-full z-30">
-      <div className="px-3 py-3 lg:px-5 lg:pl-3 flex justify-between items-center">
-        <div className="flex items-center">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-expanded={sidebarOpen}
-            className="p-2 rounded-md focus:outline-none"
-          >
-            {sidebarOpen && isMobileView ? <X className="text-gray-300" /> : <Menu className="text-gray-300" />}
-          </button>
-          <div className="flex items-center ml-3 lg:ml-0">
-            <span className="text-xl font-semibold text-white">GoodFit Admin</span>
-          </div>
-        </div>
-        
-        <AdminUserInfo
-          user={user}
-          userRole={userRole}
-          onLogout={onLogout}
-          onSwitchToApp={onSwitchToApp}
-          isMobileView={false}
-        />
+    <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <h1 className="text-xl font-semibold text-gray-900">Панель администратора</h1>
+      </div>
+      
+      <div className="flex items-center space-x-4">
+        <NotificationCenter />
+        <AdminUserInfo />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => signOut()}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Выйти
+        </Button>
       </div>
     </nav>
   );
 };
+
+export default AdminNavbar;
