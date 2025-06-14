@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserRoleManager from "./UserRoleManager";
 import UserBlockManager from "./UserBlockManager";
+import { useEffect, useRef } from "react";
 
 interface User {
   id: string;
@@ -33,8 +34,19 @@ const AdminUsersTableContent = ({
   onSelectAll,
   isLoading = false
 }: AdminUsersTableContentProps) => {
+  const selectAllRef = useRef<HTMLButtonElement>(null);
   const isAllSelected = users.length > 0 && selectedUsers.length === users.length;
   const isIndeterminate = selectedUsers.length > 0 && selectedUsers.length < users.length;
+
+  // Handle indeterminate state using a custom approach
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const checkboxElement = selectAllRef.current.querySelector('[role="checkbox"]') as HTMLElement;
+      if (checkboxElement) {
+        checkboxElement.setAttribute('data-state', isIndeterminate ? 'indeterminate' : isAllSelected ? 'checked' : 'unchecked');
+      }
+    }
+  }, [isAllSelected, isIndeterminate]);
 
   if (isLoading) {
     return (
@@ -94,10 +106,8 @@ const AdminUsersTableContent = ({
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
+                ref={selectAllRef}
                 checked={isAllSelected}
-                ref={(el) => {
-                  if (el) el.indeterminate = isIndeterminate;
-                }}
                 onCheckedChange={(checked) => onSelectAll(!!checked)}
               />
             </TableHead>
