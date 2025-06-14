@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/auth_context";
 
 // Route arrays
-import { publicRoutes } from "@/routes/PublicRoutes";
 import { authRoutes } from "@/routes/AuthRoutes";
 import { clientRoutes } from "@/routes/ClientRoutes";
 import { adminRoutes } from "@/routes/AdminRoutes";
@@ -12,6 +11,7 @@ import { partnerRoutes } from "@/routes/PartnerRoutes";
 import { supportRoutes } from "@/routes/SupportRoutes";
 
 // Other components
+import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 
 // Configuration
@@ -25,8 +25,8 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Public routes */}
-            {publicRoutes}
+            {/* Main page - now login/welcome screen */}
+            <Route path="/" element={<Index />} />
 
             {/* Auth routes */}
             {authRoutes}
