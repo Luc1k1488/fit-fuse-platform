@@ -129,6 +129,11 @@ const LoginPage = () => {
               </Button>
               <div className="text-center text-sm space-y-2">
                 <div>
+                  <Link to="/forgot-password" className="text-primary hover:underline">
+                    Забыли пароль?
+                  </Link>
+                </div>
+                <div>
                   Нет аккаунта?{" "}
                   <Link to="/register" className="text-primary hover:underline">
                     Зарегистрироваться
