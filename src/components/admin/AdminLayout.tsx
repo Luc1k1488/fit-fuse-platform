@@ -1,7 +1,7 @@
 
 import { useAuth } from "@/contexts/auth_context";
 import { Navigate } from "react-router-dom";
-import AdminSidebar from "./layout/AdminSidebar";
+import { AdminSidebar } from "./layout/AdminSidebar";
 import AdminNavbar from "./layout/AdminNavbar";
 import UserRoleNotification from "./users/UserRoleNotification";
 import UserBlockingNotification from "./users/UserBlockingNotification";
@@ -11,7 +11,8 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
-  const { user, role } = useAuth();
+  const { user } = useAuth();
+  const role = user?.user_metadata?.role;
 
   if (!user) {
     return <Navigate to="/login" replace />;
