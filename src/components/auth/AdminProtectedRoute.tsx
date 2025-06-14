@@ -41,7 +41,7 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
   // Если пользователь не авторизован, перенаправляем на страницу входа для админа
   if (!is_authenticated) {
     console.log("User not authenticated, redirecting to admin login");
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/admin-login" replace />;
   }
 
   // Если пользователь авторизован, но не имеет нужной роли

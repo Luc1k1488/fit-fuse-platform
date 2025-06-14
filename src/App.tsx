@@ -112,72 +112,80 @@ function App() {
             <Route path="/admin-login" element={<AdminLoginPage />} />
 
             {/* Client routes */}
-            <Route path="/app" element={
+            <Route path="/app/*" element={
               <ClientProtectedRoute>
-                <ClientLayout />
+                <ClientLayout>
+                  <Routes>
+                    <Route index element={<ClientDashboard />} />
+                    <Route path="home" element={<ClientHome />} />
+                    <Route path="gyms" element={<ClientGyms />} />
+                    <Route path="gyms/:id" element={<ClientGymDetail />} />
+                    <Route path="classes" element={<ClientClasses />} />
+                    <Route path="bookings" element={<ClientBookings />} />
+                    <Route path="profile" element={<ClientProfile />} />
+                    <Route path="profile-new" element={<ClientProfileNew />} />
+                    <Route path="calendar" element={<ClientCalendar />} />
+                    <Route path="progress" element={<ClientProgress />} />
+                    <Route path="schedule" element={<ClientSchedule />} />
+                    <Route path="search" element={<ClientSearch />} />
+                    <Route path="subscription" element={<ClientSubscription />} />
+                    <Route path="subscription-new" element={<ClientSubscriptionNew />} />
+                    <Route path="subscription-management" element={<ClientSubscriptionManagement />} />
+                    <Route path="support" element={<ClientSupport />} />
+                  </Routes>
+                </ClientLayout>
               </ClientProtectedRoute>
-            }>
-              <Route index element={<ClientDashboard />} />
-              <Route path="home" element={<ClientHome />} />
-              <Route path="gyms" element={<ClientGyms />} />
-              <Route path="gyms/:id" element={<ClientGymDetail />} />
-              <Route path="classes" element={<ClientClasses />} />
-              <Route path="bookings" element={<ClientBookings />} />
-              <Route path="profile" element={<ClientProfile />} />
-              <Route path="profile-new" element={<ClientProfileNew />} />
-              <Route path="calendar" element={<ClientCalendar />} />
-              <Route path="progress" element={<ClientProgress />} />
-              <Route path="schedule" element={<ClientSchedule />} />
-              <Route path="search" element={<ClientSearch />} />
-              <Route path="subscription" element={<ClientSubscription />} />
-              <Route path="subscription-new" element={<ClientSubscriptionNew />} />
-              <Route path="subscription-management" element={<ClientSubscriptionManagement />} />
-              <Route path="support" element={<ClientSupport />} />
-            </Route>
+            } />
 
             {/* Admin routes */}
-            <Route path="/admin" element={
+            <Route path="/admin/*" element={
               <AdminProtectedRoute>
-                <AdminLayout />
+                <AdminLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="gyms" element={<AdminGyms />} />
+                    <Route path="bookings" element={<AdminBookings />} />
+                    <Route path="classes" element={<AdminClasses />} />
+                    <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="analytics" element={<AdminAnalytics />} />
+                    <Route path="partners" element={<AdminPartners />} />
+                    <Route path="subscriptions" element={<AdminSubscriptions />} />
+                    <Route path="support" element={<AdminSupport />} />
+                  </Routes>
+                </AdminLayout>
               </AdminProtectedRoute>
-            }>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="gyms" element={<AdminGyms />} />
-              <Route path="bookings" element={<AdminBookings />} />
-              <Route path="classes" element={<AdminClasses />} />
-              <Route path="reviews" element={<AdminReviews />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-              <Route path="partners" element={<AdminPartners />} />
-              <Route path="subscriptions" element={<AdminSubscriptions />} />
-              <Route path="support" element={<AdminSupport />} />
-            </Route>
+            } />
 
             {/* Partner routes */}
-            <Route path="/partner" element={
-              <ProtectedRoute allowedRoles={["partner", "admin"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<PartnerDashboard />} />
-              <Route path="gyms" element={<PartnerGyms />} />
-              <Route path="classes" element={<PartnerClasses />} />
-              <Route path="bookings" element={<PartnerBookings />} />
-              <Route path="reviews" element={<PartnerReviews />} />
-              <Route path="analytics" element={<PartnerAnalytics />} />
-            </Route>
+            <Route path="/partner/*" element={
+              <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<PartnerDashboard />} />
+                    <Route path="gyms" element={<PartnerGyms />} />
+                    <Route path="classes" element={<PartnerClasses />} />
+                    <Route path="bookings" element={<PartnerBookings />} />
+                    <Route path="reviews" element={<PartnerReviews />} />
+                    <Route path="analytics" element={<PartnerAnalytics />} />
+                  </Routes>
+                </AdminLayout>
+              </AdminProtectedRoute>
+            } />
 
             {/* Support routes */}
-            <Route path="/support" element={
-              <ProtectedRoute allowedRoles={["support", "admin"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<SupportDashboard />} />
-              <Route path="chats" element={<SupportChats />} />
-              <Route path="tickets" element={<SupportTickets />} />
-              <Route path="users" element={<SupportUsers />} />
-            </Route>
+            <Route path="/support/*" element={
+              <AdminProtectedRoute allowedRoles={["support", "admin"]}>
+                <AdminLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<SupportDashboard />} />
+                    <Route path="chats" element={<SupportChats />} />
+                    <Route path="tickets" element={<SupportTickets />} />
+                    <Route path="users" element={<SupportUsers />} />
+                  </Routes>
+                </AdminLayout>
+              </AdminProtectedRoute>
+            } />
 
             {/* 404 route */}
             <Route path="*" element={<NotFound />} />
