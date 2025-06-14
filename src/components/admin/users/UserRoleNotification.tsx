@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { sendEmailNotification } from "@/utils/emailNotifications";
 
 interface UserRoleNotificationProps {
   onNotificationSent?: (userEmail: string, oldRole: string, newRole: string) => void;
@@ -20,7 +21,6 @@ const UserRoleNotification = ({ onNotificationSent }: UserRoleNotificationProps)
   };
 
   useEffect(() => {
-    // Подписываемся на изменения в таблице users для отслеживания смены ролей
     const channel = supabase
       .channel('user-role-changes')
       .on(
@@ -31,11 +31,10 @@ const UserRoleNotification = ({ onNotificationSent }: UserRoleNotificationProps)
           table: 'users',
           filter: 'role=neq.null'
         },
-        (payload) => {
+        async (payload) => {
           const newUser = payload.new as any;
           const oldUser = payload.old as any;
           
-          // Проверяем изменение роли
           if (oldUser.role !== newUser.role) {
             const userEmail = newUser.email || 'Неизвестный пользователь';
             const oldRoleLabel = getRoleLabel(oldUser.role || 'user');
@@ -45,6 +44,27 @@ const UserRoleNotification = ({ onNotificationSent }: UserRoleNotificationProps)
               title: "Роль пользователя изменена",
               description: `Пользователь ${userEmail}: ${oldRoleLabel} → ${newRoleLabel}`,
             });
+            
+            // Отправляем email уведомление
+            try {
+              await sendEmailNotification({
+                type: 'role_change',
+                userEmail: userEmail,
+                details: {
+                  oldRole: oldRoleLabel,
+                  newRole: newRoleLabel
+                }
+              });
+              
+              console.log('Email уведомление о смене роли отправлено');
+            } catch (error) {
+              console.error('Ошибка отправки email уведомления:', error);
+              toast({
+                title: "Ошибка",
+                description: "Не удалось отправить email уведомление",
+                variant: "destructive",
+              });
+            }
             
             onNotificationSent?.(userEmail, oldUser.role || 'user', newUser.role);
           }
@@ -57,7 +77,7 @@ const UserRoleNotification = ({ onNotificationSent }: UserRoleNotificationProps)
     };
   }, [toast, onNotificationSent]);
 
-  return null; // Этот компонент не рендерит UI
+  return null;
 };
 
 export default UserRoleNotification;
