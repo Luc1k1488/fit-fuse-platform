@@ -21,13 +21,21 @@ export const RecentActivity = () => {
       if (!user) return [];
 
       try {
-        // Получаем последние бронирования с информацией о залах
+        // Получаем последние бронирования
         const { data: bookings, error: bookingsError } = await supabase
           .from('bookings')
           .select(`
-            *,
-            gym:gym_id (name, location),
-            class:class_id (title, instructor)
+            id,
+            created_at,
+            gym_id,
+            class_id,
+            gyms!fk_bookings_gym_id (
+              name,
+              location
+            ),
+            classes!fk_bookings_class_id (
+              title
+            )
           `)
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
@@ -35,12 +43,18 @@ export const RecentActivity = () => {
 
         if (bookingsError) throw bookingsError;
 
-        // Получаем последние отзывы с информацией о залах
+        // Получаем последние отзывы
         const { data: reviews, error: reviewsError } = await supabase
           .from('reviews')
           .select(`
-            *,
-            gym:gym_id (name, location)
+            id,
+            created_at,
+            rating,
+            gym_id,
+            gyms!fk_reviews_gym_id (
+              name,
+              location
+            )
           `)
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
@@ -147,19 +161,19 @@ export const RecentActivity = () => {
                           Бронирование {activity.data.class_id ? 'занятия' : 'зала'}
                         </p>
                         <p className="text-gray-300 text-sm truncate">
-                          {activity.data.gym?.name || activity.data.class?.title}
+                          {activity.data.gyms?.name || activity.data.classes?.title}
                         </p>
-                        {activity.data.gym?.location && (
+                        {activity.data.gyms?.location && (
                           <div className="flex items-center text-gray-400 text-xs mt-1">
                             <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                            <span className="truncate">{activity.data.gym.location}</span>
+                            <span className="truncate">{activity.data.gyms.location}</span>
                           </div>
                         )}
                       </div>
                     ) : (
                       <div>
                         <p className="text-white font-medium truncate">
-                          Отзыв о {activity.data.gym?.name}
+                          Отзыв о {activity.data.gyms?.name}
                         </p>
                         <div className="flex items-center mt-1">
                           {Array.from({ length: 5 }, (_, i) => (

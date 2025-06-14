@@ -5,8 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { ClassWithGym } from "@/types";
 import { toast } from "sonner";
+
+interface ClassWithGym {
+  id: string;
+  title: string;
+  description?: string;
+  instructor: string;
+  start_time: string;
+  end_time: string;
+  capacity: number;
+  booked_count: number;
+  category: string;
+  gym_id: string;
+  created_at: string;
+  gyms?: {
+    id: string;
+    name: string;
+    location: string;
+    description?: string;
+    phone?: string;
+  };
+}
 
 const ClientSchedule = () => {
   const [classes, setClasses] = useState<ClassWithGym[]>([]);
@@ -46,8 +66,24 @@ const ClientSchedule = () => {
       const { data, error } = await supabase
         .from('classes')
         .select(`
-          *,
-          gym:gym_id (*)
+          id,
+          title,
+          description,
+          instructor,
+          start_time,
+          end_time,
+          capacity,
+          booked_count,
+          category,
+          gym_id,
+          created_at,
+          gyms!fk_classes_gym_id (
+            id,
+            name,
+            location,
+            description,
+            phone
+          )
         `)
         .gte('start_time', startDate.toISOString())
         .lte('start_time', endDate.toISOString())
@@ -59,16 +95,7 @@ const ClientSchedule = () => {
         return;
       }
 
-      const typedClasses: ClassWithGym[] = (data || []).map(classItem => ({
-        ...classItem,
-        gym: {
-          ...classItem.gym,
-          description: classItem.gym?.description || null,
-          phone: classItem.gym?.phone || null,
-        }
-      }));
-
-      setClasses(typedClasses);
+      setClasses(data || []);
     } catch (error) {
       console.error('Error:', error);
       toast.error('Ошибка загрузки данных');
@@ -201,10 +228,10 @@ const ClientSchedule = () => {
                           </div>
                         )}
 
-                        {classItem.gym && (
+                        {classItem.gyms && (
                           <div className="flex items-center gap-2 text-slate-400">
                             <MapPin className="h-4 w-4" />
-                            <span>{classItem.gym.name}</span>
+                            <span>{classItem.gyms.name}</span>
                           </div>
                         )}
 
@@ -220,8 +247,8 @@ const ClientSchedule = () => {
 
                       <div className="flex items-center justify-between">
                         <div className="text-slate-400 text-sm">
-                          {classItem.gym?.location && (
-                            <span>{classItem.gym.location}</span>
+                          {classItem.gyms?.location && (
+                            <span>{classItem.gyms.location}</span>
                           )}
                         </div>
                         <Button

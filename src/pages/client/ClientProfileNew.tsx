@@ -41,10 +41,16 @@ const ClientProfileNew = () => {
       const { data, error } = await supabase
         .from("bookings")
         .select(`
-          *,
-          class:class_id (
+          id,
+          date_time,
+          status,
+          class_id,
+          classes!fk_bookings_class_id (
             title,
-            gym:gym_id (name)
+            gym_id,
+            gyms!fk_classes_gym_id (
+              name
+            )
           )
         `)
         .eq("user_id", user.id)
@@ -116,10 +122,10 @@ const ClientProfileNew = () => {
                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                     <div className="flex-1">
                       <div className="text-white font-medium">
-                        {workout.class?.title || "Тренировка"}
+                        {workout.classes?.title || "Тренировка"}
                       </div>
                       <div className="text-slate-400 text-sm">
-                        {workout.class?.gym?.name || "Спортзал"} • {new Date(workout.date_time).toLocaleDateString()}
+                        {workout.classes?.gyms?.name || "Спортзал"} • {new Date(workout.date_time).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
