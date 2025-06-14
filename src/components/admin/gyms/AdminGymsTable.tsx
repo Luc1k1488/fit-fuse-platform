@@ -1,92 +1,117 @@
 
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Edit, MapPin, Star, Users } from "lucide-react";
-import { Gym, Partner } from "@/types";
+import { Plus } from "lucide-react";
+import AdminGymsHeader from "./AdminGymsHeader";
+import AdminGymCreateDialog from "./AdminGymCreateDialog";
+import AdminGymEditDialog from "./AdminGymEditDialog";
+import AdminGymsTableContent from "./AdminGymsTableContent";
 
-interface AdminGymsTableProps {
-  gyms: Gym[];
-  partners: Partner[];
-  onEditGym: (gym: Gym) => void;
-}
+const AdminGymsTable = () => {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedGym, setSelectedGym] = useState<any>(null);
 
-export const AdminGymsTable = ({ gyms, partners, onEditGym }: AdminGymsTableProps) => {
-  const getPartnerName = (partnerId: string | null) => {
-    if (!partnerId || partnerId === 'unassigned') return 'Не назначен';
-    const partner = partners.find(p => p.id === partnerId);
-    return partner ? partner.name : 'Неизвестный партнер';
+  const { data: gyms = [], isLoading, refetch } = useQuery({
+    queryKey: ['admin-gyms'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('gyms')
+        .select(`
+          *,
+          partner:partners(name, company_name)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: partners = [] } = useQuery({
+    queryKey: ['partners'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('status', 'approved')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const handleEdit = (gym: any) => {
+    setSelectedGym(gym);
+    setEditDialogOpen(true);
   };
 
-  const formatRating = (rating: number | null) => {
-    if (!rating) return '-';
-    return rating.toFixed(1);
+  const handleGymUpdated = () => {
+    refetch();
+    setCreateDialogOpen(false);
+    setEditDialogOpen(false);
+    setSelectedGym(null);
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <AdminGymsHeader />
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Название</TableHead>
-          <TableHead>Локация</TableHead>
-          <TableHead>Категория</TableHead>
-          <TableHead>Партнер</TableHead>
-          <TableHead>Рейтинг</TableHead>
-          <TableHead>Отзывы</TableHead>
-          <TableHead>Действия</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {gyms.map((gym) => (
-          <TableRow key={gym.id}>
-            <TableCell>
-              <div>
-                <div className="font-medium">{gym.name}</div>
-                <div className="text-sm text-gray-500 flex items-center">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  {gym.address}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>{gym.city}</TableCell>
-            <TableCell>
-              {gym.category && (
-                <Badge variant="outline">{gym.category}</Badge>
-              )}
-            </TableCell>
-            <TableCell>{getPartnerName(gym.partner_id)}</TableCell>
-            <TableCell>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-500 mr-1" />
-                {formatRating(gym.rating)}
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center">
-                <Users className="h-4 w-4 text-gray-500 mr-1" />
-                {gym.review_count || 0}
-              </div>
-            </TableCell>
-            <TableCell>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEditGym(gym)}
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Редактировать
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <>
+      <Card>
+        <AdminGymsHeader />
+        <CardContent>
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-sm text-gray-500">
+              Всего спортзалов: {gyms.length}
+            </div>
+            <Button 
+              onClick={() => setCreateDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Добавить спортзал
+            </Button>
+          </div>
+          
+          <AdminGymsTableContent 
+            gyms={gyms} 
+            onEdit={handleEdit}
+            onGymUpdated={handleGymUpdated}
+          />
+        </CardContent>
+      </Card>
+
+      <AdminGymCreateDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        partners={partners}
+        onGymCreated={handleGymUpdated}
+      />
+
+      <AdminGymEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        gym={selectedGym}
+        partners={partners}
+        onGymUpdated={handleGymUpdated}
+      />
+    </>
   );
 };
+
+export default AdminGymsTable;
