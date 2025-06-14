@@ -39,7 +39,7 @@ const UserBlockManager = ({ userId, userEmail, isBlocked = false, onStatusUpdate
           is_blocked: true,
           blocked_at: new Date().toISOString(),
           blocked_reason: blockReason.trim()
-        })
+        } as any)
         .eq('id', userId);
 
       if (error) throw error;
@@ -71,7 +71,7 @@ const UserBlockManager = ({ userId, userEmail, isBlocked = false, onStatusUpdate
           is_blocked: false,
           blocked_at: null,
           blocked_reason: null
-        })
+        } as any)
         .eq('id', userId);
 
       if (error) throw error;

@@ -773,9 +773,12 @@ export type Database = {
       }
       users: {
         Row: {
+          blocked_at: string | null
+          blocked_reason: string | null
           created_at: string | null
           email: string | null
           id: string
+          is_blocked: boolean | null
           name: string | null
           phone: string | null
           profile_image: string | null
@@ -783,9 +786,12 @@ export type Database = {
           subscription_id: string | null
         }
         Insert: {
+          blocked_at?: string | null
+          blocked_reason?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
+          is_blocked?: boolean | null
           name?: string | null
           phone?: string | null
           profile_image?: string | null
@@ -793,9 +799,12 @@ export type Database = {
           subscription_id?: string | null
         }
         Update: {
+          blocked_at?: string | null
+          blocked_reason?: string | null
           created_at?: string | null
           email?: string | null
           id?: string
+          is_blocked?: boolean | null
           name?: string | null
           phone?: string | null
           profile_image?: string | null

@@ -109,7 +109,7 @@ const AdminUsersTable = () => {
                     <UserRoleManager
                       userId={user.id}
                       userEmail={user.email || ''}
-                      currentRole={user.role || 'user'}
+                      currentRole={user.role as "user" | "admin" | "partner" | "support"}
                       onRoleUpdated={handleUserUpdated}
                     />
                   </TableCell>
