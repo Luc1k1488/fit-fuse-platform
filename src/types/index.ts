@@ -94,6 +94,8 @@ export interface SupportTicket {
   message?: string;
   status?: string;
   created_at?: string;
+  assigned_support_id?: string | null;
+  resolved_at?: string | null;
 }
 
 export interface UserStats {
