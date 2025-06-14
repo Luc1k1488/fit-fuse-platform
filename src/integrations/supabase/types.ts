@@ -59,6 +59,27 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_bookings_class_id"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_bookings_gym_id"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_bookings_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_messages: {
@@ -143,6 +164,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "classes_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_classes_gym_id"
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gyms"
@@ -440,6 +468,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_reviews_gym_id"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_reviews_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_gym_id_fkey"
             columns: ["gym_id"]
             isOneToOne: false
@@ -526,6 +568,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_subscriptions_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_plan_id_fkey"
             columns: ["plan_id"]
@@ -632,6 +681,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_user_stats_user_id"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_stats_favorite_gym_id_fkey"
             columns: ["favorite_gym_id"]
             isOneToOne: false
@@ -685,6 +741,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string

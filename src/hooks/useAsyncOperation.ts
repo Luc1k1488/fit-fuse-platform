@@ -1,58 +1,50 @@
 
 import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useErrorHandler } from './useErrorHandler';
 
-interface UseAsyncOperationProps<T> {
-  operation: () => Promise<T>;
-  onSuccess?: (result: T) => void;
-  onError?: (error: Error) => void;
-  successMessage?: string;
-  errorMessage?: string;
+interface AsyncOperationState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
 }
 
 export const useAsyncOperation = <T>() => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [state, setState] = useState<AsyncOperationState<T>>({
+    data: null,
+    loading: false,
+    error: null
+  });
+  
+  const { handleError } = useErrorHandler();
 
-  const execute = useCallback(async (props: UseAsyncOperationProps<T>) => {
-    const { operation, onSuccess, onError, successMessage, errorMessage } = props;
+  const execute = useCallback(async (
+    operation: () => Promise<T>,
+    onSuccess?: (data: T) => void,
+    onError?: (error: Error) => void
+  ) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
     
-    setLoading(true);
-    setError(null);
-
     try {
       const result = await operation();
-      
-      if (successMessage) {
-        toast.success(successMessage);
-      }
-      
-      if (onSuccess) {
-        onSuccess(result);
-      }
-      
+      setState({ data: result, loading: false, error: null });
+      onSuccess?.(result);
       return result;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Неизвестная ошибка');
-      setError(error);
-      
-      console.error('Async operation error:', error);
-      
-      if (errorMessage) {
-        toast.error(errorMessage);
-      } else {
-        toast.error(error.message);
-      }
-      
-      if (onError) {
-        onError(error);
-      }
-      
-      throw error;
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      const errorObj = error as Error;
+      setState(prev => ({ ...prev, loading: false, error: errorObj }));
+      onError?.(errorObj);
+      handleError(errorObj);
+      throw errorObj;
     }
+  }, [handleError]);
+
+  const reset = useCallback(() => {
+    setState({ data: null, loading: false, error: null });
   }, []);
 
-  return { loading, error, execute };
+  return {
+    ...state,
+    execute,
+    reset
+  };
 };
