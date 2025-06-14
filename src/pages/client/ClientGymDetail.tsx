@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,7 @@ import { GymHeader } from "@/components/client/gym-detail/GymHeader";
 import { GymInfoSection } from "@/components/client/gym-detail/GymInfoSection";
 import { GymGallerySection } from "@/components/client/gym-detail/GymGallerySection";
 import { GymClassesSection } from "@/components/client/gym-detail/GymClassesSection";
-import { GymReviewsSection } from "@/components/client/gym-detail/GymReviewsSection";
+import { ReviewsList } from "@/components/reviews/ReviewsList";
 import { Separator } from "@/components/ui/separator";
 import { Gym } from "@/types";
 
@@ -76,7 +75,7 @@ const ClientGymDetail = () => {
             
             <Separator className="my-8 bg-gray-700" />
             
-            <GymReviewsSection gymId={gym.id} />
+            <ReviewsList gymId={gym.id} />
           </div>
           
           <div>
