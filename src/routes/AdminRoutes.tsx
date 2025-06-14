@@ -19,9 +19,7 @@ export const adminRoutes = [
       <AdminLayout>
         <AdminDashboard />
       </AdminLayout>
-    </AdminProt
-
-}ectedRoute>
+    </AdminProtectedRoute>
   } />,
   <Route key="admin-users" path="/admin/users" element={
     <AdminProtectedRoute>
