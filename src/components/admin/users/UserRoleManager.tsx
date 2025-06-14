@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Shield, UserCheck, UserX } from "lucide-react";
+import { Shield, UserCheck, Crown, Headphones, User } from "lucide-react";
 
 interface UserRoleManagerProps {
   userId: string;
@@ -21,10 +21,34 @@ const UserRoleManager = ({ userId, userEmail, currentRole, onRoleUpdated }: User
   const { toast } = useToast();
 
   const roles = [
-    { value: "user", label: "Пользователь", color: "bg-gray-500" },
-    { value: "admin", label: "Администратор", color: "bg-red-500" },
-    { value: "partner", label: "Партнер", color: "bg-blue-500" },
-    { value: "support", label: "Поддержка", color: "bg-green-500" },
+    { 
+      value: "user", 
+      label: "Пользователь", 
+      icon: User,
+      color: "bg-gray-500",
+      description: "Базовые права пользователя"
+    },
+    { 
+      value: "admin", 
+      label: "Администратор", 
+      icon: Crown,
+      color: "bg-red-500",
+      description: "Полный доступ к системе"
+    },
+    { 
+      value: "partner", 
+      label: "Партнер", 
+      icon: Shield,
+      color: "bg-blue-500",
+      description: "Управление спортзалами"
+    },
+    { 
+      value: "support", 
+      label: "Поддержка", 
+      icon: Headphones,
+      color: "bg-green-500",
+      description: "Техническая поддержка"
+    },
   ];
 
   const handleUpdateRole = async () => {
@@ -67,34 +91,44 @@ const UserRoleManager = ({ userId, userEmail, currentRole, onRoleUpdated }: User
         description: error.message || "Не удалось изменить роль пользователя",
         variant: "destructive",
       });
+      setSelectedRole(currentRole); // Возвращаем исходную роль при ошибке
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getRoleColor = (role: string) => {
-    return roles.find(r => r.value === role)?.color || "bg-gray-500";
+  const getCurrentRole = () => {
+    return roles.find(r => r.value === currentRole);
   };
 
-  const getRoleLabel = (role: string) => {
-    return roles.find(r => r.value === role)?.label || role;
+  const getSelectedRole = () => {
+    return roles.find(r => r.value === selectedRole);
   };
+
+  const currentRoleData = getCurrentRole();
+  const selectedRoleData = getSelectedRole();
 
   return (
     <div className="flex items-center gap-3">
-      <Badge className={`${getRoleColor(currentRole)} text-white`}>
-        <Shield className="w-3 h-3 mr-1" />
-        {getRoleLabel(currentRole)}
+      <Badge className={`${currentRoleData?.color} text-white flex items-center gap-1`}>
+        {currentRoleData?.icon && <currentRoleData.icon className="w-3 h-3" />}
+        {currentRoleData?.label}
       </Badge>
 
       <Select value={selectedRole} onValueChange={setSelectedRole}>
-        <SelectTrigger className="w-32">
+        <SelectTrigger className="w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {roles.map((role) => (
             <SelectItem key={role.value} value={role.value}>
-              {role.label}
+              <div className="flex items-center gap-2">
+                <role.icon className="w-4 h-4" />
+                <div>
+                  <div className="font-medium">{role.label}</div>
+                  <div className="text-xs text-gray-500">{role.description}</div>
+                </div>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
@@ -120,11 +154,30 @@ const UserRoleManager = ({ userId, userEmail, currentRole, onRoleUpdated }: User
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Изменить роль пользователя</AlertDialogTitle>
-            <AlertDialogDescription>
-              Вы уверены, что хотите изменить роль пользователя {userEmail} 
-              с "{getRoleLabel(currentRole)}" на "{getRoleLabel(selectedRole)}"?
-              <br /><br />
-              Это действие изменит права доступа пользователя в системе.
+            <AlertDialogDescription className="space-y-3">
+              <div>
+                Вы уверены, что хотите изменить роль пользователя <strong>{userEmail}</strong>?
+              </div>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium">Текущая роль:</span>
+                  <Badge className={`${currentRoleData?.color} text-white`}>
+                    {currentRoleData?.label}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Новая роль:</span>
+                  <Badge className={`${selectedRoleData?.color} text-white`}>
+                    {selectedRoleData?.label}
+                  </Badge>
+                </div>
+                <div className="mt-2 text-xs text-gray-600">
+                  {selectedRoleData?.description}
+                </div>
+              </div>
+              <div className="text-sm text-orange-600">
+                ⚠️ Это действие изменит права доступа пользователя в системе.
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
