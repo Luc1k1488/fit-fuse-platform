@@ -54,12 +54,14 @@ export const ClassBookingDialog: React.FC<ClassBookingDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-            <h3 className="font-medium">{classItem.title}</h3>
+          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+            <h3 className="font-medium text-lg">{classItem.title}</h3>
+            
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <User className="h-4 w-4" />
               <span>{classItem.instructor}</span>
             </div>
+            
             {classItem.start_time && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="h-4 w-4" />
@@ -68,23 +70,33 @@ export const ClassBookingDialog: React.FC<ClassBookingDialogProps> = ({
                 </span>
               </div>
             )}
+            
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Users className="h-4 w-4" />
               <span>
                 {classItem.booked_count || 0} / {classItem.capacity || 0} мест
                 {spotsLeft > 0 && (
-                  <span className="text-green-600 ml-1">
+                  <span className="text-green-600 ml-1 font-medium">
                     (осталось {spotsLeft})
                   </span>
                 )}
               </span>
             </div>
+
+            {classItem.gym && (
+              <div className="text-sm text-gray-600 pt-2 border-t">
+                <strong>Зал:</strong> {classItem.gym.name}
+                {classItem.gym.location && (
+                  <div className="text-xs mt-1">{classItem.gym.location}</div>
+                )}
+              </div>
+            )}
           </div>
 
           {isFull ? (
-            <div className="text-center py-4">
-              <p className="text-red-600 font-medium">Мест не осталось</p>
-              <p className="text-gray-500 text-sm">Попробуйте выбрать другое время</p>
+            <div className="text-center py-6">
+              <p className="text-red-600 font-medium text-lg">Мест не осталось</p>
+              <p className="text-gray-500 text-sm mt-2">Попробуйте выбрать другое время или занятие</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,6 +108,7 @@ export const ClassBookingDialog: React.FC<ClassBookingDialogProps> = ({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Особые пожелания или примечания..."
                   rows={3}
+                  className="mt-1"
                 />
               </div>
 
@@ -111,7 +124,7 @@ export const ClassBookingDialog: React.FC<ClassBookingDialogProps> = ({
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
                 >
                   {loading ? "Запись..." : "Записаться"}
                 </Button>
