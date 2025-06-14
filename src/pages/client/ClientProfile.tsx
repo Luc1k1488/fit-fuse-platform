@@ -17,9 +17,9 @@ const ClientProfile = () => {
   const { user, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: user?.name || "",
+    name: user?.user_metadata?.name || user?.email?.split('@')[0] || "",
     email: user?.email || "",
-    phone: user?.phone || ""
+    phone: user?.user_metadata?.phone || ""
   });
 
   const handleUpdateProfile = async (e: React.FormEvent) => {

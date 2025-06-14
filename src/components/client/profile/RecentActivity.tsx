@@ -112,7 +112,7 @@ export const RecentActivity = () => {
                     {activity.type === 'booking' ? (
                       <div>
                         <p className="text-white font-medium">
-                          Бронирование {activity.data.booking_type === 'gym_visit' ? 'зала' : 'занятия'}
+                          Бронирование {activity.data.class_id ? 'занятия' : 'зала'}
                         </p>
                         <p className="text-gray-300 text-sm">
                           {activity.data.gym?.name || activity.data.class?.title}
