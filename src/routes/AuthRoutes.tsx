@@ -8,14 +8,12 @@ import PhoneLoginPage from "@/pages/auth/PhoneLoginPage";
 import MobileLoginPage from "@/pages/auth/MobileLoginPage";
 import AdminLoginPage from "@/pages/auth/AdminLoginPage";
 
-export const AuthRoutes = () => (
-  <>
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
-    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-    <Route path="/reset-password" element={<ResetPasswordPage />} />
-    <Route path="/phone-login" element={<PhoneLoginPage />} />
-    <Route path="/mobile-login" element={<MobileLoginPage />} />
-    <Route path="/admin-login" element={<AdminLoginPage />} />
-  </>
-);
+export const authRoutes = [
+  <Route key="login" path="/login" element={<LoginPage />} />,
+  <Route key="register" path="/register" element={<RegisterPage />} />,
+  <Route key="forgot-password" path="/forgot-password" element={<ForgotPasswordPage />} />,
+  <Route key="reset-password" path="/reset-password" element={<ResetPasswordPage />} />,
+  <Route key="phone-login" path="/phone-login" element={<PhoneLoginPage />} />,
+  <Route key="mobile-login" path="/mobile-login" element={<MobileLoginPage />} />,
+  <Route key="admin-login" path="/admin-login" element={<AdminLoginPage />} />
+];

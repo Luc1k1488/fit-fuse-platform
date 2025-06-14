@@ -7,13 +7,11 @@ import ContactPage from "@/pages/public/ContactPage";
 import FaqPage from "@/pages/public/FaqPage";
 import GymsPage from "@/pages/public/GymsPage";
 
-export const PublicRoutes = () => (
-  <>
-    <Route path="/" element={<Index />} />
-    <Route path="/landing" element={<LandingPage />} />
-    <Route path="/pricing" element={<PricingPage />} />
-    <Route path="/contact" element={<ContactPage />} />
-    <Route path="/faq" element={<FaqPage />} />
-    <Route path="/gyms" element={<GymsPage />} />
-  </>
-);
+export const publicRoutes = [
+  <Route key="index" path="/" element={<Index />} />,
+  <Route key="landing" path="/landing" element={<LandingPage />} />,
+  <Route key="pricing" path="/pricing" element={<PricingPage />} />,
+  <Route key="contact" path="/contact" element={<ContactPage />} />,
+  <Route key="faq" path="/faq" element={<FaqPage />} />,
+  <Route key="gyms" path="/gyms" element={<GymsPage />} />
+];

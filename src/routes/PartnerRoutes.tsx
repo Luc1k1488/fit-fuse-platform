@@ -9,8 +9,8 @@ import PartnerBookings from "@/pages/partner/PartnerBookings";
 import PartnerReviews from "@/pages/partner/PartnerReviews";
 import PartnerAnalytics from "@/pages/partner/PartnerAnalytics";
 
-export const PartnerRoutes = () => (
-  <Route path="/partner/*" element={
+export const partnerRoutes = [
+  <Route key="partner" path="/partner/*" element={
     <AdminProtectedRoute allowedRoles={["partner", "admin"]}>
       <AdminLayout>
         <Route path="dashboard" element={<PartnerDashboard />} />
@@ -22,4 +22,4 @@ export const PartnerRoutes = () => (
       </AdminLayout>
     </AdminProtectedRoute>
   } />
-);
+];

@@ -1,16 +1,15 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/auth_context";
 
-// Route components
-import { PublicRoutes } from "@/routes/PublicRoutes";
-import { AuthRoutes } from "@/routes/AuthRoutes";
-import { ClientRoutes } from "@/routes/ClientRoutes";
-import { AdminRoutes } from "@/routes/AdminRoutes";
-import { PartnerRoutes } from "@/routes/PartnerRoutes";
-import { SupportRoutes } from "@/routes/SupportRoutes";
+// Route arrays
+import { publicRoutes } from "@/routes/PublicRoutes";
+import { authRoutes } from "@/routes/AuthRoutes";
+import { clientRoutes } from "@/routes/ClientRoutes";
+import { adminRoutes } from "@/routes/AdminRoutes";
+import { partnerRoutes } from "@/routes/PartnerRoutes";
+import { supportRoutes } from "@/routes/SupportRoutes";
 
 // Other components
 import NotFound from "@/pages/NotFound";
@@ -27,22 +26,22 @@ function App() {
         <Router>
           <Routes>
             {/* Public routes */}
-            <PublicRoutes />
+            {publicRoutes}
 
             {/* Auth routes */}
-            <AuthRoutes />
+            {authRoutes}
 
             {/* Client routes */}
-            <ClientRoutes />
+            {clientRoutes}
 
             {/* Admin routes */}
-            <AdminRoutes />
+            {adminRoutes}
 
             {/* Partner routes */}
-            <PartnerRoutes />
+            {partnerRoutes}
 
             {/* Support routes */}
-            <SupportRoutes />
+            {supportRoutes}
 
             {/* 404 route */}
             <Route path="*" element={<NotFound />} />

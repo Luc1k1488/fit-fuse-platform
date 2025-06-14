@@ -13,8 +13,8 @@ import AdminPartners from "@/pages/admin/AdminPartners";
 import AdminSubscriptions from "@/pages/admin/AdminSubscriptions";
 import AdminSupport from "@/pages/admin/AdminSupport";
 
-export const AdminRoutes = () => (
-  <Route path="/admin/*" element={
+export const adminRoutes = [
+  <Route key="admin" path="/admin/*" element={
     <AdminProtectedRoute>
       <AdminLayout>
         <Route path="dashboard" element={<AdminDashboard />} />
@@ -30,4 +30,4 @@ export const AdminRoutes = () => (
       </AdminLayout>
     </AdminProtectedRoute>
   } />
-);
+];

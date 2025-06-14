@@ -19,8 +19,8 @@ import ClientSubscriptionNew from "@/pages/client/ClientSubscriptionNew";
 import ClientSubscriptionManagement from "@/pages/client/ClientSubscriptionManagement";
 import ClientSupport from "@/pages/client/ClientSupport";
 
-export const ClientRoutes = () => (
-  <Route path="/app/*" element={
+export const clientRoutes = [
+  <Route key="app" path="/app/*" element={
     <ClientProtectedRoute>
       <ClientLayout>
         <Route index element={<ClientDashboard />} />
@@ -42,4 +42,4 @@ export const ClientRoutes = () => (
       </ClientLayout>
     </ClientProtectedRoute>
   } />
-);
+];

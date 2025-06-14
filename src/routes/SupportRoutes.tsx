@@ -7,8 +7,8 @@ import SupportChats from "@/pages/support/SupportChats";
 import SupportTickets from "@/pages/support/SupportTickets";
 import SupportUsers from "@/pages/support/SupportUsers";
 
-export const SupportRoutes = () => (
-  <Route path="/support/*" element={
+export const supportRoutes = [
+  <Route key="support" path="/support/*" element={
     <AdminProtectedRoute allowedRoles={["support", "admin"]}>
       <AdminLayout>
         <Route path="dashboard" element={<SupportDashboard />} />
@@ -18,4 +18,4 @@ export const SupportRoutes = () => (
       </AdminLayout>
     </AdminProtectedRoute>
   } />
-);
+];
