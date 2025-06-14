@@ -1,8 +1,9 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Dumbbell } from "lucide-react";
+import { ArrowRight, Dumbbell, Users } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -43,6 +44,15 @@ const Index = () => {
             size="lg"
           >
             Создать аккаунт
+          </Button>
+          <Button 
+            onClick={() => navigate("/create-test-users")} 
+            variant="secondary" 
+            className="w-full" 
+            size="sm"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Создать тестовых пользователей
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>Нет аккаунта? Зарегистрируйтесь для доступа к приложению</p>
