@@ -66,12 +66,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           onLogout={handleLogout}
           onSwitchToApp={handleSwitchToApp}
         />
-        <main className="flex-1 p-6">
+        <main className={`flex-1 transition-all duration-300 ${
+          sidebarOpen || !isMobileView ? 'md:ml-64' : 'md:ml-16'
+        } p-6`}>
           {children}
         </main>
       </div>
       
-      {/* Глобальные компоненты уведомлений */}
+      {/* Global notification components */}
       <UserRoleNotification />
       <UserBlockingNotification />
     </div>
