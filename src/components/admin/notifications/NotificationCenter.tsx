@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,52 +6,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Bell, X, User, Shield, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
-
-interface Notification {
-  id: string;
-  type: 'role_change' | 'user_blocked' | 'user_unblocked';
-  title: string;
-  description: string;
-  timestamp: Date;
-  read: boolean;
-}
+import { useNotifications, Notification } from "@/hooks/useNotifications";
 
 const NotificationCenter = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const addNotification = (type: Notification['type'], title: string, description: string) => {
-    const newNotification: Notification = {
-      id: Date.now().toString(),
-      type,
-      title,
-      description,
-      timestamp: new Date(),
-      read: false
-    };
-
-    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]); // Оставляем только 10 последних
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    removeNotification 
+  } = useNotifications();
 
   const getIcon = (type: Notification['type']) => {
     switch (type) {
@@ -72,16 +35,8 @@ const NotificationCenter = () => {
     }
   };
 
-  // Функции для добавления уведомлений (будут вызываться из других компонентов)
-  useEffect(() => {
-    (window as any).addNotification = addNotification;
-    return () => {
-      delete (window as any).addNotification;
-    };
-  }, []);
-
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
