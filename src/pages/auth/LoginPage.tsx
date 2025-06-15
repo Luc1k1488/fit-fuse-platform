@@ -44,8 +44,16 @@ const LoginPage = () => {
         // Ждем немного для обновления состояния пользователя
         setTimeout(() => {
           const currentUser = JSON.parse(localStorage.getItem('sb-ymxqdmojesynwqbiiscd-auth-token') || '{}')?.user;
-          if (currentUser?.user_metadata?.role === "admin" || currentUser?.role === "admin") {
+          const userRole = currentUser?.user_metadata?.role;
+          
+          console.log("User role for redirection:", userRole);
+          
+          if (userRole === "admin") {
             navigate("/admin/dashboard", { replace: true });
+          } else if (userRole === "partner") {
+            navigate("/partner/dashboard", { replace: true });
+          } else if (userRole === "support") {
+            navigate("/support/dashboard", { replace: true });
           } else {
             navigate("/app", { replace: true });
           }
@@ -115,8 +123,8 @@ const LoginPage = () => {
               </div>
               <div className="text-sm text-gray-600">
                 Для тестирования используйте:<br/>
-                Email: boldarevsergei228@gmail.com<br/>
-                Пароль: ваш пароль при регистрации
+                Email: partner@test.com<br/>
+                Пароль: partner123
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
