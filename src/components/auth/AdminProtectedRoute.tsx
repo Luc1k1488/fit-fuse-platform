@@ -38,15 +38,23 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
     );
   }
 
-  // Если пользователь не авторизован, перенаправляем на страницу входа для админа
+  // Если пользователь не авторизован, перенаправляем на страницу входа
   if (!is_authenticated) {
-    console.log("User not authenticated, redirecting to admin login");
-    return <Navigate to="/admin-login" replace />;
+    console.log("User not authenticated, redirecting to login");
+    return <Navigate to="/login" replace />;
   }
 
   // Если пользователь авторизован, но не имеет нужной роли
   if (!checkUserRole()) {
-    console.log("User doesn't have required role, redirecting to main page");
+    console.log("User doesn't have required role, redirecting based on actual role");
+    const userRole = user?.user_metadata?.role || "user";
+    
+    // Перенаправляем на соответствующую роли страницу
+    if (userRole === "user") {
+      return <Navigate to="/app" replace />;
+    }
+    
+    // Если роль неизвестна, перенаправляем на главную
     return <Navigate to="/" replace />;
   }
 
