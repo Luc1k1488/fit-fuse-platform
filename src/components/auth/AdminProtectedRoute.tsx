@@ -15,19 +15,26 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
   console.log("AdminProtectedRoute - Loading:", is_loading);
   console.log("AdminProtectedRoute - Authenticated:", is_authenticated);
   console.log("AdminProtectedRoute - User role from metadata:", user?.user_metadata?.role);
+  console.log("AdminProtectedRoute - Allowed roles:", allowedRoles);
 
   // Проверка роли пользователя
   const checkUserRole = () => {
-    if (!user) return false;
+    if (!user) {
+      console.log("No user found for role check");
+      return false;
+    }
     
     // Проверяем роль из метаданных пользователя
     const userRole = user.user_metadata?.role || "user";
-    console.log("Checking user role:", userRole, "Allowed roles:", allowedRoles);
-    return allowedRoles.includes(userRole);
+    console.log("Checking user role:", userRole, "against allowed roles:", allowedRoles);
+    const hasRole = allowedRoles.includes(userRole);
+    console.log("User has required role:", hasRole);
+    return hasRole;
   };
 
   // Показываем экран загрузки, пока проверяем авторизацию
   if (is_loading) {
+    console.log("Still loading auth state...");
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center space-y-4">
@@ -46,12 +53,20 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin", "partner", "su
 
   // Если пользователь авторизован, но не имеет нужной роли
   if (!checkUserRole()) {
-    console.log("User doesn't have required role, redirecting based on actual role");
+    console.log("User doesn't have required role, current role:", user?.user_metadata?.role);
     const userRole = user?.user_metadata?.role || "user";
+    
+    console.log("Redirecting based on user role:", userRole);
     
     // Перенаправляем на соответствующую роли страницу
     if (userRole === "user") {
       return <Navigate to="/app" replace />;
+    } else if (userRole === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (userRole === "partner") {
+      return <Navigate to="/partner/dashboard" replace />;
+    } else if (userRole === "support") {
+      return <Navigate to="/support/dashboard" replace />;
     }
     
     // Если роль неизвестна, перенаправляем на главную

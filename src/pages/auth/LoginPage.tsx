@@ -40,24 +40,37 @@ const LoginPage = () => {
       console.log("Login result:", result);
       
       if (result.success) {
-        console.log("Login successful, redirecting based on user role");
-        // Ждем немного для обновления состояния пользователя
+        console.log("Login successful, waiting for user role update...");
+        
+        // Используем более длительную задержку и проверяем состояние пользователя
         setTimeout(() => {
+          // Проверяем текущее состояние пользователя в контексте
           const currentUser = JSON.parse(localStorage.getItem('sb-ymxqdmojesynwqbiiscd-auth-token') || '{}')?.user;
           const userRole = currentUser?.user_metadata?.role;
           
+          console.log("Post-login user data:", currentUser);
           console.log("User role for redirection:", userRole);
           
-          if (userRole === "admin") {
-            navigate("/admin/dashboard", { replace: true });
-          } else if (userRole === "partner") {
-            navigate("/partner/dashboard", { replace: true });
-          } else if (userRole === "support") {
-            navigate("/support/dashboard", { replace: true });
-          } else {
-            navigate("/app", { replace: true });
+          // Навигация на основе роли
+          switch (userRole) {
+            case "admin":
+              console.log("Redirecting admin to /admin/dashboard");
+              navigate("/admin/dashboard", { replace: true });
+              break;
+            case "partner":
+              console.log("Redirecting partner to /partner/dashboard");
+              navigate("/partner/dashboard", { replace: true });
+              break;
+            case "support":
+              console.log("Redirecting support to /support/dashboard");
+              navigate("/support/dashboard", { replace: true });
+              break;
+            default:
+              console.log("Redirecting regular user to /app");
+              navigate("/app", { replace: true });
+              break;
           }
-        }, 500);
+        }, 1000); // Увеличиваем задержку до 1 секунды
       } else {
         console.error("Login failed:", result.error);
         setError(result.error || "Неверный email или пароль");
